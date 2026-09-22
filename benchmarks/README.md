@@ -34,10 +34,11 @@ compute-sanitizer --tool racecheck --error-exitcode 1 python tests/sanitize_kern
 
 The following sweep measures **M = N = K from 1024 to 16384, step 1024, G256**.
 **All 16 sizes are faster than BF16 in this run**, with per-size speedups from 1.21× to 1.69×.
-Each size is reported separately. GrainGEMM, the unchanged SGLang default
-baseline, and PyTorch BF16 are measured together in a fresh experiment.
+Each size is reported separately. The chart compares GrainGEMM with PyTorch BF16
+across all 16 sizes. The raw CSV and JSON also retain the unchanged SGLang default
+baseline, measured in the same experiment.
 
-![GrainGEMM versus SGLang and PyTorch BF16 on GB10](../docs/assets/gb10_grain_g256_vs_baselines.png)
+![GrainGEMM versus PyTorch BF16 on GB10, all 16 square sizes](../docs/assets/gb10_grain_g256_vs_baselines.png)
 
 GrainGEMM uses the checked-in per-size dispatch table: the fastest of **four
 Triton and eight CUDA/CuTe candidates** in an offline search of three rounds per

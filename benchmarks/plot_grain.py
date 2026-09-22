@@ -1,4 +1,4 @@
-"""Plot measured GrainGEMM/SGLang INT8 and PyTorch BF16 square comparisons."""
+"""Plot measured GrainGEMM INT8 versus PyTorch BF16 square comparisons."""
 
 import argparse
 import json
@@ -8,6 +8,7 @@ import statistics
 
 
 METHODS = ("grain_int8_gemm", "sglang_int8_gemm", "torch_mm_bf16")
+DISPLAY_METHODS = ("grain_int8_gemm", "torch_mm_bf16")
 
 
 def positive_number(value, description):
@@ -172,11 +173,10 @@ def plot_report(data, output, svg=None):
     scale_x = all(size % 1024 == 0 for size in sizes)
     x_values = [size / 1024 if scale_x else size for size in sizes]
     x_label = "Matrix size M = N = K (×1024)" if scale_x else "Matrix size M = N = K"
-    colors = {"grain_int8_gemm": "#0072B2", "sglang_int8_gemm": "#D55E00", "torch_mm_bf16": "#009E73"}
-    markers = {"grain_int8_gemm": "o", "sglang_int8_gemm": "s", "torch_mm_bf16": "^"}
+    colors = {"grain_int8_gemm": "#0072B2", "torch_mm_bf16": "#009E73"}
+    markers = {"grain_int8_gemm": "o", "torch_mm_bf16": "^"}
     labels = {
         "grain_int8_gemm": grain_backend_label(reports),
-        "sglang_int8_gemm": "SGLang Triton INT8 (TOPS)",
         "torch_mm_bf16": "PyTorch BF16 (TFLOPS)",
     }
     fig, (throughput_ax, speedup_ax) = plt.subplots(
@@ -195,7 +195,7 @@ def plot_report(data, output, svg=None):
         fontsize=12.5, color="#44546A",
     )
 
-    for name in METHODS:
+    for name in DISPLAY_METHODS:
         summaries = [case["results"][name] for case in reports]
         operations = [2 * size**3 for size in sizes]
         throughput_ax.fill_between(
@@ -214,13 +214,12 @@ def plot_report(data, output, svg=None):
     throughput_ax.set_ylabel("Effective throughput\n(TOPS / TFLOPS)")
     throughput_ax.set_title("Throughput · higher is better", loc="left", pad=32)
     throughput_ax.legend(
-        loc="lower left", bbox_to_anchor=(0, 1.005), ncol=3,
+        loc="lower left", bbox_to_anchor=(0, 1.005), ncol=2,
         frameon=False, fontsize=10.2, borderaxespad=0, columnspacing=2.0,
     )
 
     ratios = (
         ("grain_speedup_over_bf16", "GrainGEMM vs. PyTorch BF16", "#0072B2", "o"),
-        ("grain_speedup_over_sglang", "GrainGEMM vs. SGLang INT8", "#D55E00", "s"),
     )
     all_ratios = []
     for key, label, color, marker in ratios:
@@ -233,10 +232,10 @@ def plot_report(data, output, svg=None):
     padding = max(0.08, (upper - lower) * 0.14)
     speedup_ax.set_ylim(max(0, lower - padding), upper + padding)
     speedup_ax.yaxis.set_major_formatter(FuncFormatter(lambda value, _: f"{value:.2f}×"))
-    speedup_ax.set_ylabel("Baseline latency /\nGrainGEMM latency")
+    speedup_ax.set_ylabel("PyTorch BF16 latency /\nGrainGEMM latency")
     speedup_ax.set_title("GrainGEMM speedup · above 1× is faster", loc="left", pad=32)
     speedup_ax.legend(
-        loc="lower left", bbox_to_anchor=(0, 1.005), ncol=2,
+        loc="lower left", bbox_to_anchor=(0, 1.005), ncol=1,
         frameon=False, fontsize=10.2, borderaxespad=0, columnspacing=2.0,
     )
     speedup_ax.annotate(
@@ -263,7 +262,7 @@ def plot_report(data, output, svg=None):
         f"target captured batch {timing['rep_ms']:g} ms. Shading: min–max across rounds.",
         "Each point is one measured square size. Throughput = 2MNK / time: INT8 uses integer TOPS; BF16 uses floating-point TFLOPS.",
         "GEMM includes group scaling, accumulation, and output conversion. Quantization, compilation, autotuning, and warmup are excluded.",
-        "Repeated inputs; no cache flush. SGLang baseline: untuned 32×64 tile, 4 warps, 2 stages. Kernel settings and raw rounds are in the JSON.",
+        "Repeated inputs; no cache flush. Kernel settings and raw timing rounds are recorded in the JSON.",
         f"PyTorch {software['torch']}  |  Triton {software['triton']}  |  CUDA {software['cuda']}  |  GrainGEMM · measured results",
     )
     for index, text in enumerate(footer):
@@ -274,6 +273,10 @@ def plot_report(data, output, svg=None):
     if svg:
         svg.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(svg)
+        svg.write_text(
+            "\n".join(line.rstrip() for line in svg.read_text(encoding="utf-8").splitlines()) + "\n",
+            encoding="utf-8",
+        )
     plt.close(fig)
 
 
