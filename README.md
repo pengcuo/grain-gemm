@@ -107,6 +107,14 @@ The benchmark checks up to 32 evenly spaced output rows and columns against inde
 
 Initial validation on **GB10**, with PyTorch 2.14.0+cu130 and Triton 3.8.0: **26 tests passed**. An [example benchmark report](benchmarks/results/gb10_m128_n4096_k4096_fp32.json) records all four group sizes at `M=128, N=4096, K=4096`. G64 was fastest in this single run with the default untuned configuration; this does not establish a general group-size ranking or performance on the target GPUs.
 
+To compare the baseline with PyTorch BF16 GEMM:
+
+```bash
+python benchmarks/compare_bf16.py --m 1024 --n 2048 --k 4096 --group-size 256 --output comparison.json
+```
+
+Both paths use the same original BF16 inputs, row-major A, column-major B, and BF16 output. The INT8 path quantizes the inputs before timing. Five rounds alternate measurement order and report median CUDA-graph latency. On GB10, the default untuned INT8 configuration measured **241.14 µs**, versus **207.31 µs** for `torch.mm` in BF16: **16.3% higher latency**. See the [full report](benchmarks/results/gb10_m1024_n2048_k4096_g256_vs_bf16.json) for individual rounds, software versions, correctness checks, and synthetic-input quantization error. This comparison excludes quantization cost and does not measure end-to-end inference.
+
 ## Local development
 
 ```bash
