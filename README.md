@@ -107,13 +107,23 @@ The benchmark checks up to 32 evenly spaced output rows and columns against inde
 
 Initial validation on **GB10**, with PyTorch 2.14.0+cu130 and Triton 3.8.0: **26 tests passed**. An [example benchmark report](benchmarks/results/gb10_m128_n4096_k4096_fp32.json) records all four group sizes at `M=128, N=4096, K=4096`. G64 was fastest in this single run with the default untuned configuration; this does not establish a general group-size ranking or performance on the target GPUs.
 
-To compare the baseline with PyTorch BF16 GEMM:
+To compare the baseline with PyTorch BF16 GEMM at three square sizes:
 
 ```bash
-python benchmarks/compare_bf16.py --m 1024 --n 2048 --k 4096 --group-size 256 --output comparison.json
+for size in 1024 2048 4096; do
+    python benchmarks/compare_bf16.py --m "$size" --n "$size" --k "$size" --group-size 256 --output "comparison_${size}.json"
+done
 ```
 
-Both paths use the same original BF16 inputs, row-major A, column-major B, and BF16 output. The INT8 path quantizes the inputs before timing. Five rounds alternate measurement order and report median CUDA-graph latency. On GB10, the default untuned INT8 configuration measured **241.14 µs**, versus **207.31 µs** for `torch.mm` in BF16: **16.3% higher latency**. See the [full report](benchmarks/results/gb10_m1024_n2048_k4096_g256_vs_bf16.json) for individual rounds, software versions, correctness checks, and synthetic-input quantization error. This comparison excludes quantization cost and does not measure end-to-end inference.
+Both paths use the same original BF16 inputs, row-major A, column-major B, and BF16 output. The INT8 path quantizes the inputs before timing. Each size is measured independently in five rounds with alternating implementation order; the table reports each size's median CUDA-graph latency on GB10, without averaging across sizes. The INT8 launch configuration is the default untuned baseline.
+
+| M = N = K | INT8 G256 (µs) | PyTorch BF16 (µs) | INT8 latency increase |
+| --- | ---: | ---: | ---: |
+| [1024](benchmarks/results/gb10_m1024_n1024_k1024_g256_vs_bf16.json) | 34.69 | 32.04 | 8.3% |
+| [2048](benchmarks/results/gb10_m2048_n2048_k2048_g256_vs_bf16.json) | 242.61 | 184.86 | 31.2% |
+| [4096](benchmarks/results/gb10_m4096_n4096_k4096_g256_vs_bf16.json) | 1861.48 | 1542.31 | 20.7% |
+
+The linked reports contain all five rounds, software versions, sampled correctness checks, and synthetic-input quantization error. The comparison uses repeated inputs without a cache flush, excludes quantization cost, and does not measure end-to-end inference.
 
 ## Local development
 
