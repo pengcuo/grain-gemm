@@ -10,7 +10,7 @@ For `A[M, K] @ B[K, N]`:
 
 - Activations: one scale per row and K group.
 - Weights: one scale per column and K group.
-- Group sizes: **64, 128, and 256**.
+- Group sizes: **32, 64, 128, and 256**.
 - INT32 accumulation within each group, followed by scaling and FP32 accumulation across groups.
 - Target GPUs: **NVIDIA A100, H100, and Thor**.
 
@@ -30,7 +30,7 @@ A^{\mathrm{INT8}}_{mk}\,B^{\mathrm{INT8}}_{kn}
 
 Here, $s^A_{mg}$ and $s^B_{gn}$ correspond to `scale_A[m, g]` and `scale_B[g, n]`. The outer weighted sum accumulates in FP32.
 
-Each group covers up to `G` consecutive elements along K. These group sizes are a custom block scaling scheme; they do not claim compatibility with the standard MXINT8 format.
+Each group covers up to `G` consecutive elements along K. GrainGEMM uses a configurable block scaling scheme and does not currently claim compatibility with the standard MXINT8 format.
 
 ## Research basis
 
@@ -38,7 +38,7 @@ GrainGEMM's INT8 design is motivated by **[INT v.s. FP: A Comprehensive Study of
 
 - **Theory ([Section 4](https://arxiv.org/html/2510.25602v1#S4)):** Smaller blocks typically reduce the peak-to-RMS ratio (crest factor), improving uniform INT8 quantization under the paper's approximate quantization signal-to-noise ratio (QSNR) model.
 - **8-bit evidence ([Section 5.2](https://arxiv.org/html/2510.25602v1#S5.SS2)):** With 32-element blocks and UE8M0 scales, MXINT8 achieves lower KL divergence from BF16 than MXFP8 on all 12 evaluated models.
-- **Groups 64/128/256 ([Table 10](https://arxiv.org/html/2510.25602v1#S11.T10)):** These sizes appear in INT8 training ablations of scale precision and symmetric `[-127, 127]` clipping. This table compares INT8 quantization recipes, without an FP8 baseline.
+- **Groups 32/64/128/256 ([Table 10](https://arxiv.org/html/2510.25602v1#S11.T10)):** These sizes appear in INT8 training ablations of scale precision and symmetric `[-127, 127]` clipping. This table compares INT8 quantization recipes, without an FP8 baseline.
 - **Hardware motivation ([Section 6](https://arxiv.org/html/2510.25602v1#S6)):** Gate-level modeling estimates lower MXINT8 energy and area than MXFP8 at matched throughput.
 
 These results motivate GrainGEMM's custom K-group scaling. Its scale choices, numerical behavior, and kernel performance on A100/H100/Thor still require validation.
