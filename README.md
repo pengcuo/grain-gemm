@@ -107,23 +107,23 @@ The benchmark checks up to 32 evenly spaced output rows and columns against inde
 
 Initial validation on **GB10**, with PyTorch 2.14.0+cu130 and Triton 3.8.0: **26 tests passed**. An [example benchmark report](benchmarks/results/gb10_m128_n4096_k4096_fp32.json) records all four group sizes at `M=128, N=4096, K=4096`. G64 was fastest in this single run with the default untuned configuration; this does not establish a general group-size ranking or performance on the target GPUs.
 
-To compare the baseline with PyTorch BF16 GEMM at three square sizes:
+### GB10 throughput sweep
+
+The following comparison measures **M = N = K from 1024 to 16384 in steps of 1024**, with **G256**. Each of the 16 sizes is measured independently in five rounds with alternating implementation order. The chart uses effective throughput, `2MNK / time`, calculated from each size's median latency. INT8 values are **TOPS** and BF16 values are **TFLOPS**, displayed on the same operation-count scale.
+
+![GB10 INT8 G256 versus PyTorch BF16 GEMM throughput](docs/assets/gb10_g256_vs_bf16.png)
+
+Both paths use the same original BF16 inputs, row-major A, column-major B, and BF16 output. The INT8 path quantizes its inputs before timing and uses the default untuned `32 × 64` output tile, 4 warps, and 2 stages. CUDA-graph timing uses repeated inputs without a cache flush and excludes quantization, compilation, warmup, and host dispatch overhead. These are GB10 kernel measurements, not end-to-end inference results or measurements on A100/H100/Thor.
+
+The [CSV](benchmarks/results/gb10_g256_square_sweep.csv) contains per-size throughput, latency, and ratios. The [JSON](benchmarks/results/gb10_g256_square_sweep.json) retains every timing round, software versions, sampled correctness checks, and synthetic-input quantization error. No values are averaged across different matrix sizes.
+
+Reproduce the sweep and figure:
 
 ```bash
-for size in 1024 2048 4096; do
-    python benchmarks/compare_bf16.py --m "$size" --n "$size" --k "$size" --group-size 256 --output "comparison_${size}.json"
-done
+python -m pip install -e ".[baseline,plot]"
+python benchmarks/sweep_bf16.py --start 1024 --stop 16384 --step 1024 --group-size 256 --output benchmarks/results/gb10_g256_square_sweep.json
+python benchmarks/plot_bf16_sweep.py --input benchmarks/results/gb10_g256_square_sweep.json --output docs/assets/gb10_g256_vs_bf16.png
 ```
-
-Both paths use the same original BF16 inputs, row-major A, column-major B, and BF16 output. The INT8 path quantizes the inputs before timing. Each size is measured independently in five rounds with alternating implementation order; the table reports each size's median CUDA-graph latency on GB10, without averaging across sizes. The INT8 launch configuration is the default untuned baseline.
-
-| M = N = K | INT8 G256 (µs) | PyTorch BF16 (µs) | INT8 latency increase |
-| --- | ---: | ---: | ---: |
-| [1024](benchmarks/results/gb10_m1024_n1024_k1024_g256_vs_bf16.json) | 34.69 | 32.04 | 8.3% |
-| [2048](benchmarks/results/gb10_m2048_n2048_k2048_g256_vs_bf16.json) | 242.61 | 184.86 | 31.2% |
-| [4096](benchmarks/results/gb10_m4096_n4096_k4096_g256_vs_bf16.json) | 1861.48 | 1542.31 | 20.7% |
-
-The linked reports contain all five rounds, software versions, sampled correctness checks, and synthetic-input quantization error. The comparison uses repeated inputs without a cache flush, excludes quantization cost, and does not measure end-to-end inference.
 
 ## Local development
 

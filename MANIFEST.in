@@ -1,3 +1,6 @@
 include benchmarks/*.py
 include benchmarks/results/*.json
+include benchmarks/results/*.csv
+include docs/assets/*.png
+include docs/assets/*.svg
 include tests/*.py

@@ -1,0 +1,1724 @@
+{
+  "benchmark": "SGLang INT8 versus PyTorch BF16 square GEMM sweep",
+  "started_at_utc": "2026-09-22T07:18:11.291332+00:00",
+  "expected_sizes": [
+    1024,
+    2048,
+    3072,
+    4096,
+    5120,
+    6144,
+    7168,
+    8192,
+    9216,
+    10240,
+    11264,
+    12288,
+    13312,
+    14336,
+    15360,
+    16384
+  ],
+  "group_size": 256,
+  "comparison_script_sha256": "fab6108df241218fe50fe39f8a2f66cf2e80db4dd289cd831a9cb34ee919b517",
+  "complete": true,
+  "reports": [
+    {
+      "timestamp_utc": "2026-09-22T07:18:21.383572+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 1024,
+        "n": 1024,
+        "k": 1024
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.0
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010129695758223534,
+        "max_abs_error": 1.625,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            0.034645032838497916,
+            0.03455208429681047,
+            0.034672156312411884,
+            0.03460740094590144,
+            0.034530160458112524
+          ],
+          "median_ms": 0.03460740094590144,
+          "min_ms": 0.034530160458112524,
+          "max_ms": 0.034672156312411884,
+          "effective_tops": 62.05272829811644
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            0.03201727052476017,
+            0.03198296449561651,
+            0.03196780680708032,
+            0.031971804786274455,
+            0.03189074761569269
+          ],
+          "median_ms": 0.031971804786274455,
+          "min_ms": 0.03189074761569269,
+          "max_ms": 0.03201727052476017,
+          "effective_tflops": 67.168045793959
+        }
+      },
+      "int8_speedup_over_bf16": 0.9238429905861186
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:18:33.320084+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 2048,
+        "n": 2048,
+        "k": 2048
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.001953125
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010112198069691658,
+        "max_abs_error": 2.5,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            0.2410223652266528,
+            0.24102287570925524,
+            0.24082103479861058,
+            0.24121235992948886,
+            0.24111021659224507
+          ],
+          "median_ms": 0.24102287570925524,
+          "min_ms": 0.24082103479861058,
+          "max_ms": 0.24121235992948886,
+          "effective_tops": 71.27899844960773
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            0.1849813670137503,
+            0.18457274092841394,
+            0.18550630241577373,
+            0.1862175001766219,
+            0.18547061618081334
+          ],
+          "median_ms": 0.18547061618081334,
+          "min_ms": 0.18457274092841394,
+          "max_ms": 0.1862175001766219,
+          "effective_tflops": 92.62852271570354
+        }
+      },
+      "int8_speedup_over_bf16": 0.7695145767182102
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:18:45.362719+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 3072,
+        "n": 3072,
+        "k": 3072
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.0
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010117602534592152,
+        "max_abs_error": 3.0,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            0.7983354797363281,
+            0.7968251524853105,
+            0.7926794687906902,
+            0.7988713264465332,
+            0.7979037475585937
+          ],
+          "median_ms": 0.7979037475585937,
+          "min_ms": 0.7926794687906902,
+          "max_ms": 0.7988713264465332,
+          "effective_tops": 72.6679861742874
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            0.6543783708052202,
+            0.6523021373873443,
+            0.6526477290134804,
+            0.6553009132933773,
+            0.660759829735571
+          ],
+          "median_ms": 0.6543783708052202,
+          "min_ms": 0.6523021373873443,
+          "max_ms": 0.660759829735571,
+          "effective_tflops": 88.6063187336898
+        }
+      },
+      "int8_speedup_over_bf16": 0.8201219417849221
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:18:57.832968+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 4096,
+        "n": 4096,
+        "k": 4096
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.0
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010123071260750294,
+        "max_abs_error": 3.625,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            1.8624815311072007,
+            1.8475495797616464,
+            1.8518142700195312,
+            1.884197023179796,
+            1.8602101361310042
+          ],
+          "median_ms": 1.8602101361310042,
+          "min_ms": 1.8475495797616464,
+          "max_ms": 1.884197023179796,
+          "effective_tops": 73.88356336873596
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            1.532911763046727,
+            1.5403008532168259,
+            1.5336167306611033,
+            1.5376095310334237,
+            1.537401430534594
+          ],
+          "median_ms": 1.537401430534594,
+          "min_ms": 1.532911763046727,
+          "max_ms": 1.5403008532168259,
+          "effective_tflops": 89.39692050644764
+        }
+      },
+      "int8_speedup_over_bf16": 0.826466537663422
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:19:10.513370+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 5120,
+        "n": 5120,
+        "k": 5120
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.0
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010117272846400738,
+        "max_abs_error": 4.5,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            3.629814430519387,
+            3.6336769690880413,
+            3.623387230767144,
+            3.624407401451698,
+            3.6713617112901478
+          ],
+          "median_ms": 3.629814430519387,
+          "min_ms": 3.623387230767144,
+          "max_ms": 3.6713617112901478,
+          "effective_tops": 73.95294198595982
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            2.8605533175998263,
+            2.856460041469998,
+            2.8602737850613065,
+            2.861862631405101,
+            2.866236768450056
+          ],
+          "median_ms": 2.8605533175998263,
+          "min_ms": 2.856460041469998,
+          "max_ms": 2.866236768450056,
+          "effective_tflops": 93.84039596410433
+        }
+      },
+      "int8_speedup_over_bf16": 0.7880715040274145
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:19:23.180694+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 6144,
+        "n": 6144,
+        "k": 6144
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.0
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010118681006133556,
+        "max_abs_error": 4.5,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            6.196308135986328,
+            6.2256523132324215,
+            6.273205041885376,
+            6.320150248209636,
+            6.330033111572266
+          ],
+          "median_ms": 6.273205041885376,
+          "min_ms": 6.196308135986328,
+          "max_ms": 6.330033111572266,
+          "effective_tops": 73.94250066288134
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            5.748287916183472,
+            5.768749952316284,
+            5.734210743623621,
+            5.751941680908203,
+            5.781466007232666
+          ],
+          "median_ms": 5.751941680908203,
+          "min_ms": 5.734210743623621,
+          "max_ms": 5.781466007232666,
+          "effective_tflops": 80.64345810522184
+        }
+      },
+      "int8_speedup_over_bf16": 0.9169063728195133
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:19:36.175731+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 7168,
+        "n": 7168,
+        "k": 7168
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.00048828125
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010117001831531525,
+        "max_abs_error": 5.0,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            9.887425740559896,
+            10.00498326619466,
+            10.066750420464409,
+            10.09511269463433,
+            10.122188568115234
+          ],
+          "median_ms": 10.066750420464409,
+          "min_ms": 9.887425740559896,
+          "max_ms": 10.122188568115234,
+          "effective_tops": 73.17027446777796
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            7.901126861572266,
+            7.895256042480469,
+            7.9292999903361,
+            7.910357475280762,
+            7.9248851140340175
+          ],
+          "median_ms": 7.910357475280762,
+          "min_ms": 7.895256042480469,
+          "max_ms": 7.9292999903361,
+          "effective_tflops": 93.11676413686429
+        }
+      },
+      "int8_speedup_over_bf16": 0.7857905624838004
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:19:49.868831+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 8192,
+        "n": 8192,
+        "k": 8192
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.0
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010117913596332073,
+        "max_abs_error": 5.25,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            15.023751576741537,
+            15.000416437784832,
+            14.994367599487305,
+            15.112594604492188,
+            15.128875096638996
+          ],
+          "median_ms": 15.023751576741537,
+          "min_ms": 14.994367599487305,
+          "max_ms": 15.128875096638996,
+          "effective_tops": 73.18489141408382
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            11.759106159210205,
+            11.724195957183838,
+            11.72373628616333,
+            11.762890338897705,
+            11.742918014526367
+          ],
+          "median_ms": 11.742918014526367,
+          "min_ms": 11.72373628616333,
+          "max_ms": 11.762890338897705,
+          "effective_tflops": 93.63189169982016
+        }
+      },
+      "int8_speedup_over_bf16": 0.7816235481892372
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:20:03.956949+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 9216,
+        "n": 9216,
+        "k": 9216
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.0
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010118821635842323,
+        "max_abs_error": 6.0,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            21.615168571472168,
+            21.677379608154297,
+            21.663872718811035,
+            21.736071586608887,
+            21.859111785888672
+          ],
+          "median_ms": 21.677379608154297,
+          "min_ms": 21.615168571472168,
+          "max_ms": 21.859111785888672,
+          "effective_tops": 72.21885706163054
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            16.75408020019531,
+            16.626541137695312,
+            16.72093734741211,
+            16.632483673095702,
+            16.633712005615237
+          ],
+          "median_ms": 16.633712005615237,
+          "min_ms": 16.626541137695312,
+          "max_ms": 16.75408020019531,
+          "effective_tflops": 94.1170304537863
+        }
+      },
+      "int8_speedup_over_bf16": 0.767330383389983
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:20:19.743095+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 10240,
+        "n": 10240,
+        "k": 10240
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.25
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010118785314261913,
+        "max_abs_error": 6.03125,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            29.434768676757812,
+            29.61846923828125,
+            29.733343760172524,
+            29.77956771850586,
+            29.66684850056966
+          ],
+          "median_ms": 29.66684850056966,
+          "min_ms": 29.434768676757812,
+          "max_ms": 29.77956771850586,
+          "effective_tops": 72.38664558383289
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            22.891632080078125,
+            22.88560390472412,
+            22.75518798828125,
+            22.872175216674805,
+            22.917019844055176
+          ],
+          "median_ms": 22.88560390472412,
+          "min_ms": 22.75518798828125,
+          "max_ms": 22.917019844055176,
+          "effective_tflops": 93.8355682873944
+        }
+      },
+      "int8_speedup_over_bf16": 0.7714201225076089
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:20:36.570627+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 11264,
+        "n": 11264,
+        "k": 11264
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.5
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.01011878252029419,
+        "max_abs_error": 6.0,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            40.0602970123291,
+            40.25762367248535,
+            40.538368225097656,
+            40.69392013549805,
+            40.327688217163086
+          ],
+          "median_ms": 40.327688217163086,
+          "min_ms": 40.0602970123291,
+          "max_ms": 40.69392013549805,
+          "effective_tops": 70.87688042260588
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            29.852212270100914,
+            30.18185043334961,
+            30.087151845296226,
+            29.92185084025065,
+            30.243253072102867
+          ],
+          "median_ms": 30.087151845296226,
+          "min_ms": 29.852212270100914,
+          "max_ms": 30.243253072102867,
+          "effective_tflops": 95.00070828189281
+        }
+      },
+      "int8_speedup_over_bf16": 0.7460668631258515
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:20:53.304618+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 12288,
+        "n": 12288,
+        "k": 12288
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.0
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010116824880242348,
+        "max_abs_error": 7.0,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            52.37001609802246,
+            52.207136154174805,
+            53.61367988586426,
+            52.583919525146484,
+            52.43192100524902
+          ],
+          "median_ms": 52.43192100524902,
+          "min_ms": 52.207136154174805,
+          "max_ms": 53.61367988586426,
+          "effective_tops": 70.77466689371352
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            38.80142402648926,
+            38.729400634765625,
+            38.86657524108887,
+            38.72667121887207,
+            38.700239181518555
+          ],
+          "median_ms": 38.729400634765625,
+          "min_ms": 38.700239181518555,
+          "max_ms": 38.86657524108887,
+          "effective_tflops": 95.81485080905014
+        }
+      },
+      "int8_speedup_over_bf16": 0.7386607221751111
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:21:13.980777+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 13312,
+        "n": 13312,
+        "k": 13312
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.0
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010118190199136734,
+        "max_abs_error": 6.5,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            70.39132690429688,
+            70.77974319458008,
+            70.6233139038086,
+            70.77608108520508,
+            71.10663986206055
+          ],
+          "median_ms": 70.77608108520508,
+          "min_ms": 70.39132690429688,
+          "max_ms": 71.10663986206055,
+          "effective_tops": 66.66124349236183
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            47.81885528564453,
+            47.934200286865234,
+            47.713470458984375,
+            47.741159439086914,
+            47.71502494812012
+          ],
+          "median_ms": 47.741159439086914,
+          "min_ms": 47.713470458984375,
+          "max_ms": 47.934200286865234,
+          "effective_tflops": 98.82503127465385
+        }
+      },
+      "int8_speedup_over_bf16": 0.674538046004735
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:21:36.043955+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 14336,
+        "n": 14336,
+        "k": 14336
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.0
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010117544792592525,
+        "max_abs_error": 7.0,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            83.4297103881836,
+            84.64884567260742,
+            89.3240966796875,
+            83.93073654174805,
+            88.7632827758789
+          ],
+          "median_ms": 84.64884567260742,
+          "min_ms": 83.4297103881836,
+          "max_ms": 89.3240966796875,
+          "effective_tops": 69.61341390174314
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            60.78326416015625,
+            60.746177673339844,
+            60.80663871765137,
+            61.72119903564453,
+            61.298336029052734
+          ],
+          "median_ms": 60.80663871765137,
+          "min_ms": 60.746177673339844,
+          "max_ms": 61.72119903564453,
+          "effective_tflops": 96.90874638662486
+        }
+      },
+      "int8_speedup_over_bf16": 0.7183398454460974
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:22:02.691166+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 15360,
+        "n": 15360,
+        "k": 15360
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.0
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010120480321347713,
+        "max_abs_error": 8.0,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            104.9060173034668,
+            105.18779373168945,
+            105.57542419433594,
+            106.09983825683594,
+            106.31021118164062
+          ],
+          "median_ms": 105.57542419433594,
+          "min_ms": 104.9060173034668,
+          "max_ms": 106.31021118164062,
+          "effective_tops": 68.65004206527108
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            75.03569793701172,
+            73.6993293762207,
+            73.41902542114258,
+            73.5528335571289,
+            73.98392105102539
+          ],
+          "median_ms": 73.6993293762207,
+          "min_ms": 73.41902542114258,
+          "max_ms": 75.03569793701172,
+          "effective_tflops": 98.34224236969122
+        }
+      },
+      "int8_speedup_over_bf16": 0.6980727753512037
+    },
+    {
+      "timestamp_utc": "2026-09-22T07:22:34.208820+00:00",
+      "gpu": "NVIDIA GB10",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "software": {
+        "python": "3.12.3",
+        "torch": "2.14.0+cu130",
+        "triton": "3.8.0",
+        "cuda": "13.0",
+        "driver": "580.178.04"
+      },
+      "shape": {
+        "m": 16384,
+        "n": 16384,
+        "k": 16384
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for both implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "int8_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "int8_config_autotuned": false,
+      "torch_allow_bf16_reduced_precision_reduction": true,
+      "timing": {
+        "method": "triton.testing.do_bench_cudagraph",
+        "statistic": "median of per-round medians",
+        "rounds": 5,
+        "rep_ms": 100,
+        "measurement_order": [
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ],
+          [
+            "torch_mm_bf16",
+            "sglang_int8_gemm"
+          ],
+          [
+            "sglang_int8_gemm",
+            "torch_mm_bf16"
+          ]
+        ],
+        "scope": "GPU GEMM execution only; excludes input quantization, compilation, warmup, and host dispatch overhead",
+        "cache_policy": "repeated inputs; no cache flush"
+      },
+      "int8_sampled_correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 0.125
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "relative_rms_error": 0.010119198821485043,
+        "max_abs_error": 8.0,
+        "note": "Synthetic-input quantization difference, not a model-accuracy test."
+      },
+      "results": {
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            131.4765625,
+            131.26841735839844,
+            130.7782440185547,
+            132.4591522216797,
+            131.21692657470703
+          ],
+          "median_ms": 131.26841735839844,
+          "min_ms": 130.7782440185547,
+          "max_ms": 132.4591522216797,
+          "effective_tops": 67.0084487892642
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            88.84676742553711,
+            89.15876770019531,
+            88.7649917602539,
+            89.44375991821289,
+            89.29598617553711
+          ],
+          "median_ms": 89.15876770019531,
+          "min_ms": 88.7649917602539,
+          "max_ms": 89.44375991821289,
+          "effective_tflops": 98.65651185069858
+        }
+      },
+      "int8_speedup_over_bf16": 0.679209588219287
+    }
+  ],
+  "completed_at_utc": "2026-09-22T07:22:34.644164+00:00"
+}
