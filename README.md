@@ -63,7 +63,7 @@ For a fixed K, this conversion-and-scaling work occurs `ceil(K / G)` times. **G2
 
 ## Development status
 
-GrainGEMM includes a custom Triton kernel and an optional native CUDA/CuTe kernel, with a measured G256 dispatch table for **GB10 (SM121)**. The public API selects a backend and launch configuration by architecture, shape, dtype, and layout. A100, H100, and Thor use the portable Triton path pending validation and dedicated tuning on those GPUs. The standalone SGLang kernel is retained as a baseline.
+GrainGEMM includes a custom Triton kernel and an optional native CUDA/CuTe kernel, with a measured G256 dispatch table for **GB10 (SM121)**. The public API selects a backend and launch configuration by architecture, shape, dtype, and layout. A100, H100, and Thor use the portable Triton path pending validation and dedicated tuning on those GPUs.
 
 ## GrainGEMM API
 
@@ -140,37 +140,6 @@ contiguous scales, M/N multiples of 64, and K a multiple of 256.
 See [Kernel design and native build](docs/kernel_design.md) for the implementation,
 CUTLASS build instructions, and dispatch behavior. Inputs must already be
 quantized; the API does not perform quantization or provide autograd.
-
-## SGLang Triton baseline
-
-[`sglang_int8_gemm`](src/grain_gemm/baselines/sglang.py) extracts SGLang's INT8 kernel at [commit `8ac19cc`](https://github.com/sgl-project/sglang/blob/8ac19cc19f8ade51ed203478f17c9a09c706d730/python/sglang/kernels/ops/quantization/int8_kernel.py). It runs independently of the SGLang package. The original kernel computation is retained; GrainGEMM supplies the input validation and launch wrapper. See [third-party notices](THIRD_PARTY_NOTICES.md) for attribution and the upstream Apache-2.0 license.
-
-- Inputs: INT8 `A[M, K]` and `B[K, N]`, with FP32 scales `[M, ceil(K/G)]` and `[ceil(K/G), N]` on the same CUDA device.
-- Groups: **32, 64, 128, 256**; the default is **256**. The final group may be shorter than G.
-- Accumulation: one INT32 dot product per complete K-group (or masked tail), followed by FP32 scaling and accumulation. Output may be FP32 (default), FP16, or BF16.
-- Layout: transposed positive-stride views are accepted without an implicit copy. For example, weights stored as `[N, K]` can be passed as `weight.T`.
-
-The wrapper sets `group_n=1` and `BLOCK_SIZE_K=G`. Its M/N compute tiles are independent of the quantization groups, avoiding a one-column compute tile when weights have per-column scales. The default launch configuration is a starting baseline, not an autotuned SGLang result. `block_m`, `block_n`, `num_warps`, and `num_stages` can be overridden for experiments.
-
-Use a CUDA-enabled PyTorch build and a compatible Triton version on Linux. Triton's CUDA driver build also needs a C compiler and matching Python development headers.
-
-```bash
-python -m pip install -e ".[baseline]"
-```
-
-Example using prequantized inputs and their dequantization scales:
-
-```python
-import torch
-from grain_gemm.baselines import sglang_int8_gemm
-
-M, N, K, G = 128, 1024, 4096, 256
-a = torch.randint(-127, 128, (M, K), device="cuda", dtype=torch.int8)
-b = torch.randint(-127, 128, (N, K), device="cuda", dtype=torch.int8).T
-scale_a = torch.full((M, K // G), 1 / 127, device="cuda")
-scale_b = torch.full((K // G, N), 1 / 127, device="cuda")
-c = sglang_int8_gemm(a, b, scale_a, scale_b, group_size=G)
-```
 
 See [Tests and benchmarks](benchmarks/README.md) for validation, performance results, plots, and reproduction instructions.
 
