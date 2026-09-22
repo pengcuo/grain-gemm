@@ -16,12 +16,19 @@ For `A[M, K] @ B[K, N]`:
 
 For group size `G`, the scale shapes are `[M, ceil(K/G)]` for A and `[ceil(K/G), N]` for B. The intended operation is:
 
-```text
-C[m, n] = sum_g (
-    scale_A[m, g] * scale_B[g, n]
-    * float32(sum_{k in group g} int8_A[m, k] * int8_B[k, n])
-)
-```
+$$
+C_{mn}
+= \sum_{g=0}^{\lceil K/G \rceil - 1}
+s^A_{mg}\,s^B_{gn}\,
+\operatorname{FP32}\!\left(
+\underbrace{
+\sum_{k=gG}^{\min((g+1)G,\,K)-1}
+A^{\mathrm{INT8}}_{mk}\,B^{\mathrm{INT8}}_{kn}
+}_{\text{INT32 accumulation}}
+\right)
+$$
+
+Here, $s^A_{mg}$ and $s^B_{gn}$ correspond to `scale_A[m, g]` and `scale_B[g, n]`. The outer weighted sum accumulates in FP32.
 
 Each group covers up to `G` consecutive elements along K. These group sizes are a custom block scaling scheme; they do not claim compatibility with the standard MXINT8 format.
 
