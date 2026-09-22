@@ -20,7 +20,7 @@ $$
 C_{mn}
 = \sum_{g=0}^{\lceil K/G \rceil - 1}
 s^A_{mg}\,s^B_{gn}\,
-\operatorname{FP32}\!\left(
+\mathrm{FP32}\!\left(
 \underbrace{
 \sum_{k=gG}^{\min((g+1)G,\,K)-1}
 A^{\mathrm{INT8}}_{mk}\,B^{\mathrm{INT8}}_{kn}
