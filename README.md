@@ -32,6 +32,17 @@ Here, $s^A_{mg}$ and $s^B_{gn}$ correspond to `scale_A[m, g]` and `scale_B[g, n]
 
 Each group covers up to `G` consecutive elements along K. These group sizes are a custom block scaling scheme; they do not claim compatibility with the standard MXINT8 format.
 
+## Research basis
+
+GrainGEMM's INT8 design is motivated by **[INT v.s. FP: A Comprehensive Study of Fine-Grained Low-bit Quantization Formats](https://arxiv.org/abs/2510.25602)**, Mengzhao Chen et al. (2025). See also the [authors' implementation](https://github.com/ChenMnZ/INT_vs_FP).
+
+- **Theory ([Section 4](https://arxiv.org/html/2510.25602v1#S4)):** Smaller blocks typically reduce the peak-to-RMS ratio (crest factor), improving uniform INT8 quantization under the paper's approximate quantization signal-to-noise ratio (QSNR) model.
+- **8-bit evidence ([Section 5.2](https://arxiv.org/html/2510.25602v1#S5.SS2)):** With 32-element blocks and UE8M0 scales, MXINT8 achieves lower KL divergence from BF16 than MXFP8 on all 12 evaluated models.
+- **Groups 64/128/256 ([Table 10](https://arxiv.org/html/2510.25602v1#S11.T10)):** These sizes appear in INT8 training ablations of scale precision and symmetric `[-127, 127]` clipping. This table compares INT8 quantization recipes, without an FP8 baseline.
+- **Hardware motivation ([Section 6](https://arxiv.org/html/2510.25602v1#S6)):** Gate-level modeling estimates lower MXINT8 energy and area than MXFP8 at matched throughput.
+
+These results motivate GrainGEMM's custom K-group scaling. Its scale choices, numerical behavior, and kernel performance on A100/H100/Thor still require validation.
+
 ## Development status
 
 This repository currently contains an initial project scaffold. GPU kernels are not implemented, hardware support is not validated, and no performance results are available.
@@ -41,4 +52,16 @@ This repository currently contains an initial project scaffold. GPU kernels are 
 ```bash
 python -m pip install -e .
 python -c "import grain_gemm; print(grain_gemm.__version__)"
+```
+
+## Reference
+
+```bibtex
+@article{int_vs_fp_2025,
+  title={INT v.s. FP: A Comprehensive Study of Fine-Grained Low-bit Quantization Formats},
+  author={Chen, Mengzhao and Wu, Meng and Jin, Hui and Yuan, Zhihang and Liu, Jing and Zhang, Chaoyi and Li, Yunshui and Huang, Jie and Ma, Jin and Xue, Zeyue and Liu, Zhiheng and Bin, Xingyan and Luo, Ping},
+  journal={arXiv preprint arXiv:2510.25602},
+  year={2025},
+  url={https://arxiv.org/abs/2510.25602}
+}
 ```
