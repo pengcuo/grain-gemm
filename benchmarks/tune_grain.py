@@ -1,8 +1,8 @@
 """Offline GB10 G256 candidate search; no tuning is performed during inference.
 
-Run before compare_grain.py, which measures the selected configurations again
-against fresh SGLang and BF16 results. This search does not establish a global
-performance optimum. Native candidates require tools/build_cuda.py first.
+Run before compare_backends.py, which measures the selected CuTe and Triton
+configurations again against fresh BF16 results. This search does not establish
+a global performance optimum. Native candidates require tools/build_cuda.py.
 """
 import argparse
 from datetime import datetime, timezone
@@ -41,7 +41,7 @@ def main():
         parser.error("this candidate set and dispatch format target GB10 / SM121")
     candidates = list(TRITON_CANDIDATES)
     if cuda.is_available():
-        candidates += [dict(backend="cuda", config_id=i) for i in range(8)]
+        candidates += [dict(backend="cuda", config_id=i) for i in range(len(cuda.CONFIGS))]
     report = dict(
         complete=False, gpu=torch.cuda.get_device_name(), compute_capability=[12, 1],
         torch=torch.__version__, triton=triton.__version__, cuda=torch.version.cuda,
@@ -50,7 +50,16 @@ def main():
         seed=2026, candidates=candidates, cases=[],
         scope="Prequantized GEMM; group scaling and output conversion included. Input preparation, compilation and warmup excluded.",
         timing="CUDA graphs, median of per-round medians, rotating candidate order, repeated inputs, no cache flush",
+        native_configurations=cuda.CONFIGS,
     )
+    package = Path(cuda.__file__).resolve().parent
+    report["kernel_source_sha256"] = {
+        str(path.relative_to(package)): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in (package / "triton.py", package / "cuda.py", package / "csrc" / "grain_cute.cu")
+    }
+    report["tuning_script_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    if cuda.is_available():
+        report["native_build"] = json.loads((package / "_native" / "build.json").read_text())
     dispatch = dict(gpu="NVIDIA GB10", compute_capability=[12, 1], group_size=256,
                     output_dtype="bfloat16", square_configs={})
     for n in args.sizes:
@@ -85,6 +94,10 @@ def main():
                           key=lambda row: row["median_ms"])
         report["cases"].append(dict(size=n, candidates=rows, selected=best["config"]))
         dispatch["square_configs"][str(n)] = dict(selected=best["config"], triton=best_triton["config"])
+        native_rows = [row for row in rows if row["config"]["backend"] == "cuda"]
+        if native_rows:
+            best_cuda = min(native_rows, key=lambda row: row["median_ms"])
+            dispatch["square_configs"][str(n)]["cuda"] = best_cuda["config"]
         print(f"{n}: {best['median_ms'] * 1000:.2f} us {best['config']}", flush=True)
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(json.dumps(report, indent=2) + "\n")

@@ -110,7 +110,7 @@ def get_kernel_config(a, b, *, group_size=256, output_dtype=torch.float32,
                              "K a positive multiple of 256, aligned contiguous A and B.T, "
                              "and contiguous FP32 scales")
         if supported and cuda.is_available():
-            config_id = (entry["selected"].get("config_id", 7)
+            config_id = (entry.get("cuda", entry["selected"]).get("config_id", 7)
                          if entry else (7 if m % 128 == n % 128 == 0 else 0))
             config = dict(backend="cuda", config_id=config_id)
             policy = "sm121_g256_measured" if entry else "sm121_g256_explicit"

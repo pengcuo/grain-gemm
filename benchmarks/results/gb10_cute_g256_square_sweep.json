@@ -1,0 +1,2773 @@
+{
+  "benchmark": "Forced GrainGEMM CUDA/CuTe and Triton INT8 versus PyTorch BF16 square GEMM sweep",
+  "forced_backends": {
+    "cute_int8_gemm": "cuda",
+    "triton_int8_gemm": "triton"
+  },
+  "started_at_utc": "2026-09-22T09:44:55.045809+00:00",
+  "expected_sizes": [
+    1024,
+    2048,
+    3072,
+    4096,
+    5120,
+    6144,
+    7168,
+    8192,
+    9216,
+    10240,
+    11264,
+    12288,
+    13312,
+    14336,
+    15360,
+    16384
+  ],
+  "group_size": 256,
+  "seed": 2026,
+  "gpu": "NVIDIA GB10",
+  "compute_capability": [
+    12,
+    1
+  ],
+  "gpu_properties": {
+    "cuda_device_index": 0,
+    "multiprocessor_count": 48,
+    "total_memory_bytes": 130660913152
+  },
+  "software": {
+    "python": "3.12.3",
+    "torch": "2.14.0+cu130",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "driver": "580.178.04",
+    "grain_gemm": "0.0.0"
+  },
+  "source": {
+    "native_build": {
+      "architecture": "sm_121",
+      "cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+      "tested_cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+      "nvcc_version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Aug_20_01:57:39_PM_PDT_2025\nCuda compilation tools, release 13.0, V13.0.88\nBuild cuda_13.0.r13.0/compiler.36424714_0",
+      "source_sha256": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148"
+    },
+    "native_library_sha256": "4c1940d5105732617cebb3b799a753a66565061d5e3440b2af8bd133e573c0ce",
+    "git_commit": "a045d325458b3305dfdb5e954b35d8b16ef14b9b",
+    "git_status_porcelain": "M benchmarks/tune_grain.py\n M docs/kernel_design.md\n M src/grain_gemm/gemm.py\n M src/grain_gemm/kernels/configs/sm121_g256.json\n M src/grain_gemm/kernels/csrc/grain_cute.cu\n M src/grain_gemm/kernels/cuda.py\n M tests/sanitize_kernels.py\n M tests/test_int8_gemm.py\n?? benchmarks/compare_backends.py\n?? benchmarks/plot_backends.py\n?? benchmarks/results/gb10_cute_g256_tuning.json",
+    "comparison_script_sha256": "f2da4c6731227abeaaa1b8ab08f3adb953a3c23e238c7548eb877e4a3ea3a1f0",
+    "check_sample_script_sha256": "0e7ea663757e16b37f5bc088459a81d20dd0ea8e30f81729da13f0108a6d49bd",
+    "package_source_sha256": {
+      "grain_gemm/__init__.py": "22c5685605c9d04d8168009cbead08dcb1d9000aaf606c4df633bb1f40c03d42",
+      "grain_gemm/baselines/__init__.py": "b045e960f98bbc0d0ffc1d9ad4ad3e9ecff31d859fd5761dd0f20423dd14c211",
+      "grain_gemm/baselines/sglang.py": "cde6cf5e9cef6bb66a8da2af5cdb7a74bd744eee4ca50686bc39dae661953b81",
+      "grain_gemm/gemm.py": "1705d42ccab45b5734918e8005be9c26c3d08fffa5d28f28666a7af17a3b2961",
+      "grain_gemm/kernels/__init__.py": "df3df411d10614aabefa0a3893e37899c67b80d984a70f2d82b6f334658f69ab",
+      "grain_gemm/kernels/_native/build.json": "6195046f5bbef742b799267da1d41f3cfc40d640c9b7a6c5ff9a109add04c116",
+      "grain_gemm/kernels/configs/sm121_g256.json": "bedb1fafa69ad388e0fe128bc79d0f2d90f3585a2d45d4691653711ce019cdb9",
+      "grain_gemm/kernels/csrc/grain_cute.cu": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148",
+      "grain_gemm/kernels/cuda.py": "5b9e259e223cd666b0ed09470a4ccceb2cd616db957a204445f4f7a5154932fe",
+      "grain_gemm/kernels/triton.py": "0e4834f409c64c3cffb4481a985948239c8d737bb53b805270eabe15f029da21"
+    }
+  },
+  "torch_allow_bf16_reduced_precision_reduction": true,
+  "timing": {
+    "method": "triton.testing.do_bench_cudagraph",
+    "statistic": "median of per-round medians, separately for each size",
+    "rounds": 5,
+    "rep_ms": 100,
+    "warmup_calls_per_implementation": 50,
+    "measurement_order": "rotates implementation order each round; exact orders saved per case",
+    "scope": "GPU GEMM execution including group scaling, accumulation, and BF16 output",
+    "correctness_checks_performed_before_timing": true,
+    "includes_input_quantization": false,
+    "includes_compilation_or_autotuning": false,
+    "includes_warmup": false,
+    "includes_host_dispatch": false,
+    "cache_policy": "repeated inputs; no cache flush",
+    "rep_ms_note": "Target duration of each captured batch; graph replay count follows installed Triton."
+  },
+  "quantization": {
+    "input_dtype": "bfloat16",
+    "quantized_dtype": "int8",
+    "scale_dtype": "float32",
+    "method": "per row/column and K-group: max(abs(x)).clamp_min(1e-12)/127; round and clamp to [-127,127]",
+    "performed_before_timing": true
+  },
+  "complete": true,
+  "reports": [
+    {
+      "timestamp_utc": "2026-09-22T09:45:07.605361+00:00",
+      "shape": {
+        "m": 1024,
+        "n": 1024,
+        "k": 1024
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          1024,
+          1
+        ],
+        "b": [
+          1,
+          1024
+        ],
+        "scale_a": [
+          4,
+          1
+        ],
+        "scale_b": [
+          1024,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 2
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 64,
+          "block_n": 128,
+          "num_warps": 8,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010129697620868683,
+            "max_abs_error": 1.625
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010129697620868683,
+            "max_abs_error": 1.625
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            0.02094260410488588,
+            0.020878319015552697,
+            0.02082409685474053,
+            0.020872225526903494,
+            0.020844762610771894
+          ],
+          "median_ms": 0.020872225526903494,
+          "min_ms": 0.02082409685474053,
+          "max_ms": 0.02094260410488588,
+          "effective_tops": 102.88714278369483
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            0.024834675673648318,
+            0.02475631956507852,
+            0.024803568948462126,
+            0.02482901185392943,
+            0.02485650694361485
+          ],
+          "median_ms": 0.02482901185392943,
+          "min_ms": 0.02475631956507852,
+          "max_ms": 0.02485650694361485,
+          "effective_tops": 86.49090268407681
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            0.03204813118978945,
+            0.0320494662443858,
+            0.03208046103968765,
+            0.03224226716276887,
+            0.03219177573919296
+          ],
+          "median_ms": 0.03208046103968765,
+          "min_ms": 0.03204813118978945,
+          "max_ms": 0.03224226716276887,
+          "effective_tflops": 66.94054818424483
+        }
+      },
+      "cute_speedup_over_bf16": 1.5369928328120626,
+      "cute_speedup_over_triton": 1.1895718461802642,
+      "triton_speedup_over_bf16": 1.292055488491404
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:45:22.926039+00:00",
+      "shape": {
+        "m": 2048,
+        "n": 2048,
+        "k": 2048
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          2048,
+          1
+        ],
+        "b": [
+          1,
+          2048
+        ],
+        "scale_a": [
+          8,
+          1
+        ],
+        "scale_b": [
+          2048,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 7
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 64,
+          "block_n": 128,
+          "num_warps": 8,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.001953125
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.001953125
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010112195275723934,
+            "max_abs_error": 2.5
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010112195275723934,
+            "max_abs_error": 2.5
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            0.12077690796418623,
+            0.12278822082594056,
+            0.12249404132956325,
+            0.12278968286162806,
+            0.12410125545426912
+          ],
+          "median_ms": 0.12278822082594056,
+          "min_ms": 0.12077690796418623,
+          "max_ms": 0.12410125545426912,
+          "effective_tops": 139.91463569093867
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            0.1569004179939391,
+            0.15683502654547948,
+            0.15676693961447347,
+            0.15679853049397657,
+            0.15788209608893705
+          ],
+          "median_ms": 0.15683502654547948,
+          "min_ms": 0.15676693961447347,
+          "max_ms": 0.15788209608893705,
+          "effective_tops": 109.54102257902275
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            0.18944233788384332,
+            0.18975284315521745,
+            0.19070579725153308,
+            0.1913699162289691,
+            0.19218419345721244
+          ],
+          "median_ms": 0.19070579725153308,
+          "min_ms": 0.18944233788384332,
+          "max_ms": 0.19218419345721244,
+          "effective_tflops": 90.08572068388912
+        }
+      },
+      "cute_speedup_over_bf16": 1.5531277835018853,
+      "cute_speedup_over_triton": 1.2772807154507293,
+      "triton_speedup_over_bf16": 1.2159643253940577
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:45:38.771007+00:00",
+      "shape": {
+        "m": 3072,
+        "n": 3072,
+        "k": 3072
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          3072,
+          1
+        ],
+        "b": [
+          1,
+          3072
+        ],
+        "scale_a": [
+          12,
+          1
+        ],
+        "scale_b": [
+          3072,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 7
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 64,
+          "block_n": 128,
+          "num_warps": 8,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010117604397237301,
+            "max_abs_error": 3.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010117604397237301,
+            "max_abs_error": 3.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            0.3719234001345751,
+            0.3717780613399052,
+            0.3727969856528969,
+            0.37341066686118524,
+            0.3730811804113254
+          ],
+          "median_ms": 0.3727969856528969,
+          "min_ms": 0.3717780613399052,
+          "max_ms": 0.37341066686118524,
+          "effective_tops": 155.53253037830575
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            0.47788256519245653,
+            0.48257493073085567,
+            0.48187606883160944,
+            0.4810063149691758,
+            0.48006241276579087
+          ],
+          "median_ms": 0.4810063149691758,
+          "min_ms": 0.47788256519245653,
+          "max_ms": 0.48257493073085567,
+          "effective_tops": 120.54323756584289
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            0.6625090016947164,
+            0.6593528295818128,
+            0.6635547984730114,
+            0.6613131436434658,
+            0.6652578046244959
+          ],
+          "median_ms": 0.6625090016947164,
+          "min_ms": 0.6593528295818128,
+          "max_ms": 0.6652578046244959,
+          "effective_tflops": 87.518899135982
+        }
+      },
+      "cute_speedup_over_bf16": 1.7771307901925044,
+      "cute_speedup_over_triton": 1.2902634234736818,
+      "triton_speedup_over_bf16": 1.3773395090190692
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:45:54.368919+00:00",
+      "shape": {
+        "m": 4096,
+        "n": 4096,
+        "k": 4096
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          4096,
+          1
+        ],
+        "b": [
+          1,
+          4096
+        ],
+        "scale_a": [
+          16,
+          1
+        ],
+        "scale_b": [
+          4096,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 7
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 64,
+          "block_n": 128,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010123070329427719,
+            "max_abs_error": 3.625
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010123070329427719,
+            "max_abs_error": 3.625
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            0.8572505857886338,
+            0.864744548139901,
+            0.8657331874227931,
+            0.8657354486399683,
+            0.8672394588075836
+          ],
+          "median_ms": 0.8657331874227931,
+          "min_ms": 0.8572505857886338,
+          "max_ms": 0.8672394588075836,
+          "effective_tops": 158.75440085777805
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            1.1112492188163425,
+            1.1135904547873507,
+            1.1170339796278212,
+            1.1221914503309462,
+            1.1165168419312894
+          ],
+          "median_ms": 1.1165168419312894,
+          "min_ms": 1.1112492188163425,
+          "max_ms": 1.1221914503309462,
+          "effective_tops": 123.09617581250781
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            1.5442148648775542,
+            1.535856217604417,
+            1.5488167395958534,
+            1.550628896859976,
+            1.5508222579956055
+          ],
+          "median_ms": 1.5488167395958534,
+          "min_ms": 1.535856217604417,
+          "max_ms": 1.5508222579956055,
+          "effective_tflops": 88.7380346288504
+        }
+      },
+      "cute_speedup_over_bf16": 1.7890231795393408,
+      "cute_speedup_over_triton": 1.2896777646413855,
+      "triton_speedup_over_bf16": 1.3871861860290395
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:46:10.126901+00:00",
+      "shape": {
+        "m": 5120,
+        "n": 5120,
+        "k": 5120
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          5120,
+          1
+        ],
+        "b": [
+          1,
+          5120
+        ],
+        "scale_a": [
+          20,
+          1
+        ],
+        "scale_b": [
+          5120,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 15
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010117271915078163,
+            "max_abs_error": 4.5
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010117271915078163,
+            "max_abs_error": 4.5
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            1.6816300509268776,
+            1.692800585428874,
+            1.6935270923679158,
+            1.6932786305745442,
+            1.6941786943855932
+          ],
+          "median_ms": 1.6932786305745442,
+          "min_ms": 1.6816300509268776,
+          "max_ms": 1.6941786943855932,
+          "effective_tops": 158.52999686703512
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            2.0918980812539862,
+            2.0950373013814287,
+            2.094746669133504,
+            2.1085989475250244,
+            2.103377342224121
+          ],
+          "median_ms": 2.0950373013814287,
+          "min_ms": 2.0918980812539862,
+          "max_ms": 2.1085989475250244,
+          "effective_tops": 128.1292012428603
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            2.933564867292132,
+            2.9246139526367188,
+            2.919843384713838,
+            2.9220051484949447,
+            2.9304846595315373
+          ],
+          "median_ms": 2.9246139526367188,
+          "min_ms": 2.919843384713838,
+          "max_ms": 2.933564867292132,
+          "effective_tflops": 91.78491942773815
+        }
+      },
+      "cute_speedup_over_bf16": 1.7271900204896413,
+      "cute_speedup_over_triton": 1.2372667224121079,
+      "triton_speedup_over_bf16": 1.3959722582067071
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:46:26.121370+00:00",
+      "shape": {
+        "m": 6144,
+        "n": 6144,
+        "k": 6144
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          6144,
+          1
+        ],
+        "b": [
+          1,
+          6144
+        ],
+        "scale_a": [
+          24,
+          1
+        ],
+        "scale_b": [
+          6144,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 15
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010118682868778706,
+            "max_abs_error": 4.5
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010118682868778706,
+            "max_abs_error": 4.5
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            2.834387143452962,
+            2.851893705480239,
+            2.853885759626116,
+            2.8754843575613838,
+            2.84738686505486
+          ],
+          "median_ms": 2.851893705480239,
+          "min_ms": 2.834387143452962,
+          "max_ms": 2.8754843575613838,
+          "effective_tops": 162.64858226540733
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            3.600621223449707,
+            3.5923254224989147,
+            3.5895633697509766,
+            3.592086247035435,
+            3.597137723650251
+          ],
+          "median_ms": 3.5923254224989147,
+          "min_ms": 3.5895633697509766,
+          "max_ms": 3.600621223449707,
+          "effective_tops": 129.12428953759135
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            5.812575817108154,
+            5.794583082199097,
+            5.793237573960248,
+            5.803762912750244,
+            5.797551870346069
+          ],
+          "median_ms": 5.797551870346069,
+          "min_ms": 5.793237573960248,
+          "max_ms": 5.812575817108154,
+          "effective_tflops": 80.00902421254428
+        }
+      },
+      "cute_speedup_over_bf16": 2.0328779642822634,
+      "cute_speedup_over_triton": 1.2596280904845267,
+      "triton_speedup_over_bf16": 1.6138715702190316
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:46:42.478641+00:00",
+      "shape": {
+        "m": 7168,
+        "n": 7168,
+        "k": 7168
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          7168,
+          1
+        ],
+        "b": [
+          1,
+          7168
+        ],
+        "scale_a": [
+          28,
+          1
+        ],
+        "scale_b": [
+          7168,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 15
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.01011700090020895,
+            "max_abs_error": 5.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.01011700090020895,
+            "max_abs_error": 5.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            4.405483743418818,
+            4.435204245827414,
+            4.434131622314453,
+            4.43524794145064,
+            4.437007210471414
+          ],
+          "median_ms": 4.435204245827414,
+          "min_ms": 4.405483743418818,
+          "max_ms": 4.437007210471414,
+          "effective_tops": 166.07733273094962
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            5.5799538107479325,
+            5.60914836210363,
+            5.604875227984261,
+            5.604423522949219,
+            5.610440422506894
+          ],
+          "median_ms": 5.604875227984261,
+          "min_ms": 5.5799538107479325,
+          "max_ms": 5.610440422506894,
+          "effective_tops": 131.41896318874996
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            8.124500274658203,
+            8.117547988891602,
+            8.120153109232586,
+            8.112441380818684,
+            8.091069221496582
+          ],
+          "median_ms": 8.117547988891602,
+          "min_ms": 8.091069221496582,
+          "max_ms": 8.124500274658203,
+          "effective_tflops": 90.74007228192268
+        }
+      },
+      "cute_speedup_over_bf16": 1.8302534762696647,
+      "cute_speedup_over_triton": 1.2637242655188334,
+      "triton_speedup_over_bf16": 1.4483012839183218
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:46:59.345394+00:00",
+      "shape": {
+        "m": 8192,
+        "n": 8192,
+        "k": 8192
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          8192,
+          1
+        ],
+        "b": [
+          1,
+          8192
+        ],
+        "scale_a": [
+          32,
+          1
+        ],
+        "scale_b": [
+          8192,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 15
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010117913596332073,
+            "max_abs_error": 5.25
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010117913596332073,
+            "max_abs_error": 5.25
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            6.527552195957728,
+            6.590398788452148,
+            6.569870812552315,
+            6.582141876220703,
+            6.572681681315104
+          ],
+          "median_ms": 6.572681681315104,
+          "min_ms": 6.527552195957728,
+          "max_ms": 6.590398788452148,
+          "effective_tops": 167.28508713600178
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            8.326378215443004,
+            8.369084040323893,
+            8.354719797770183,
+            8.362178802490234,
+            8.366251858797941
+          ],
+          "median_ms": 8.362178802490234,
+          "min_ms": 8.326378215443004,
+          "max_ms": 8.369084040323893,
+          "effective_tops": 131.486261385438
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            12.19493920462472,
+            12.264342716761998,
+            12.250174045562744,
+            12.209065914154053,
+            12.180027961730957
+          ],
+          "median_ms": 12.209065914154053,
+          "min_ms": 12.180027961730957,
+          "max_ms": 12.264342716761998,
+          "effective_tflops": 90.05698187781333
+        }
+      },
+      "cute_speedup_over_bf16": 1.8575471179232865,
+      "cute_speedup_over_triton": 1.27226286133137,
+      "triton_speedup_over_bf16": 1.4600340655856612
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:47:16.607586+00:00",
+      "shape": {
+        "m": 9216,
+        "n": 9216,
+        "k": 9216
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          9216,
+          1
+        ],
+        "b": [
+          1,
+          9216
+        ],
+        "scale_a": [
+          36,
+          1
+        ],
+        "scale_b": [
+          9216,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 15
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010118824429810047,
+            "max_abs_error": 6.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010118824429810047,
+            "max_abs_error": 6.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            9.066124725341798,
+            9.276297760009765,
+            9.19643669128418,
+            9.242702102661132,
+            9.209713745117188
+          ],
+          "median_ms": 9.209713745117188,
+          "min_ms": 9.066124725341798,
+          "max_ms": 9.276297760009765,
+          "effective_tops": 169.98525933794699
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            11.492668151855469,
+            11.579854011535645,
+            11.594812393188477,
+            11.615987777709961,
+            11.554733753204346
+          ],
+          "median_ms": 11.579854011535645,
+          "min_ms": 11.492668151855469,
+          "max_ms": 11.615987777709961,
+          "effective_tops": 135.19303247108826
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            17.06122817993164,
+            17.21700439453125,
+            17.299788665771487,
+            17.20896987915039,
+            17.204608154296878
+          ],
+          "median_ms": 17.20896987915039,
+          "min_ms": 17.06122817993164,
+          "max_ms": 17.299788665771487,
+          "effective_tflops": 90.97090589301965
+        }
+      },
+      "cute_speedup_over_bf16": 1.8685672926885761,
+      "cute_speedup_over_triton": 1.257352218756534,
+      "triton_speedup_over_bf16": 1.4861128527187926
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:47:35.343467+00:00",
+      "shape": {
+        "m": 10240,
+        "n": 10240,
+        "k": 10240
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          10240,
+          1
+        ],
+        "b": [
+          1,
+          10240
+        ],
+        "scale_a": [
+          40,
+          1
+        ],
+        "scale_b": [
+          10240,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 15
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010118783451616764,
+            "max_abs_error": 6.03125
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010118783451616764,
+            "max_abs_error": 6.03125
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            12.3731814793178,
+            12.562811170305524,
+            12.44377190726144,
+            12.549145289829799,
+            12.550109318324498
+          ],
+          "median_ms": 12.549145289829799,
+          "min_ms": 12.3731814793178,
+          "max_ms": 12.562811170305524,
+          "effective_tops": 171.12588932573638
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            15.821711858113606,
+            15.947556813557942,
+            15.88111178080241,
+            15.854567845662435,
+            15.892716725667318
+          ],
+          "median_ms": 15.88111178080241,
+          "min_ms": 15.821711858113606,
+          "max_ms": 15.947556813557942,
+          "effective_tops": 135.22250064355987
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            22.887539863586426,
+            23.0857515335083,
+            23.01689624786377,
+            23.092700004577637,
+            23.004915237426758
+          ],
+          "median_ms": 23.01689624786377,
+          "min_ms": 22.887539863586426,
+          "max_ms": 23.092700004577637,
+          "effective_tflops": 93.3003140334054
+        }
+      },
+      "cute_speedup_over_bf16": 1.8341405503143986,
+      "cute_speedup_over_triton": 1.26551342055725,
+      "triton_speedup_over_bf16": 1.4493252465918236
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:47:55.420955+00:00",
+      "shape": {
+        "m": 11264,
+        "n": 11264,
+        "k": 11264
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          11264,
+          1
+        ],
+        "b": [
+          1,
+          11264
+        ],
+        "scale_a": [
+          44,
+          1
+        ],
+        "scale_b": [
+          11264,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 15
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010118783451616764,
+            "max_abs_error": 6.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010118783451616764,
+            "max_abs_error": 6.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            16.369074503580727,
+            16.586627197265628,
+            16.656837463378906,
+            16.61169878641764,
+            16.679877599080406
+          ],
+          "median_ms": 16.61169878641764,
+          "min_ms": 16.369074503580727,
+          "max_ms": 16.679877599080406,
+          "effective_tops": 172.06552877211183
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            21.241392135620117,
+            21.308740615844727,
+            21.20397663116455,
+            21.23256778717041,
+            21.316887855529785
+          ],
+          "median_ms": 21.241392135620117,
+          "min_ms": 21.20397663116455,
+          "max_ms": 21.316887855529785,
+          "effective_tops": 134.56277805327355
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            30.14058049519857,
+            30.28066635131836,
+            30.205642700195312,
+            30.15269215901693,
+            30.245519002278648
+          ],
+          "median_ms": 30.205642700195312,
+          "min_ms": 30.14058049519857,
+          "max_ms": 30.28066635131836,
+          "effective_tflops": 94.62803900112074
+        }
+      },
+      "cute_speedup_over_bf16": 1.8183355651074409,
+      "cute_speedup_over_triton": 1.2787007764063174,
+      "triton_speedup_over_bf16": 1.4220180347569058
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:48:16.319402+00:00",
+      "shape": {
+        "m": 12288,
+        "n": 12288,
+        "k": 12288
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          12288,
+          1
+        ],
+        "b": [
+          1,
+          12288
+        ],
+        "scale_a": [
+          48,
+          1
+        ],
+        "scale_b": [
+          12288,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 15
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010116824880242348,
+            "max_abs_error": 7.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010116824880242348,
+            "max_abs_error": 7.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            21.228808403015137,
+            21.408260345458984,
+            21.496103286743164,
+            21.383159637451172,
+            21.38264751434326
+          ],
+          "median_ms": 21.383159637451172,
+          "min_ms": 21.228808403015137,
+          "max_ms": 21.496103286743164,
+          "effective_tops": 173.54085208458585
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            27.57855478922526,
+            27.782752990722656,
+            27.613914489746094,
+            27.819129943847656,
+            27.648671468098957
+          ],
+          "median_ms": 27.648671468098957,
+          "min_ms": 27.57855478922526,
+          "max_ms": 27.819129943847656,
+          "effective_tops": 134.2144684248421
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            40.80007362365723,
+            40.58113670349121,
+            40.68426513671875,
+            40.48231315612793,
+            40.55351257324219
+          ],
+          "median_ms": 40.58113670349121,
+          "min_ms": 40.48231315612793,
+          "max_ms": 40.80007362365723,
+          "effective_tflops": 91.44277477631015
+        }
+      },
+      "cute_speedup_over_bf16": 1.8978082468418778,
+      "cute_speedup_over_triton": 1.2930115070400616,
+      "triton_speedup_over_bf16": 1.4677427358603372
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:48:39.340934+00:00",
+      "shape": {
+        "m": 13312,
+        "n": 13312,
+        "k": 13312
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          13312,
+          1
+        ],
+        "b": [
+          1,
+          13312
+        ],
+        "scale_a": [
+          52,
+          1
+        ],
+        "scale_b": [
+          13312,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 15
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010118191130459309,
+            "max_abs_error": 6.5
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010118191130459309,
+            "max_abs_error": 6.5
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            27.02242660522461,
+            27.240074157714844,
+            27.23841094970703,
+            27.291397094726562,
+            27.39958318074544
+          ],
+          "median_ms": 27.240074157714844,
+          "min_ms": 27.02242660522461,
+          "max_ms": 27.39958318074544,
+          "effective_tops": 173.20149524335187
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            36.16885566711426,
+            36.20712089538574,
+            36.16711235046387,
+            36.38080024719238,
+            36.43960762023926
+          ],
+          "median_ms": 36.20712089538574,
+          "min_ms": 36.16711235046387,
+          "max_ms": 36.43960762023926,
+          "effective_tops": 130.30645513869808
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            48.688528060913086,
+            48.750200271606445,
+            48.79012680053711,
+            48.84599304199219,
+            48.73619270324707
+          ],
+          "median_ms": 48.750200271606445,
+          "min_ms": 48.688528060913086,
+          "max_ms": 48.84599304199219,
+          "effective_tflops": 96.77953215309999
+        }
+      },
+      "cute_speedup_over_bf16": 1.7896500570942673,
+      "cute_speedup_over_triton": 1.3291858416299973,
+      "triton_speedup_over_bf16": 1.3464257600724945
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:49:03.113450+00:00",
+      "shape": {
+        "m": 14336,
+        "n": 14336,
+        "k": 14336
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          14336,
+          1
+        ],
+        "b": [
+          1,
+          14336
+        ],
+        "scale_a": [
+          56,
+          1
+        ],
+        "scale_b": [
+          14336,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 15
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.0101175457239151,
+            "max_abs_error": 7.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.0101175457239151,
+            "max_abs_error": 7.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            34.16628837585449,
+            34.1746883392334,
+            34.41018486022949,
+            34.24447250366211,
+            34.28121566772461
+          ],
+          "median_ms": 34.24447250366211,
+          "min_ms": 34.16628837585449,
+          "max_ms": 34.41018486022949,
+          "effective_tops": 172.0772638411012
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            42.84235954284668,
+            43.40905570983887,
+            42.91066360473633,
+            43.06540870666504,
+            42.99716758728027
+          ],
+          "median_ms": 42.99716758728027,
+          "min_ms": 42.84235954284668,
+          "max_ms": 43.40905570983887,
+          "effective_tops": 137.04844902051684
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            62.21193504333496,
+            62.43195343017578,
+            62.99888038635254,
+            62.68819236755371,
+            61.83844757080078
+          ],
+          "median_ms": 62.43195343017578,
+          "min_ms": 61.83844757080078,
+          "max_ms": 62.99888038635254,
+          "effective_tflops": 94.38588425240323
+        }
+      },
+      "cute_speedup_over_bf16": 1.8231249853096525,
+      "cute_speedup_over_triton": 1.2555943906766895,
+      "triton_speedup_over_bf16": 1.452001537158109
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:49:29.576484+00:00",
+      "shape": {
+        "m": 15360,
+        "n": 15360,
+        "k": 15360
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          15360,
+          1
+        ],
+        "b": [
+          1,
+          15360
+        ],
+        "scale_a": [
+          60,
+          1
+        ],
+        "scale_b": [
+          15360,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 15
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010120480321347713,
+            "max_abs_error": 8.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010120480321347713,
+            "max_abs_error": 8.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            41.405351638793945,
+            42.00680732727051,
+            42.05763244628906,
+            41.65861701965332,
+            41.599382400512695
+          ],
+          "median_ms": 41.65861701965332,
+          "min_ms": 41.405351638793945,
+          "max_ms": 42.05763244628906,
+          "effective_tops": 173.97978690892978
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            54.886959075927734,
+            54.665889739990234,
+            55.186960220336914,
+            54.684335708618164,
+            54.841936111450195
+          ],
+          "median_ms": 54.841936111450195,
+          "min_ms": 54.665889739990234,
+          "max_ms": 55.186960220336914,
+          "effective_tops": 132.15721081165066
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            75.66129684448242,
+            75.09643173217773,
+            75.43822479248047,
+            75.6088638305664,
+            75.28620529174805
+          ],
+          "median_ms": 75.43822479248047,
+          "min_ms": 75.09643173217773,
+          "max_ms": 75.66129684448242,
+          "effective_tflops": 96.07539588766201
+        }
+      },
+      "cute_speedup_over_bf16": 1.810867239229063,
+      "cute_speedup_over_triton": 1.316460795747909,
+      "triton_speedup_over_bf16": 1.3755572859275855
+    },
+    {
+      "timestamp_utc": "2026-09-22T09:49:58.907536+00:00",
+      "shape": {
+        "m": 16384,
+        "n": 16384,
+        "k": 16384
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          16384,
+          1
+        ],
+        "b": [
+          1,
+          16384
+        ],
+        "scale_a": [
+          64,
+          1
+        ],
+        "scale_b": [
+          16384,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "cuda",
+          "config_id": 16
+        },
+        "triton_int8_gemm": {
+          "policy": "sm121_g256_measured",
+          "compute_capability": [
+            12,
+            1
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.125
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.125
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010119199752807617,
+            "max_abs_error": 8.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010119199752807617,
+            "max_abs_error": 8.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            51.9988956451416,
+            52.259071350097656,
+            52.49575996398926,
+            52.23654365539551,
+            52.4955997467041
+          ],
+          "median_ms": 52.259071350097656,
+          "min_ms": 51.9988956451416,
+          "max_ms": 52.49575996398926,
+          "effective_tops": 168.31705567978034
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            64.81417465209961,
+            65.21035385131836,
+            64.60272216796875,
+            65.26460647583008,
+            65.45651245117188
+          ],
+          "median_ms": 65.21035385131836,
+          "min_ms": 64.60272216796875,
+          "max_ms": 65.45651245117188,
+          "effective_tops": 134.88798178067498
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            90.20156860351562,
+            90.49798583984375,
+            90.0999526977539,
+            90.24529266357422,
+            90.24585342407227
+          ],
+          "median_ms": 90.24529266357422,
+          "min_ms": 90.0999526977539,
+          "max_ms": 90.49798583984375,
+          "effective_tflops": 97.46871845159825
+        }
+      },
+      "cute_speedup_over_bf16": 1.7268828230604518,
+      "cute_speedup_over_triton": 1.2478284088604743,
+      "triton_speedup_over_bf16": 1.3839104886524047
+    }
+  ],
+  "updated_at_utc": "2026-09-22T09:49:58.909586+00:00",
+  "completed_at_utc": "2026-09-22T09:49:58.909569+00:00"
+}

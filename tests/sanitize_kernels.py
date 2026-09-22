@@ -12,7 +12,7 @@ from grain_gemm.kernels import cuda
 
 def main():
     for k in (256, 4352):
-     for config in range(8):
+     for config in range(len(cuda.CONFIGS)):
       m,n=256,128
       a=torch.full((m,k),-128,device='cuda',dtype=torch.int8)
       b=torch.full((n,k),127,device='cuda',dtype=torch.int8).T

@@ -32,6 +32,8 @@
 // commit 098de2a652cf8f00fd70b2df54051c7eccbb855a (https://github.com/NVIDIA/cutlass).
 // Changes: signed INT8 operands, K-group INT32-to-FP32 scaling, BF16 output,
 // row-major output, native C launcher and multiple CTA configurations.
+// GrainGEMM GB10 optimization: prefetch row/column scales into registers or
+// stage them asynchronously with operands; use vectorized BF16 epilogues.
 #include <cuda_runtime.h>
 #include <cuda_bf16.h>
 #include <cute/tensor.hpp>
@@ -39,14 +41,30 @@
 template <class ElementA,
           class ElementB,
           class SmemLayoutA,
-          class SmemLayoutB>
+          class SmemLayoutB,
+          bool AsyncScale>
 struct SharedStorage
 {
   cute::ArrayEngine<ElementA, cute::cosize_v<SmemLayoutA>> A;
   cute::ArrayEngine<ElementB, cute::cosize_v<SmemLayoutB>> B;
 };
 
-template <bool Grouped, class ProblemShape, class CtaTiler,
+// Only asynchronous-scale configurations allocate a shared scale ring.
+template <class ElementA, class ElementB, class SmemLayoutA, class SmemLayoutB>
+struct SharedStorage<ElementA, ElementB, SmemLayoutA, SmemLayoutB, true>
+{
+  cute::ArrayEngine<ElementA, cute::cosize_v<SmemLayoutA>> A;
+  cute::ArrayEngine<ElementB, cute::cosize_v<SmemLayoutB>> B;
+  float SA[decltype(cute::size<2>(SmemLayoutA{}))::value][decltype(cute::size<0>(SmemLayoutA{}))::value];
+  float SB[decltype(cute::size<2>(SmemLayoutB{}))::value][decltype(cute::size<0>(SmemLayoutB{}))::value];
+};
+
+__device__ __forceinline__ void copy_scale_async(float* dst, float const* src) {
+  unsigned smem_addr = static_cast<unsigned>(__cvta_generic_to_shared(dst));
+  asm volatile("cp.async.ca.shared.global [%0], [%1], 4;" :: "r"(smem_addr), "l"(src));
+}
+
+template <bool Grouped, bool AsyncScale, int StoreBits, class ProblemShape, class CtaTiler,
           class TA, class AStride, class ASmemLayout, class TiledCopyA, class S2RAtomA,
           class TB, class BStride, class BSmemLayout, class TiledCopyB, class S2RAtomB,
           class TC, class CStride, class TiledMma>
@@ -111,8 +129,8 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   Tensor gC = local_tile(mC, cta_tiler, cta_coord, Step<_1,_1, X>{});  // (BLK_M,BLK_N)
 
   // Shared memory buffers
-  extern __shared__ char shared_memory[];
-  using SharedStorage = SharedStorage<TA, TB, ASmemLayout, BSmemLayout>;
+  extern __shared__ __align__(16) char shared_memory[];
+  using SharedStorage = SharedStorage<TA, TB, ASmemLayout, BSmemLayout, AsyncScale>;
   SharedStorage& smem = *reinterpret_cast<SharedStorage*>(shared_memory);
   Tensor sA = make_tensor(make_smem_ptr(smem.A.begin()), sA_layout);   // (BLK_M,BLK_K,PIPE)
   Tensor sB = make_tensor(make_smem_ptr(smem.B.begin()), sB_layout);   // (BLK_N,BLK_K,PIPE)
@@ -134,6 +152,18 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   CUTE_STATIC_ASSERT_V(size<1>(tBgB) == size<1>(tBsB));                // CPY_N
   CUTE_STATIC_ASSERT_V(size<2>(tBgB) == size<2>(tBsB));                // CPY_K
 
+  auto copy_scales = [&](int group, int pipe) {
+    if constexpr (AsyncScale) {
+      for (int r = threadIdx.x; r < int(size<0>(cta_tiler)); r += int(size(mma))) {
+        int m = tile_m * int(size<0>(cta_tiler)) + r;
+        copy_scale_async(&smem.SA[pipe][r], scale_a + m * (int(get<2>(shape_MNK)) / 256) + group);
+      }
+      for (int q = threadIdx.x; q < int(size<1>(cta_tiler)); q += int(size(mma))) {
+        int n = tile_n * int(size<1>(cta_tiler)) + q;
+        copy_scale_async(&smem.SB[pipe][q], scale_b + group * int(get<1>(shape_MNK)) + n);
+      }
+    }
+  };
   //
   // PREFETCH
   //
@@ -150,6 +180,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   for (int k_pipe = 0; k_pipe < K_PIPE_MAX-1; ++k_pipe) {
     copy(copy_a, tAgA(_,_,_,k_tile_next), tAsA(_,_,_,k_pipe));
     copy(copy_b, tBgB(_,_,_,k_tile_next), tBsB(_,_,_,k_pipe));
+    if constexpr (AsyncScale) copy_scales(k_tile_next / 2, k_pipe);
     cp_async_fence();
     --k_tile_count;
     if (k_tile_count > 0) { ++k_tile_next; }
@@ -178,6 +209,8 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   clear(tCrF);
   auto cC = make_identity_tensor(shape(gC));
   auto tCcC = thr_mma.partition_C(cC);
+  Tensor tCrSA = make_fragment_like<float>(tCrC);
+  Tensor tCrSB = make_fragment_like<float>(tCrC);
   int processed_tiles = 0;
   int scale_group = 0;
 
@@ -239,6 +272,30 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   CUTE_NO_UNROLL
   while (k_tile_count > -(K_PIPE_MAX-1))
   {
+    if constexpr (AsyncScale) {
+      // The previous iteration's wait and CTA barrier have made this stage
+      // ready. Read before the next stage-reuse barrier, while only the last
+      // K128 half of this G256 group remains to compute.
+      if (processed_tiles % 2 == 1) {
+        CUTE_UNROLL
+        for (int i = 0; i < size(tCrC); ++i) {
+          auto coord = tCcC(i);
+          tCrSA(i) = smem.SA[smem_pipe_read][int(get<0>(coord))];
+          tCrSB(i) = smem.SB[smem_pipe_read][int(get<1>(coord))];
+        }
+      }
+    } else {
+      if (processed_tiles % 2 == 0) {
+        CUTE_UNROLL
+        for (int i = 0; i < size(tCrC); ++i) {
+          auto coord = tCcC(i);
+          int m = tile_m * int(size<0>(cta_tiler)) + int(get<0>(coord));
+          int n = tile_n * int(size<1>(cta_tiler)) + int(get<1>(coord));
+          tCrSA(i) = scale_a[m * (int(get<2>(shape_MNK)) / 256) + scale_group];
+          tCrSB(i) = scale_b[scale_group * int(get<1>(shape_MNK)) + n];
+        }
+      }
+    }
     CUTE_UNROLL
     for (int k_block = 0; k_block < K_BLOCK_MAX; ++k_block)
     {
@@ -262,6 +319,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
       {
         copy(copy_a, tAgA(_,_,_,k_tile_next), tAsA(_,_,_,smem_pipe_write));
         copy(copy_b, tBgB(_,_,_,k_tile_next), tBsB(_,_,_,smem_pipe_write));
+        if constexpr (AsyncScale) copy_scales(k_tile_next / 2, smem_pipe_write);
         cp_async_fence();
 
         // Advance the gmem tile
@@ -279,12 +337,7 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
     if (processed_tiles % 2 == 0) {
       CUTE_UNROLL
       for (int i = 0; i < size(tCrC); ++i) {
-        auto coord = tCcC(i);
-        int m = tile_m * int(size<0>(cta_tiler)) + int(get<0>(coord));
-        int n = tile_n * int(size<1>(cta_tiler)) + int(get<1>(coord));
-        float sa = scale_a[m * (int(get<2>(shape_MNK)) / 256) + scale_group];
-        float sb = scale_b[scale_group * int(get<1>(shape_MNK)) + n];
-        tCrF(i) += float(tCrC(i)) * sa * sb;
+        tCrF(i) = fmaf(float(tCrC(i)), tCrSA(i) * tCrSB(i), tCrF(i));
       }
       clear(tCrC);
       ++scale_group;
@@ -297,12 +350,40 @@ gemm_device(ProblemShape shape_MNK, CtaTiler cta_tiler,
   // Epilogue
   //
 
-  CUTE_UNROLL
-  for (int i = 0; i < size(tCrF); ++i) tCgC(i) = TC(tCrF(i));
+  static_assert(StoreBits == 128 || StoreBits == 32 || StoreBits == 16);
+  if constexpr (StoreBits == 128) {
+    // Reuse operand shared storage only after all asynchronous copies complete.
+    cp_async_wait<0>();
+    __syncthreads();
+    Tensor sC = make_tensor(make_smem_ptr(reinterpret_cast<TC*>(shared_memory)),
+                           make_layout(select<0,1>(cta_tiler), make_stride(size<1>(cta_tiler), _1{})));
+    Tensor tCsC = thr_mma.partition_C(sC);
+    CUTE_UNROLL
+    for (int i = 0; i < size(tCrF); ++i) tCsC(i) = TC(tCrF(i));
+    __syncthreads();
+    CUTE_UNROLL
+    for (int v = threadIdx.x; v < int(size<0>(cta_tiler) * size<1>(cta_tiler)) / 8; v += int(size(mma))) {
+      int local_index = v * 8;
+      int m = tile_m * int(size<0>(cta_tiler)) + local_index / int(size<1>(cta_tiler));
+      int n = tile_n * int(size<1>(cta_tiler)) + local_index % int(size<1>(cta_tiler));
+      auto data = reinterpret_cast<uint4 const*>(shared_memory)[v];
+      *reinterpret_cast<uint4*>(C + m * int(get<1>(shape_MNK)) + n) = data;
+    }
+  } else if constexpr (StoreBits == 32) {
+    CUTE_UNROLL
+    for (int i = 0; i < size(tCrF); i += 2) {
+      __nv_bfloat162 pair = __floats2bfloat162_rn(tCrF(i), tCrF(i + 1));
+      *reinterpret_cast<__nv_bfloat162*>(&tCgC(i)) = pair;
+    }
+  } else {
+    CUTE_UNROLL
+    for (int i = 0; i < size(tCrF); ++i) tCgC(i) = TC(tCrF(i));
+  }
+
 }
 
 
-template<int BM, int BN, int P, int WM, int WN, bool Grouped>
+template<int BM, int BN, int P, int WM, int WN, bool Grouped, bool AsyncScale, int StoreBits>
 int launch(void const* a, void const* b, void const* sa, void const* sb, void* c,
            int M, int N, int K, cudaStream_t stream) {
   using namespace cute;
@@ -315,18 +396,18 @@ int launch(void const* a, void const* b, void const* sa, void const* sb, void* c
   auto swizzle_atom=composition(Swizzle<3,4,3>{}, Layout<Shape<_8,_128>,Stride<_128,_1>>{});
   auto sA=tile_to_shape(swizzle_atom,make_shape(Int<BM>{},_128{},Int<P>{}));
   auto sB=tile_to_shape(swizzle_atom,make_shape(Int<BN>{},_128{},Int<P>{}));
-  auto copyA=make_tiled_copy(Copy_Atom<SM80_CP_ASYNC_CACHEALWAYS<uint128_t>,int8_t>{},
+  auto copyA=make_tiled_copy(Copy_Atom<SM80_CP_ASYNC_CACHEGLOBAL<uint128_t>,int8_t>{},
     Layout<Shape<Int<WM*WN*4>,_8>,Stride<_8,_1>>{}, Layout<Shape<_1,_16>>{});
   auto copyB=copyA;
   auto mma=make_tiled_mma(SM80_16x8x32_S32S8S8S32_TN{},
     Layout<Shape<Int<WM>,Int<WN>>>{}, Tile<Int<WM*16>,Int<WN*16>,_32>{});
   Copy_Atom<SM75_U32x4_LDSM_N,int8_t> s2r;
   using output_t=cute::bfloat16_t;
-  auto kernel=gemm_device<Grouped,decltype(shape_mnk),decltype(cta),
+  auto kernel=gemm_device<Grouped,AsyncScale,StoreBits,decltype(shape_mnk),decltype(cta),
     int8_t,decltype(dA),decltype(sA),decltype(copyA),decltype(s2r),
     int8_t,decltype(dB),decltype(sB),decltype(copyB),decltype(s2r),
     output_t,decltype(dC),decltype(mma)>;
-  int smem=sizeof(SharedStorage<int8_t,int8_t,decltype(sA),decltype(sB)>);
+  int smem=sizeof(SharedStorage<int8_t,int8_t,decltype(sA),decltype(sB),AsyncScale>);
   cudaError_t status=cudaFuncSetAttribute(kernel,cudaFuncAttributeMaxDynamicSharedMemorySize,smem);
   if(status!=cudaSuccess) return int(status);
   dim3 grid = Grouped ? dim3((M/BM)*(N/BN)) : dim3(M/BM,N/BN);
@@ -339,13 +420,13 @@ int launch(void const* a, void const* b, void const* sa, void const* sb, void* c
 }
 // Both traversal variants are compiled independently. Small K uses the simpler
 // 2D grid; larger K uses a grouped grid to reduce repeated large operand reads.
-template<int BM, int BN, int P, int WM, int WN>
+template<int BM, int BN, int P, int WM, int WN, bool AsyncScale, int StoreBits>
 int dispatch(void const* a, void const* b, void const* sa, void const* sb, void* c,
              int M, int N, int K, cudaStream_t stream) {
   if (K <= 4096) {
-    return launch<BM,BN,P,WM,WN,false>(a,b,sa,sb,c,M,N,K,stream);
+    return launch<BM,BN,P,WM,WN,false,AsyncScale,StoreBits>(a,b,sa,sb,c,M,N,K,stream);
   }
-  return launch<BM,BN,P,WM,WN,true>(a,b,sa,sb,c,M,N,K,stream);
+  return launch<BM,BN,P,WM,WN,true,AsyncScale,StoreBits>(a,b,sa,sb,c,M,N,K,stream);
 }
 
 extern "C" int grain_cute_g256(void const* a, void const* b, void const* sa,
@@ -353,14 +434,23 @@ extern "C" int grain_cute_g256(void const* a, void const* b, void const* sa,
   if (!a || !b || !sa || !sb || !c) return int(cudaErrorInvalidValue);
   cudaStream_t st=static_cast<cudaStream_t>(stream);
   switch(config) {
-    case 0:return dispatch<64,64,2,2,2>(a,b,sa,sb,c,M,N,K,st);
-    case 1:return dispatch<64,64,3,2,2>(a,b,sa,sb,c,M,N,K,st);
-    case 2:return dispatch<128,64,2,2,2>(a,b,sa,sb,c,M,N,K,st);
-    case 3:return dispatch<128,64,3,2,2>(a,b,sa,sb,c,M,N,K,st);
-    case 4:return dispatch<64,128,2,2,2>(a,b,sa,sb,c,M,N,K,st);
-    case 5:return dispatch<64,128,3,2,2>(a,b,sa,sb,c,M,N,K,st);
-    case 6:return dispatch<128,128,2,4,2>(a,b,sa,sb,c,M,N,K,st);
-    case 7:return dispatch<128,128,3,4,2>(a,b,sa,sb,c,M,N,K,st);
+    case 0:return dispatch<64,64,2,2,2,false,128>(a,b,sa,sb,c,M,N,K,st);
+    case 1:return dispatch<64,64,3,2,2,false,128>(a,b,sa,sb,c,M,N,K,st);
+    case 2:return dispatch<128,64,2,2,2,false,128>(a,b,sa,sb,c,M,N,K,st);
+    case 3:return dispatch<128,64,3,2,2,false,128>(a,b,sa,sb,c,M,N,K,st);
+    case 4:return dispatch<64,128,2,2,2,false,128>(a,b,sa,sb,c,M,N,K,st);
+    case 5:return dispatch<64,128,3,2,2,false,128>(a,b,sa,sb,c,M,N,K,st);
+    case 6:return dispatch<128,128,2,4,2,false,128>(a,b,sa,sb,c,M,N,K,st);
+    case 7:return dispatch<128,128,3,4,2,false,128>(a,b,sa,sb,c,M,N,K,st);
+    case 8:return dispatch<64,64,2,2,2,true,32>(a,b,sa,sb,c,M,N,K,st);
+    case 9:return dispatch<64,64,3,2,2,true,32>(a,b,sa,sb,c,M,N,K,st);
+    case 10:return dispatch<128,64,2,2,2,true,32>(a,b,sa,sb,c,M,N,K,st);
+    case 11:return dispatch<128,64,3,2,2,true,32>(a,b,sa,sb,c,M,N,K,st);
+    case 12:return dispatch<64,128,2,2,2,true,32>(a,b,sa,sb,c,M,N,K,st);
+    case 13:return dispatch<64,128,3,2,2,true,32>(a,b,sa,sb,c,M,N,K,st);
+    case 14:return dispatch<128,128,2,4,2,true,32>(a,b,sa,sb,c,M,N,K,st);
+    case 15:return dispatch<128,128,3,4,2,true,32>(a,b,sa,sb,c,M,N,K,st);
+    case 16:return dispatch<128,128,3,4,2,true,16>(a,b,sa,sb,c,M,N,K,st);
     default:return int(cudaErrorInvalidValue);
   }
 }

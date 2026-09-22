@@ -6,6 +6,7 @@ torch = pytest.importorskip("torch")
 pytest.importorskip("triton")
 
 from grain_gemm import get_kernel_config, int8_gemm
+from grain_gemm.kernels.cuda import CONFIGS as CUDA_CONFIGS
 
 
 cuda = pytest.mark.skipif(
@@ -15,7 +16,13 @@ cuda = pytest.mark.skipif(
 
 
 def reference(a, b, scale_a, scale_b, group_size):
-    """Keep the inner products exact; apply dequantization only after each dot."""
+    """Independent CPU INT32 dots with a high-precision multiply-add reference.
+
+    Both kernels use FP32 FMA after forming an FP32 scale product. Evaluate that
+    multiply-add in CPU FP64 before rounding to FP32 for these bounded-scale
+    fixtures. This reduces reference rounding error when group terms cancel;
+    it is not a universally bit-exact FMA emulator for arbitrary exponents.
+    """
     a = a.cpu().to(torch.int32)
     b = b.cpu().to(torch.int32)
     scale_a, scale_b = scale_a.cpu(), scale_b.cpu()
@@ -23,7 +30,7 @@ def reference(a, b, scale_a, scale_b, group_size):
     for group, start in enumerate(range(0, a.shape[1], group_size)):
         partial = a[:, start : start + group_size] @ b[start : start + group_size]
         scales = scale_a[:, group, None] * scale_b[group, None, :]
-        result += partial.to(torch.float32) * scales
+        result = (result.double() + partial.double() * scales.double()).float()
     return result
 
 
@@ -333,7 +340,7 @@ def native_case(request):
 
 
 @cuda
-@pytest.mark.parametrize("config_id", range(8))
+@pytest.mark.parametrize("config_id", range(len(CUDA_CONFIGS)))
 def test_native_cuda_configurations(native_case, config_id):
     native_cuda = require_native_cuda()
     tensors, expected, exact = native_case
@@ -346,7 +353,57 @@ def test_native_cuda_configurations(native_case, config_id):
 
 
 @cuda
-@pytest.mark.parametrize("config_id,m,n", [(0, 192, 192), (7, 384, 256)])
+def test_forced_native_uses_its_measured_configuration(monkeypatch):
+    require_native_cuda()
+    import grain_gemm.gemm as implementation
+
+    tensors = inputs(1024, 1024, 1024, 256, device="cuda", layout="column_major_b")
+    triton_config = dict(backend="triton", block_m=64, block_n=128,
+                         num_warps=8, num_stages=3, swizzle=8)
+    monkeypatch.setattr(implementation, "_dispatch_table", lambda: {
+        "square_configs": {"1024": {
+            "selected": triton_config, "triton": triton_config,
+            "cuda": {"backend": "cuda", "config_id": 2},
+        }}
+    })
+    config = get_kernel_config(
+        *tensors[:2], scale_a=tensors[2], scale_b=tensors[3],
+        group_size=256, output_dtype=torch.bfloat16, backend="cuda",
+    )
+    assert config["backend"] == "cuda"
+    assert config["config_id"] == 2
+
+
+@cuda
+@pytest.mark.parametrize("native_config", [None, 7, 15, 16],
+                         ids=["triton", "prefetch", "shared_pair", "shared_scalar"])
+def test_fused_group_scaling_preserves_small_cancellation_result(native_config):
+    # First group contributes -1. The next exact INT32 dot is 4097, with
+    # float32(1/4097) = 2^-12 - 2^-24 + 2^-36. Their mathematical sum is
+    # exactly 2^-36. A separately rounded FP32 multiplication would lose it.
+    native_cuda = require_native_cuda() if native_config is not None else None
+    a = torch.zeros((256, 512), dtype=torch.int8, device="cuda")
+    weights = torch.zeros_like(a)
+    a[:, 0], weights[:, 0] = -1, 1
+    a[:, 256], weights[:, 256] = 127, 32
+    a[:, 257], weights[:, 257] = 1, 33
+    sa = torch.ones((256, 2), device="cuda")
+    sb = torch.ones((2, 256), device="cuda")
+    sb[1] = 1 / 4097
+    if native_cuda is None:
+        actual = int8_gemm(a, weights.t(), sa, sb, group_size=256,
+                          output_dtype=torch.bfloat16, backend="triton")
+    else:
+        actual = torch.empty((256, 256), dtype=torch.bfloat16, device="cuda")
+        native_cuda.launch(a, weights.t(), sa, sb, actual, native_config)
+    torch.testing.assert_close(actual, torch.full_like(actual, 2**-36), rtol=0, atol=0)
+
+
+@cuda
+@pytest.mark.parametrize("config_id,m,n", [
+    (0, 192, 192), (7, 384, 256), (8, 192, 192),
+    (15, 384, 256), (16, 384, 256),
+])
 @pytest.mark.parametrize("k", [256, 4352])
 def test_native_cuda_partial_cta_bands(config_id, m, n, k):
     native_cuda = require_native_cuda()

@@ -9,12 +9,8 @@
   "square_configs": {
     "1024": {
       "selected": {
-        "backend": "triton",
-        "block_m": 64,
-        "block_n": 128,
-        "num_warps": 8,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 2
       },
       "triton": {
         "backend": "triton",
@@ -23,16 +19,16 @@
         "num_warps": 8,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 2
       }
     },
     "2048": {
       "selected": {
-        "backend": "triton",
-        "block_m": 64,
-        "block_n": 128,
-        "num_warps": 8,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 7
       },
       "triton": {
         "backend": "triton",
@@ -41,24 +37,28 @@
         "num_warps": 8,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 7
       }
     },
     "3072": {
       "selected": {
-        "backend": "triton",
-        "block_m": 64,
-        "block_n": 128,
-        "num_warps": 4,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 7
       },
       "triton": {
         "backend": "triton",
         "block_m": 64,
         "block_n": 128,
-        "num_warps": 4,
+        "num_warps": 8,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 7
       }
     },
     "4096": {
@@ -73,16 +73,16 @@
         "num_warps": 4,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 7
       }
     },
     "5120": {
       "selected": {
-        "backend": "triton",
-        "block_m": 128,
-        "block_n": 64,
-        "num_warps": 4,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 15
       },
       "triton": {
         "backend": "triton",
@@ -91,16 +91,16 @@
         "num_warps": 4,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 15
       }
     },
     "6144": {
       "selected": {
-        "backend": "triton",
-        "block_m": 128,
-        "block_n": 64,
-        "num_warps": 4,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 15
       },
       "triton": {
         "backend": "triton",
@@ -109,16 +109,16 @@
         "num_warps": 4,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 15
       }
     },
     "7168": {
       "selected": {
-        "backend": "triton",
-        "block_m": 128,
-        "block_n": 64,
-        "num_warps": 4,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 15
       },
       "triton": {
         "backend": "triton",
@@ -127,16 +127,16 @@
         "num_warps": 4,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 15
       }
     },
     "8192": {
       "selected": {
-        "backend": "triton",
-        "block_m": 128,
-        "block_n": 64,
-        "num_warps": 4,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 15
       },
       "triton": {
         "backend": "triton",
@@ -145,16 +145,16 @@
         "num_warps": 4,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 15
       }
     },
     "9216": {
       "selected": {
-        "backend": "triton",
-        "block_m": 128,
-        "block_n": 64,
-        "num_warps": 4,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 15
       },
       "triton": {
         "backend": "triton",
@@ -163,16 +163,16 @@
         "num_warps": 4,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 15
       }
     },
     "10240": {
       "selected": {
-        "backend": "triton",
-        "block_m": 128,
-        "block_n": 64,
-        "num_warps": 4,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 15
       },
       "triton": {
         "backend": "triton",
@@ -181,16 +181,16 @@
         "num_warps": 4,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 15
       }
     },
     "11264": {
       "selected": {
-        "backend": "triton",
-        "block_m": 128,
-        "block_n": 64,
-        "num_warps": 4,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 15
       },
       "triton": {
         "backend": "triton",
@@ -199,16 +199,16 @@
         "num_warps": 4,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 15
       }
     },
     "12288": {
       "selected": {
-        "backend": "triton",
-        "block_m": 128,
-        "block_n": 64,
-        "num_warps": 4,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 15
       },
       "triton": {
         "backend": "triton",
@@ -217,16 +217,16 @@
         "num_warps": 4,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 15
       }
     },
     "13312": {
       "selected": {
-        "backend": "triton",
-        "block_m": 128,
-        "block_n": 64,
-        "num_warps": 4,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 15
       },
       "triton": {
         "backend": "triton",
@@ -235,16 +235,16 @@
         "num_warps": 4,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 15
       }
     },
     "14336": {
       "selected": {
-        "backend": "triton",
-        "block_m": 128,
-        "block_n": 64,
-        "num_warps": 4,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 15
       },
       "triton": {
         "backend": "triton",
@@ -253,16 +253,16 @@
         "num_warps": 4,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 15
       }
     },
     "15360": {
       "selected": {
-        "backend": "triton",
-        "block_m": 128,
-        "block_n": 64,
-        "num_warps": 4,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 15
       },
       "triton": {
         "backend": "triton",
@@ -271,16 +271,16 @@
         "num_warps": 4,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 15
       }
     },
     "16384": {
       "selected": {
-        "backend": "triton",
-        "block_m": 128,
-        "block_n": 64,
-        "num_warps": 4,
-        "num_stages": 3,
-        "swizzle": 8
+        "backend": "cuda",
+        "config_id": 16
       },
       "triton": {
         "backend": "triton",
@@ -289,8 +289,12 @@
         "num_warps": 4,
         "num_stages": 3,
         "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 16
       }
     }
   },
-  "tuning_report_sha256": "95febe431d89210d9f68db393011c823d33a25d8dffb79f58abf9040a4f0d24f"
+  "tuning_report_sha256": "bf2b6c2acc42d9c952405d7ba47f2f8a487ba08f30a55b5dfdd84aeca6b5bfca"
 }

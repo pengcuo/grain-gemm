@@ -1,0 +1,6421 @@
+{
+  "complete": true,
+  "gpu": "NVIDIA GB10",
+  "compute_capability": [
+    12,
+    1
+  ],
+  "torch": "2.14.0+cu130",
+  "triton": "3.8.0",
+  "cuda": "13.0",
+  "timestamp_utc": "2026-09-22T09:36:39.876268+00:00",
+  "expected_sizes": [
+    1024,
+    2048,
+    3072,
+    4096,
+    5120,
+    6144,
+    7168,
+    8192,
+    9216,
+    10240,
+    11264,
+    12288,
+    13312,
+    14336,
+    15360,
+    16384
+  ],
+  "group_size": 256,
+  "output_dtype": "bfloat16",
+  "rounds": 3,
+  "rep_ms": 20,
+  "seed": 2026,
+  "candidates": [
+    {
+      "backend": "triton",
+      "block_m": 64,
+      "block_n": 64,
+      "num_warps": 4,
+      "num_stages": 2,
+      "swizzle": 8
+    },
+    {
+      "backend": "triton",
+      "block_m": 64,
+      "block_n": 128,
+      "num_warps": 8,
+      "num_stages": 3,
+      "swizzle": 8
+    },
+    {
+      "backend": "triton",
+      "block_m": 64,
+      "block_n": 128,
+      "num_warps": 4,
+      "num_stages": 3,
+      "swizzle": 8
+    },
+    {
+      "backend": "triton",
+      "block_m": 128,
+      "block_n": 64,
+      "num_warps": 4,
+      "num_stages": 3,
+      "swizzle": 8
+    },
+    {
+      "backend": "cuda",
+      "config_id": 0
+    },
+    {
+      "backend": "cuda",
+      "config_id": 1
+    },
+    {
+      "backend": "cuda",
+      "config_id": 2
+    },
+    {
+      "backend": "cuda",
+      "config_id": 3
+    },
+    {
+      "backend": "cuda",
+      "config_id": 4
+    },
+    {
+      "backend": "cuda",
+      "config_id": 5
+    },
+    {
+      "backend": "cuda",
+      "config_id": 6
+    },
+    {
+      "backend": "cuda",
+      "config_id": 7
+    },
+    {
+      "backend": "cuda",
+      "config_id": 8
+    },
+    {
+      "backend": "cuda",
+      "config_id": 9
+    },
+    {
+      "backend": "cuda",
+      "config_id": 10
+    },
+    {
+      "backend": "cuda",
+      "config_id": 11
+    },
+    {
+      "backend": "cuda",
+      "config_id": 12
+    },
+    {
+      "backend": "cuda",
+      "config_id": 13
+    },
+    {
+      "backend": "cuda",
+      "config_id": 14
+    },
+    {
+      "backend": "cuda",
+      "config_id": 15
+    },
+    {
+      "backend": "cuda",
+      "config_id": 16
+    }
+  ],
+  "cases": [
+    {
+      "size": 1024,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.025276018099020456,
+            0.025444950928559175,
+            0.025478429755065667
+          ],
+          "median_ms": 0.025444950928559175,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.02499244942152796,
+            0.0249158181607805,
+            0.02485303749909272
+          ],
+          "median_ms": 0.0249158181607805,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.025287113216448297,
+            0.025179720382795083,
+            0.025348729593552426
+          ],
+          "median_ms": 0.025287113216448297,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.025224251001059603,
+            0.02518527685327733,
+            0.02515254020690918
+          ],
+          "median_ms": 0.02518527685327733,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            0.02277295330490512,
+            0.023037521972268972,
+            0.022949233037255677
+          ],
+          "median_ms": 0.022949233037255677,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            0.024370359955040465,
+            0.02471478951943887,
+            0.024694455447749356
+          ],
+          "median_ms": 0.024694455447749356,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            0.02054814318296745,
+            0.020867390321292416,
+            0.020645094435522725
+          ],
+          "median_ms": 0.020645094435522725,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            0.02138456054355787,
+            0.021392684084785805,
+            0.021444382772984612
+          ],
+          "median_ms": 0.021392684084785805,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            0.02200548953198372,
+            0.02178844944123299,
+            0.021820122963896446
+          ],
+          "median_ms": 0.021820122963896446,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            0.021751930055844502,
+            0.02179020204198792,
+            0.021549814953656772
+          ],
+          "median_ms": 0.021751930055844502,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            0.02367300048787543,
+            0.023340745175138435,
+            0.023353186576597153
+          ],
+          "median_ms": 0.023353186576597153,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            0.023160689183686405,
+            0.023349072515350025,
+            0.023291974221506424
+          ],
+          "median_ms": 0.023291974221506424,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            0.02734281434569248,
+            0.02739883716716323,
+            0.027509523352338854
+          ],
+          "median_ms": 0.02739883716716323,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            0.02717534097600638,
+            0.027161603750184525,
+            0.027456534463305805
+          ],
+          "median_ms": 0.02717534097600638,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            0.027197502598618015,
+            0.027210218716511685,
+            0.027104885232466396
+          ],
+          "median_ms": 0.027197502598618015,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            0.02404382679913495,
+            0.023952978722592617,
+            0.0239507238915626
+          ],
+          "median_ms": 0.023952978722592617,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            0.027969170506597495,
+            0.028085899060039842,
+            0.028079575735896038
+          ],
+          "median_ms": 0.028079575735896038,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            0.023891543967070772,
+            0.023807524402628268,
+            0.02391568016498647
+          ],
+          "median_ms": 0.023891543967070772,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            0.027667612018007222,
+            0.027589230039226476,
+            0.027590586110011042
+          ],
+          "median_ms": 0.027590586110011042,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            0.02801069045840463,
+            0.02803560707466734,
+            0.027890105596750484
+          ],
+          "median_ms": 0.02801069045840463,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            0.037894134830993284,
+            0.03792560686830614,
+            0.03779647896787941
+          ],
+          "median_ms": 0.037894134830993284,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 2
+      }
+    },
+    {
+      "size": 2048,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.17239020610677785,
+            0.16986551778069858,
+            0.1698950323565253
+          ],
+          "median_ms": 0.1698950323565253,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.1558149882725307,
+            0.1562048215714712,
+            0.15643148803710938
+          ],
+          "median_ms": 0.1562048215714712,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.1560103124823452,
+            0.1565937768845331,
+            0.15650263840590067
+          ],
+          "median_ms": 0.15650263840590067,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.15680482652452257,
+            0.15732305418185102,
+            0.1577017249130621
+          ],
+          "median_ms": 0.15732305418185102,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            0.15662287920713425,
+            0.15608887374401093,
+            0.15805442689910648
+          ],
+          "median_ms": 0.15662287920713425,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            0.15958490679340978,
+            0.15882774322263654,
+            0.16154354374583174
+          ],
+          "median_ms": 0.15958490679340978,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            0.1302627653083545,
+            0.13045261690280582,
+            0.1318706234559318
+          ],
+          "median_ms": 0.13045261690280582,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            0.13479550897258602,
+            0.13506655560599434,
+            0.13562416530155635
+          ],
+          "median_ms": 0.13506655560599434,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            0.13373963816182596,
+            0.13420788670929384,
+            0.13492484831474197
+          ],
+          "median_ms": 0.13420788670929384,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            0.13392011433431547,
+            0.13450104569735594,
+            0.13523906181598533
+          ],
+          "median_ms": 0.13450104569735594,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            0.12033853048010718,
+            0.11878652814068372,
+            0.1211034007042459
+          ],
+          "median_ms": 0.12033853048010718,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            0.11923779446654525,
+            0.11992530003647131,
+            0.12035180315559293
+          ],
+          "median_ms": 0.11992530003647131,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            0.1812955667306711,
+            0.17758981531316584,
+            0.17904259277893617
+          ],
+          "median_ms": 0.17904259277893617,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            0.16377930601766288,
+            0.1668602967065228,
+            0.16649853388468425
+          ],
+          "median_ms": 0.16649853388468425,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            0.15266872766449696,
+            0.1542119374350896,
+            0.15438702350526345
+          ],
+          "median_ms": 0.1542119374350896,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            0.13472343931262126,
+            0.13505653381347657,
+            0.13727243632486422
+          ],
+          "median_ms": 0.13505653381347657,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            0.1604702492070392,
+            0.16004279377014657,
+            0.16062968230444535
+          ],
+          "median_ms": 0.1604702492070392,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            0.13475179036458335,
+            0.13524939389836868,
+            0.136894494895167
+          ],
+          "median_ms": 0.13524939389836868,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            0.1324961469807756,
+            0.13244120715415642,
+            0.13308493078571476
+          ],
+          "median_ms": 0.1324961469807756,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            0.12881610596102047,
+            0.12714206471162684,
+            0.12863917196950603
+          ],
+          "median_ms": 0.12863917196950603,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            0.15717600262354292,
+            0.15893536522274926,
+            0.15895466577439082
+          ],
+          "median_ms": 0.15893536522274926,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 7
+      }
+    },
+    {
+      "size": 3072,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.569347654070173,
+            0.5597786638471816,
+            0.5704063960484096
+          ],
+          "median_ms": 0.569347654070173,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.471326140470283,
+            0.46969370614914663,
+            0.4785573368980771
+          ],
+          "median_ms": 0.471326140470283,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.4788064729599726,
+            0.4729062943231492,
+            0.47084304264613563
+          ],
+          "median_ms": 0.4729062943231492,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.5025604520525251,
+            0.48610520362854004,
+            0.48812720775604246
+          ],
+          "median_ms": 0.48812720775604246,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            0.515995979309082,
+            0.5169305299457752,
+            0.5184686309412907
+          ],
+          "median_ms": 0.5169305299457752,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            0.5216265226665295,
+            0.5222172737121582,
+            0.5238004232707777
+          ],
+          "median_ms": 0.5222172737121582,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            0.41975114700642036,
+            0.42049838126973904,
+            0.43023829764508187
+          ],
+          "median_ms": 0.42049838126973904,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            0.42335082115011013,
+            0.42464660561603046,
+            0.4256292708376621
+          ],
+          "median_ms": 0.42464660561603046,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            0.437829335530599,
+            0.4390175925360785,
+            0.43918613857693145
+          ],
+          "median_ms": 0.4390175925360785,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            0.4284897472547448,
+            0.42961288535076636,
+            0.43084418255349866
+          ],
+          "median_ms": 0.42961288535076636,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            0.43528177473280166,
+            0.44698276519775393,
+            0.436537233988444
+          ],
+          "median_ms": 0.436537233988444,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            0.36565658781263566,
+            0.3684377490349535,
+            0.36918548301414206
+          ],
+          "median_ms": 0.3684377490349535,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            0.6087774108437931,
+            0.5958399926462481,
+            0.5922009243684656
+          ],
+          "median_ms": 0.5958399926462481,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            0.5866983357597799,
+            0.5887398864283706,
+            0.5893556421453303
+          ],
+          "median_ms": 0.5887398864283706,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            0.644725501537323,
+            0.6240944862365723,
+            0.6173135042190552
+          ],
+          "median_ms": 0.6240944862365723,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            0.42899479866027834,
+            0.43515557658915616,
+            0.43081340011285274
+          ],
+          "median_ms": 0.43081340011285274,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            0.6660117149353026,
+            0.6803418795267742,
+            0.6792842547098795
+          ],
+          "median_ms": 0.6792842547098795,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            0.4372220039367676,
+            0.43651670568129597,
+            0.4360846678415934
+          ],
+          "median_ms": 0.43651670568129597,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            0.44619889692826703,
+            0.44840582934292883,
+            0.4493440064516935
+          ],
+          "median_ms": 0.44840582934292883,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            0.38631455403453896,
+            0.38592157176896635,
+            0.3925507164001465
+          ],
+          "median_ms": 0.38631455403453896,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            0.4355146620008681,
+            0.4371377944946289,
+            0.44063858456081817
+          ],
+          "median_ms": 0.4371377944946289,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 7
+      }
+    },
+    {
+      "size": 4096,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            1.3756332397460938,
+            1.3416434015546526,
+            1.3486926215035575
+          ],
+          "median_ms": 1.3486926215035575,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            1.1074926712933708,
+            1.106172455681695,
+            1.1305902269151475
+          ],
+          "median_ms": 1.1074926712933708,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            1.094665739271376,
+            1.097093317243788,
+            1.095837328169081
+          ],
+          "median_ms": 1.095837328169081,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            1.1237722284653606,
+            1.1220037796918083,
+            1.1268715016982136
+          ],
+          "median_ms": 1.1237722284653606,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            1.1970530152320862,
+            1.2003120183944702,
+            1.2075420022010803
+          ],
+          "median_ms": 1.2003120183944702,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            1.2193229794502258,
+            1.2228693644205728,
+            1.2257009744644165
+          ],
+          "median_ms": 1.2228693644205728,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            0.9724575996398925,
+            0.9747015953063964,
+            0.9763216018676758
+          ],
+          "median_ms": 0.9747015953063964,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            0.9768199920654297,
+            0.9790279865264893,
+            1.00795521736145
+          ],
+          "median_ms": 0.9790279865264893,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            1.0128353520443565,
+            1.0161423432199579,
+            1.0250205993652344
+          ],
+          "median_ms": 1.0161423432199579,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            0.9846303939819336,
+            0.9865543842315674,
+            0.9958216190338135
+          ],
+          "median_ms": 0.9865543842315674,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            0.9354163578578404,
+            0.9383725665864491,
+            0.9444624582926432
+          ],
+          "median_ms": 0.9383725665864491,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            0.8519735750944718,
+            0.8531798487124236,
+            0.8615533994591754
+          ],
+          "median_ms": 0.8531798487124236,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            1.3956456865583147,
+            1.3719096864972795,
+            1.3799417359488353
+          ],
+          "median_ms": 1.3799417359488353,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            1.246871503194173,
+            1.2469890117645264,
+            1.2585908889770507
+          ],
+          "median_ms": 1.2469890117645264,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            1.2084100246429443,
+            1.2110610008239746,
+            1.2160740494728088
+          ],
+          "median_ms": 1.2110610008239746,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            0.977246379852295,
+            0.9797136306762695,
+            0.9890655994415283
+          ],
+          "median_ms": 0.9797136306762695,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            1.2121590375900269,
+            1.214019000530243,
+            1.219892978668213
+          ],
+          "median_ms": 1.214019000530243,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            0.9823552131652832,
+            0.9839200019836426,
+            0.9910759925842285
+          ],
+          "median_ms": 0.9839200019836426,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            0.9878542158338759,
+            0.961521577835083,
+            0.9657727718353272
+          ],
+          "median_ms": 0.9657727718353272,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            0.863720354826554,
+            0.8661245263141135,
+            0.8741803602738814
+          ],
+          "median_ms": 0.8661245263141135,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            0.9337310336884999,
+            0.9378574916294642,
+            0.9439535595121837
+          ],
+          "median_ms": 0.9378574916294642,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 7
+      }
+    },
+    {
+      "size": 5120,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            2.664308547973633,
+            2.679570198059082,
+            2.625586237226214
+          ],
+          "median_ms": 2.664308547973633,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            2.138421376546224,
+            2.1493031183878584,
+            2.145971616109212
+          ],
+          "median_ms": 2.145971616109212,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            2.103775978088379,
+            2.125726170010037,
+            2.1242773267957897
+          ],
+          "median_ms": 2.1242773267957897,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            2.072504891289605,
+            2.0752639770507812,
+            2.072718196445041
+          ],
+          "median_ms": 2.072718196445041,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            2.3933119773864746,
+            2.413309931755066,
+            2.461543917655945
+          ],
+          "median_ms": 2.413309931755066,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            2.396148545401437,
+            2.412461996078491,
+            2.418720006942749
+          ],
+          "median_ms": 2.412461996078491,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            1.9853333367241754,
+            1.9638400077819824,
+            1.9634959220886232
+          ],
+          "median_ms": 1.9638400077819824,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            1.9770272254943848,
+            1.992529582977295,
+            1.99169921875
+          ],
+          "median_ms": 1.99169921875,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            2.1029493543836804,
+            2.108069313897027,
+            2.1102560891045465
+          ],
+          "median_ms": 2.108069313897027,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            2.0374008814493814,
+            2.0505386988321943,
+            2.051982137891981
+          ],
+          "median_ms": 2.0505386988321943,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            2.0769244299994574,
+            2.012243588765462,
+            2.020821359422472
+          ],
+          "median_ms": 2.020821359422472,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            1.685093793002042,
+            1.7031534368341619,
+            1.698894587430087
+          ],
+          "median_ms": 1.698894587430087,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            2.7985691343035017,
+            2.6821417127336775,
+            2.7948684692382812
+          ],
+          "median_ms": 2.7948684692382812,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            2.6705737795148576,
+            2.668537139892578,
+            2.6735131399972096
+          ],
+          "median_ms": 2.6705737795148576,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            2.645748547145298,
+            2.6485234669276645,
+            2.7206926345825195
+          ],
+          "median_ms": 2.6485234669276645,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            2.007222366333008,
+            1.978761577606201,
+            1.9851840337117512
+          ],
+          "median_ms": 1.9851840337117512,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            2.933527946472168,
+            2.9456666310628252,
+            2.908370653788249
+          ],
+          "median_ms": 2.933527946472168,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            2.0388239860534667,
+            2.0483311653137206,
+            2.1197343826293946
+          ],
+          "median_ms": 2.0483311653137206,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            1.9927216529846192,
+            1.9775983810424804,
+            1.982927989959717
+          ],
+          "median_ms": 1.982927989959717,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            1.6742880561135032,
+            1.6741192557594993,
+            1.6795767870816318
+          ],
+          "median_ms": 1.6742880561135032,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            1.8198016166687012,
+            1.8174191474914552,
+            1.8218223571777343
+          ],
+          "median_ms": 1.8198016166687012,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 15
+      }
+    },
+    {
+      "size": 6144,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            4.574548006057739,
+            4.528899908065796,
+            4.538851976394653
+          ],
+          "median_ms": 4.538851976394653,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            3.655491065979004,
+            3.6225055694580077,
+            3.6364513397216798
+          ],
+          "median_ms": 3.6364513397216798,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            3.558425712585449,
+            3.586755180358887,
+            3.582032012939453
+          ],
+          "median_ms": 3.582032012939453,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            3.5261951446533204,
+            3.5494750976562504,
+            3.5318336486816406
+          ],
+          "median_ms": 3.5318336486816406,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            4.1243438720703125,
+            4.153032064437866,
+            4.186552047729492
+          ],
+          "median_ms": 4.153032064437866,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            4.100811958312988,
+            4.145655870437622,
+            4.149735927581787
+          ],
+          "median_ms": 4.145655870437622,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            3.363395118713379,
+            3.405603218078613,
+            3.483964729309082
+          ],
+          "median_ms": 3.405603218078613,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            3.365587043762207,
+            3.394112014770508,
+            3.393142318725586
+          ],
+          "median_ms": 3.393142318725586,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            3.613145637512207,
+            3.711948776245117,
+            3.634921455383301
+          ],
+          "median_ms": 3.634921455383301,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            3.4697248458862306,
+            3.498233604431152,
+            3.5001630783081055
+          ],
+          "median_ms": 3.498233604431152,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            3.4720191955566406,
+            3.4129695892333984,
+            3.4308032989501953
+          ],
+          "median_ms": 3.4308032989501953,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            2.8364572525024414,
+            2.854525702340262,
+            2.861317316691081
+          ],
+          "median_ms": 2.854525702340262,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            4.60973596572876,
+            4.627716064453125,
+            4.739784002304077
+          ],
+          "median_ms": 4.627716064453125,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            4.559816122055054,
+            4.541075944900513,
+            4.555732011795044
+          ],
+          "median_ms": 4.555732011795044,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            4.685199975967407,
+            4.528867959976196,
+            4.777552127838135
+          ],
+          "median_ms": 4.685199975967407,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            3.3509374618530274,
+            3.3585413297017412,
+            3.3587615966796873
+          ],
+          "median_ms": 3.3585413297017412,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            5.040869235992432,
+            5.191738605499268,
+            5.023039976755777
+          ],
+          "median_ms": 5.040869235992432,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            3.5125598907470703,
+            3.5021173159281416,
+            3.4943552017211914
+          ],
+          "median_ms": 3.5021173159281416,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            3.3843616485595707,
+            3.3768863677978516,
+            3.4818687438964844
+          ],
+          "median_ms": 3.3843616485595707,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            2.8306446075439453,
+            2.828420502798898,
+            2.837917736598423
+          ],
+          "median_ms": 2.8306446075439453,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            3.010759989420573,
+            3.009554704030355,
+            3.0166400273640948
+          ],
+          "median_ms": 3.010759989420573,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 15
+      }
+    },
+    {
+      "size": 7168,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            7.350695848464966,
+            7.3440399169921875,
+            7.265455961227417
+          ],
+          "median_ms": 7.3440399169921875,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            5.745338757832846,
+            5.721413612365723,
+            5.729274749755859
+          ],
+          "median_ms": 5.729274749755859,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            5.6195519765218105,
+            5.670570691426595,
+            5.665738741556803
+          ],
+          "median_ms": 5.665738741556803,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            5.544069290161133,
+            5.5887250900268555,
+            5.580986658732097
+          ],
+          "median_ms": 5.580986658732097,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            6.578128099441528,
+            6.616815805435181,
+            6.608431816101074
+          ],
+          "median_ms": 6.608431816101074,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            6.5011199315389,
+            6.552122751871744,
+            6.548991918563843
+          ],
+          "median_ms": 6.548991918563843,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            5.396410624186198,
+            5.423370679219564,
+            5.445786794026693
+          ],
+          "median_ms": 5.423370679219564,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            5.310469309488933,
+            5.297664006551107,
+            5.31601603825887
+          ],
+          "median_ms": 5.310469309488933,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            5.762245496114096,
+            5.884506543477376,
+            5.767637570699056
+          ],
+          "median_ms": 5.767637570699056,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            5.577829360961914,
+            5.541658401489258,
+            5.537749290466309
+          ],
+          "median_ms": 5.541658401489258,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            5.411647796630859,
+            5.428650856018066,
+            5.424970626831055
+          ],
+          "median_ms": 5.424970626831055,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            4.485944032669067,
+            4.509979963302612,
+            4.511620044708252
+          ],
+          "median_ms": 4.509979963302612,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            7.278320074081421,
+            7.303295850753784,
+            7.311783790588379
+          ],
+          "median_ms": 7.303295850753784,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            7.1327598094940186,
+            7.1528239250183105,
+            7.155351877212524
+          ],
+          "median_ms": 7.1528239250183105,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            7.385535955429077,
+            7.106935977935791,
+            7.109647989273071
+          ],
+          "median_ms": 7.109647989273071,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            5.271050612131754,
+            5.2658826510111485,
+            5.264938672383626
+          ],
+          "median_ms": 5.2658826510111485,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            8.195791721343994,
+            8.549744129180908,
+            8.174520015716553
+          ],
+          "median_ms": 8.195791721343994,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            5.516079902648926,
+            5.543754577636719,
+            5.7086292902628575
+          ],
+          "median_ms": 5.543754577636719,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            5.271365324656169,
+            5.452405293782553,
+            5.422058582305908
+          ],
+          "median_ms": 5.422058582305908,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            4.427052021026611,
+            4.439996004104614,
+            4.431695938110352
+          ],
+          "median_ms": 4.431695938110352,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            4.652424097061157,
+            4.648952007293701,
+            4.669687986373901
+          ],
+          "median_ms": 4.652424097061157,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 15
+      }
+    },
+    {
+      "size": 8192,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            12.08403205871582,
+            11.877071857452393,
+            11.880144119262695
+          ],
+          "median_ms": 11.880144119262695,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            8.696671962738037,
+            8.691864013671875,
+            8.67853593826294
+          ],
+          "median_ms": 8.691864013671875,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            8.508408069610596,
+            8.571024417877197,
+            8.63812780380249
+          ],
+          "median_ms": 8.571024417877197,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            8.366528034210205,
+            8.438528060913086,
+            8.489992141723633
+          ],
+          "median_ms": 8.438528060913086,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            9.764655590057373,
+            9.83742380142212,
+            9.857647895812988
+          ],
+          "median_ms": 9.83742380142212,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            9.717639923095703,
+            9.816872119903564,
+            9.84540843963623
+          ],
+          "median_ms": 9.816872119903564,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            8.050647735595703,
+            8.121880054473877,
+            8.156928062438965
+          ],
+          "median_ms": 8.121880054473877,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            7.8329761028289795,
+            7.858776092529297,
+            7.918136119842529
+          ],
+          "median_ms": 7.858776092529297,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            8.357888221740723,
+            8.567584037780762,
+            8.423919677734375
+          ],
+          "median_ms": 8.423919677734375,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            8.073303699493408,
+            8.105703830718994,
+            8.128495693206787
+          ],
+          "median_ms": 8.105703830718994,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            7.858464002609253,
+            7.897351980209351,
+            7.9053919315338135
+          ],
+          "median_ms": 7.897351980209351,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            6.6366798877716064,
+            6.681735992431641,
+            6.709015846252441
+          ],
+          "median_ms": 6.681735992431641,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            10.764304161071777,
+            10.779439926147461,
+            10.818528175354004
+          ],
+          "median_ms": 10.779439926147461,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            10.52947187423706,
+            10.567440032958984,
+            10.567520141601562
+          ],
+          "median_ms": 10.567440032958984,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            10.534832000732422,
+            10.525008201599121,
+            10.576959609985352
+          ],
+          "median_ms": 10.534832000732422,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            7.7486958503723145,
+            7.777119874954224,
+            7.819999933242798
+          ],
+          "median_ms": 7.777119874954224,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            11.703392028808594,
+            11.714479923248291,
+            11.622191905975342
+          ],
+          "median_ms": 11.703392028808594,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            8.093255996704102,
+            8.18824815750122,
+            8.15771198272705
+          ],
+          "median_ms": 8.15771198272705,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            7.838575839996338,
+            8.08464002609253,
+            7.687399864196777
+          ],
+          "median_ms": 7.838575839996338,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            6.554656028747559,
+            6.57746664683024,
+            6.567834536234537
+          ],
+          "median_ms": 6.567834536234537,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            6.770456075668335,
+            6.7570719718933105,
+            6.782464027404785
+          ],
+          "median_ms": 6.770456075668335,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 15
+      }
+    },
+    {
+      "size": 9216,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            17.324447631835938,
+            16.893664360046387,
+            17.219728469848633
+          ],
+          "median_ms": 17.219728469848633,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            11.96731185913086,
+            11.944400310516357,
+            11.870415687561035
+          ],
+          "median_ms": 11.944400310516357,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            11.688079833984375,
+            11.8024320602417,
+            11.786992073059082
+          ],
+          "median_ms": 11.786992073059082,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            11.511295795440674,
+            11.59603214263916,
+            11.562511920928955
+          ],
+          "median_ms": 11.562511920928955,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            14.073535919189453,
+            14.335855960845947,
+            14.67143964767456
+          ],
+          "median_ms": 14.335855960845947,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            14.301136016845703,
+            14.193056106567383,
+            14.204831600189209
+          ],
+          "median_ms": 14.204831600189209,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            11.470880031585693,
+            11.580863952636719,
+            11.514527797698975
+          ],
+          "median_ms": 11.514527797698975,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            11.06824016571045,
+            11.115423679351807,
+            11.092383861541748
+          ],
+          "median_ms": 11.092383861541748,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            12.009215831756592,
+            12.147439956665039,
+            12.046448230743408
+          ],
+          "median_ms": 12.046448230743408,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            11.39240026473999,
+            11.52561616897583,
+            11.457616329193115
+          ],
+          "median_ms": 11.457616329193115,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            11.387663841247559,
+            11.368127822875977,
+            11.3471999168396
+          ],
+          "median_ms": 11.368127822875977,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            9.326704025268555,
+            9.349416255950928,
+            9.398984432220459
+          ],
+          "median_ms": 9.349416255950928,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            15.514496326446533,
+            15.981679916381836,
+            15.69926404953003
+          ],
+          "median_ms": 15.69926404953003,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            15.006767749786377,
+            15.026159763336182,
+            15.022848129272461
+          ],
+          "median_ms": 15.022848129272461,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            15.026671886444092,
+            14.996848106384277,
+            15.175104141235352
+          ],
+          "median_ms": 15.026671886444092,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            10.915839672088623,
+            10.967296123504639,
+            10.996000289916992
+          ],
+          "median_ms": 10.967296123504639,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            16.7903995513916,
+            16.783455848693848,
+            16.8089599609375
+          ],
+          "median_ms": 16.7903995513916,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            11.373199939727783,
+            11.351919651031494,
+            11.444143772125244
+          ],
+          "median_ms": 11.373199939727783,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            10.97814416885376,
+            10.983328342437744,
+            10.984047889709473
+          ],
+          "median_ms": 10.983328342437744,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            9.25227975845337,
+            9.192008018493652,
+            9.195871829986572
+          ],
+          "median_ms": 9.195871829986572,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            9.576903820037842,
+            9.554855823516846,
+            9.573520183563232
+          ],
+          "median_ms": 9.573520183563232,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 15
+      }
+    },
+    {
+      "size": 10240,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            24.039504051208496,
+            23.27791976928711,
+            23.063551902770996
+          ],
+          "median_ms": 23.27791976928711,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            16.385360717773438,
+            16.44321632385254,
+            16.405007362365723
+          ],
+          "median_ms": 16.405007362365723,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            16.227375984191895,
+            16.24880027770996,
+            16.31007957458496
+          ],
+          "median_ms": 16.24880027770996,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            15.77672004699707,
+            15.846400260925293,
+            15.863247871398926
+          ],
+          "median_ms": 15.846400260925293,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            19.800111770629883,
+            19.840991973876953,
+            19.959343910217285
+          ],
+          "median_ms": 19.840991973876953,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            19.332127571105957,
+            19.631183624267578,
+            19.35807991027832
+          ],
+          "median_ms": 19.35807991027832,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            15.747568130493164,
+            16.054096221923828,
+            15.851647853851318
+          ],
+          "median_ms": 15.851647853851318,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            15.06008005142212,
+            15.170720100402832,
+            15.156400203704834
+          ],
+          "median_ms": 15.156400203704834,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            16.37974452972412,
+            16.421408653259277,
+            16.398192405700684
+          ],
+          "median_ms": 16.398192405700684,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            15.474400043487549,
+            15.547584056854248,
+            15.570687770843506
+          ],
+          "median_ms": 15.547584056854248,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            15.473167896270752,
+            15.503200054168701,
+            15.639551639556885
+          ],
+          "median_ms": 15.503200054168701,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            12.75611162185669,
+            12.86841630935669,
+            12.849567890167236
+          ],
+          "median_ms": 12.849567890167236,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            21.1527042388916,
+            21.489103317260742,
+            21.21499252319336
+          ],
+          "median_ms": 21.21499252319336,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            20.550447463989258,
+            20.623600006103516,
+            20.597439765930176
+          ],
+          "median_ms": 20.597439765930176,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            20.49443244934082,
+            20.466336250305176,
+            20.520368576049805
+          ],
+          "median_ms": 20.49443244934082,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            14.914703845977783,
+            15.00705623626709,
+            15.023200035095215
+          ],
+          "median_ms": 15.00705623626709,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            22.910207748413086,
+            22.913968086242676,
+            22.90839958190918
+          ],
+          "median_ms": 22.910207748413086,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            15.528512001037598,
+            15.49451208114624,
+            15.578991889953613
+          ],
+          "median_ms": 15.528512001037598,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            15.017759799957275,
+            15.03374433517456,
+            14.966736316680908
+          ],
+          "median_ms": 15.017759799957275,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            12.555263996124268,
+            12.552048206329346,
+            12.634479999542236
+          ],
+          "median_ms": 12.555263996124268,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            13.063712120056152,
+            13.075455665588379,
+            13.041872024536133
+          ],
+          "median_ms": 13.063712120056152,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 15
+      }
+    },
+    {
+      "size": 11264,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            31.670991897583008,
+            31.478943824768066,
+            31.195055961608887
+          ],
+          "median_ms": 31.478943824768066,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            22.06435203552246,
+            22.116080284118652,
+            22.085311889648438
+          ],
+          "median_ms": 22.085311889648438,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            21.65176010131836,
+            21.799903869628906,
+            21.759008407592773
+          ],
+          "median_ms": 21.759008407592773,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            21.17849636077881,
+            21.339599609375,
+            21.325072288513184
+          ],
+          "median_ms": 21.325072288513184,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            25.598511695861816,
+            25.792400360107422,
+            25.788512229919434
+          ],
+          "median_ms": 25.788512229919434,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            25.766688346862793,
+            25.367615699768066,
+            25.519360542297363
+          ],
+          "median_ms": 25.519360542297363,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            20.96510410308838,
+            21.13535976409912,
+            21.10539150238037
+          ],
+          "median_ms": 21.10539150238037,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            20.02894401550293,
+            20.168864250183105,
+            20.171327590942383
+          ],
+          "median_ms": 20.168864250183105,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            21.906031608581543,
+            21.815631866455078,
+            21.84488010406494
+          ],
+          "median_ms": 21.84488010406494,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            20.730880737304688,
+            20.771648406982422,
+            20.763312339782715
+          ],
+          "median_ms": 20.763312339782715,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            20.87166404724121,
+            20.998687744140625,
+            20.765503883361816
+          ],
+          "median_ms": 20.87166404724121,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            17.05913543701172,
+            17.109840393066406,
+            17.03651237487793
+          ],
+          "median_ms": 17.05913543701172,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            28.33022403717041,
+            28.197007179260254,
+            28.27280044555664
+          ],
+          "median_ms": 28.27280044555664,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            27.386432647705078,
+            27.57974338531494,
+            27.304192543029785
+          ],
+          "median_ms": 27.386432647705078,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            27.37782382965088,
+            27.29132843017578,
+            27.305679321289062
+          ],
+          "median_ms": 27.305679321289062,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            20.09715175628662,
+            19.974224090576172,
+            19.977999687194824
+          ],
+          "median_ms": 19.977999687194824,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            31.16825580596924,
+            31.123023986816406,
+            31.112367630004883
+          ],
+          "median_ms": 31.123023986816406,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            20.661216735839844,
+            20.637632369995117,
+            20.721872329711914
+          ],
+          "median_ms": 20.661216735839844,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            20.168208122253418,
+            20.189760208129883,
+            20.157376289367676
+          ],
+          "median_ms": 20.168208122253418,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            16.58504009246826,
+            16.628560066223145,
+            16.597968101501465
+          ],
+          "median_ms": 16.597968101501465,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            16.994064331054688,
+            16.991151809692383,
+            17.121567726135254
+          ],
+          "median_ms": 16.994064331054688,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 7.62939453125e-06
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 15
+      }
+    },
+    {
+      "size": 12288,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            40.41385459899902,
+            40.78531265258789,
+            40.74955177307129
+          ],
+          "median_ms": 40.74955177307129,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            28.35752010345459,
+            28.58504009246826,
+            28.70639991760254
+          ],
+          "median_ms": 28.58504009246826,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            28.001296043395996,
+            28.24665641784668,
+            28.233888626098633
+          ],
+          "median_ms": 28.233888626098633,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            27.42092800140381,
+            27.49899196624756,
+            27.540512084960938
+          ],
+          "median_ms": 27.49899196624756,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            33.17827224731445,
+            33.47950553894043,
+            33.52014350891113
+          ],
+          "median_ms": 33.47950553894043,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            33.11260795593262,
+            32.7563362121582,
+            33.31287956237793
+          ],
+          "median_ms": 33.11260795593262,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            27.422592163085938,
+            27.629199981689453,
+            28.22305679321289
+          ],
+          "median_ms": 27.629199981689453,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            26.173808097839355,
+            26.36400032043457,
+            26.353904724121094
+          ],
+          "median_ms": 26.353904724121094,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            28.195136070251465,
+            28.247440338134766,
+            28.237648010253906
+          ],
+          "median_ms": 28.237648010253906,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            26.871695518493652,
+            27.00267219543457,
+            26.908272743225098
+          ],
+          "median_ms": 26.908272743225098,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            28.23452854156494,
+            28.228528022766113,
+            27.9083194732666
+          ],
+          "median_ms": 28.228528022766113,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            21.97713565826416,
+            21.92185688018799,
+            21.906975746154785
+          ],
+          "median_ms": 21.92185688018799,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            36.6125602722168,
+            36.55998420715332,
+            36.56715202331543
+          ],
+          "median_ms": 36.56715202331543,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            35.29449462890625,
+            35.289262771606445,
+            35.29070472717285
+          ],
+          "median_ms": 35.29070472717285,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            35.232112884521484,
+            35.164785385131836,
+            35.244943618774414
+          ],
+          "median_ms": 35.232112884521484,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            25.86284828186035,
+            25.93899154663086,
+            25.952367782592773
+          ],
+          "median_ms": 25.93899154663086,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            39.21718406677246,
+            39.20966339111328,
+            39.26300811767578
+          ],
+          "median_ms": 39.21718406677246,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            26.95313549041748,
+            27.61625576019287,
+            26.947872161865234
+          ],
+          "median_ms": 26.95313549041748,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            26.714336395263672,
+            26.542863845825195,
+            26.95150375366211
+          ],
+          "median_ms": 26.714336395263672,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            21.316800117492676,
+            21.40713596343994,
+            21.38481616973877
+          ],
+          "median_ms": 21.38481616973877,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            22.042880058288574,
+            22.19929599761963,
+            22.154128074645996
+          ],
+          "median_ms": 22.154128074645996,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 15
+      }
+    },
+    {
+      "size": 13312,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            53.097280502319336,
+            53.532480239868164,
+            53.16966438293457
+          ],
+          "median_ms": 53.16966438293457,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            37.991376876831055,
+            38.34316825866699,
+            38.45427322387695
+          ],
+          "median_ms": 38.34316825866699,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            37.63567924499512,
+            37.72411346435547,
+            37.93484878540039
+          ],
+          "median_ms": 37.72411346435547,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            36.238128662109375,
+            36.347551345825195,
+            36.49510383605957
+          ],
+          "median_ms": 36.347551345825195,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            43.13198471069336,
+            43.42971229553223,
+            43.42055892944336
+          ],
+          "median_ms": 43.42055892944336,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            41.93964767456055,
+            42.196495056152344,
+            42.20782470703125
+          ],
+          "median_ms": 42.196495056152344,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            35.36265563964844,
+            35.62579154968262,
+            35.635568618774414
+          ],
+          "median_ms": 35.62579154968262,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            33.925392150878906,
+            34.16775894165039,
+            34.15340805053711
+          ],
+          "median_ms": 34.15340805053711,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            35.85326385498047,
+            36.04055976867676,
+            36.06532669067383
+          ],
+          "median_ms": 36.04055976867676,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            34.67313575744629,
+            34.62827110290527,
+            34.630592346191406
+          ],
+          "median_ms": 34.630592346191406,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            37.33787155151367,
+            36.73067283630371,
+            38.306528091430664
+          ],
+          "median_ms": 37.33787155151367,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            28.250479698181152,
+            28.25256061553955,
+            28.1759672164917
+          ],
+          "median_ms": 28.250479698181152,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            46.815792083740234,
+            46.81449508666992,
+            46.783504486083984
+          ],
+          "median_ms": 46.81449508666992,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            45.64809608459473,
+            45.63558387756348,
+            45.78118324279785
+          ],
+          "median_ms": 45.64809608459473,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            44.79977607727051,
+            44.820655822753906,
+            44.9770393371582
+          ],
+          "median_ms": 44.820655822753906,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            33.59137725830078,
+            33.64667320251465,
+            33.511329650878906
+          ],
+          "median_ms": 33.59137725830078,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            51.07779121398926,
+            50.177215576171875,
+            50.6701602935791
+          ],
+          "median_ms": 50.6701602935791,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            34.24724769592285,
+            34.48219108581543,
+            34.260528564453125
+          ],
+          "median_ms": 34.260528564453125,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            35.62825584411621,
+            35.4920654296875,
+            34.8089599609375
+          ],
+          "median_ms": 35.4920654296875,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            27.282367706298828,
+            27.249120712280273,
+            27.33419132232666
+          ],
+          "median_ms": 27.282367706298828,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            27.847007751464844,
+            27.937503814697266,
+            27.962639808654785
+          ],
+          "median_ms": 27.937503814697266,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 15
+      }
+    },
+    {
+      "size": 14336,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            65.0274543762207,
+            65.00958633422852,
+            65.26052474975586
+          ],
+          "median_ms": 65.0274543762207,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            43.895681381225586,
+            44.33491134643555,
+            44.09513473510742
+          ],
+          "median_ms": 44.09513473510742,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            43.29779052734375,
+            43.671329498291016,
+            43.86260795593262
+          ],
+          "median_ms": 43.671329498291016,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            42.56857681274414,
+            42.960655212402344,
+            42.96495819091797
+          ],
+          "median_ms": 42.960655212402344,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            53.188608169555664,
+            53.56819152832031,
+            54.2917423248291
+          ],
+          "median_ms": 53.56819152832031,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            52.72404861450195,
+            53.113264083862305,
+            52.569358825683594
+          ],
+          "median_ms": 52.72404861450195,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            42.97511863708496,
+            43.586320877075195,
+            43.40891075134277
+          ],
+          "median_ms": 43.40891075134277,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            40.96294403076172,
+            41.1823844909668,
+            41.218414306640625
+          ],
+          "median_ms": 41.1823844909668,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            45.8726863861084,
+            45.55131149291992,
+            45.50921630859375
+          ],
+          "median_ms": 45.55131149291992,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            42.84600067138672,
+            42.74054527282715,
+            42.70363235473633
+          ],
+          "median_ms": 42.74054527282715,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            50.90715026855469,
+            50.89123344421387,
+            50.89276695251465
+          ],
+          "median_ms": 50.89276695251465,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            35.92875289916992,
+            35.805904388427734,
+            35.81412887573242
+          ],
+          "median_ms": 35.81412887573242,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            59.31291198730469,
+            58.43427085876465,
+            58.452880859375
+          ],
+          "median_ms": 58.452880859375,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            56.30433654785156,
+            56.281185150146484,
+            56.296016693115234
+          ],
+          "median_ms": 56.296016693115234,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            56.92840003967285,
+            57.089599609375,
+            57.844255447387695
+          ],
+          "median_ms": 57.089599609375,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            40.818111419677734,
+            40.85118293762207,
+            40.99915313720703
+          ],
+          "median_ms": 40.85118293762207,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            64.11406707763672,
+            64.14627075195312,
+            64.217041015625
+          ],
+          "median_ms": 64.14627075195312,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            42.40279960632324,
+            42.4566707611084,
+            42.429264068603516
+          ],
+          "median_ms": 42.429264068603516,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            49.568321228027344,
+            49.13161659240723,
+            49.371809005737305
+          ],
+          "median_ms": 49.371809005737305,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            34.46121597290039,
+            34.371952056884766,
+            34.47307205200195
+          ],
+          "median_ms": 34.46121597290039,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            34.729841232299805,
+            34.751054763793945,
+            34.709951400756836
+          ],
+          "median_ms": 34.729841232299805,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.000244140625
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 15
+      }
+    },
+    {
+      "size": 15360,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            81.71916961669922,
+            80.10128021240234,
+            80.60574340820312
+          ],
+          "median_ms": 80.60574340820312,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            57.20046424865723,
+            57.15865516662598,
+            57.13422393798828
+          ],
+          "median_ms": 57.15865516662598,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            56.52187156677246,
+            56.621856689453125,
+            56.42996788024902
+          ],
+          "median_ms": 56.52187156677246,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            54.36811065673828,
+            54.61222457885742,
+            54.974945068359375
+          ],
+          "median_ms": 54.61222457885742,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            67.5871696472168,
+            66.92326354980469,
+            66.51351928710938
+          ],
+          "median_ms": 66.92326354980469,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            65.64121627807617,
+            65.93668746948242,
+            65.24494171142578
+          ],
+          "median_ms": 65.64121627807617,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            53.171552658081055,
+            53.561279296875,
+            53.58790397644043
+          ],
+          "median_ms": 53.561279296875,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            50.214656829833984,
+            50.13688087463379,
+            50.18176078796387
+          ],
+          "median_ms": 50.18176078796387,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            55.609487533569336,
+            55.274606704711914,
+            55.798160552978516
+          ],
+          "median_ms": 55.609487533569336,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            51.9063835144043,
+            51.79684829711914,
+            51.83396911621094
+          ],
+          "median_ms": 51.83396911621094,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            64.29079818725586,
+            64.34478378295898,
+            64.28545379638672
+          ],
+          "median_ms": 64.29079818725586,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            43.66217613220215,
+            43.75833511352539,
+            43.69708824157715
+          ],
+          "median_ms": 43.69708824157715,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            71.6628646850586,
+            71.49947357177734,
+            71.58886337280273
+          ],
+          "median_ms": 71.58886337280273,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            68.43697357177734,
+            68.37297821044922,
+            68.33508682250977
+          ],
+          "median_ms": 68.37297821044922,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            69.90457916259766,
+            70.8794059753418,
+            70.50336074829102
+          ],
+          "median_ms": 70.50336074829102,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            49.83553695678711,
+            49.74513626098633,
+            49.80148887634277
+          ],
+          "median_ms": 49.80148887634277,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            76.72606658935547,
+            76.74560165405273,
+            76.76911926269531
+          ],
+          "median_ms": 76.74560165405273,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            51.376447677612305,
+            51.424720764160156,
+            51.38310432434082
+          ],
+          "median_ms": 51.38310432434082,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            62.67011260986328,
+            62.69532775878906,
+            62.71870422363281
+          ],
+          "median_ms": 62.69532775878906,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            41.89780807495117,
+            41.7927360534668,
+            41.91927909851074
+          ],
+          "median_ms": 41.89780807495117,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            43.086158752441406,
+            42.947072982788086,
+            43.10606384277344
+          ],
+          "median_ms": 43.086158752441406,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 15
+      }
+    },
+    {
+      "size": 16384,
+      "candidates": [
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            97.01070404052734,
+            104.82210922241211,
+            101.6908950805664
+          ],
+          "median_ms": 101.6908950805664,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            65.90283203125,
+            66.40929794311523,
+            66.13694381713867
+          ],
+          "median_ms": 66.13694381713867,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            65.28566360473633,
+            65.31742477416992,
+            64.76206588745117
+          ],
+          "median_ms": 65.28566360473633,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            63.99630355834961,
+            64.42057418823242,
+            63.83518409729004
+          ],
+          "median_ms": 63.99630355834961,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 0
+          },
+          "round_medians_ms": [
+            80.26876831054688,
+            81.00662612915039,
+            78.71592330932617
+          ],
+          "median_ms": 80.26876831054688,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 1
+          },
+          "round_medians_ms": [
+            78.57868576049805,
+            78.1117935180664,
+            79.84329605102539
+          ],
+          "median_ms": 78.57868576049805,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 2
+          },
+          "round_medians_ms": [
+            65.2347526550293,
+            64.3516960144043,
+            64.55075073242188
+          ],
+          "median_ms": 64.55075073242188,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 3
+          },
+          "round_medians_ms": [
+            62.56364822387695,
+            62.55009651184082,
+            62.52248001098633
+          ],
+          "median_ms": 62.55009651184082,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 4
+          },
+          "round_medians_ms": [
+            66.81800079345703,
+            66.6220474243164,
+            66.62337493896484
+          ],
+          "median_ms": 66.62337493896484,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 5
+          },
+          "round_medians_ms": [
+            61.985599517822266,
+            62.30910301208496,
+            61.94710350036621
+          ],
+          "median_ms": 61.985599517822266,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 6
+          },
+          "round_medians_ms": [
+            76.02499389648438,
+            75.96876907348633,
+            75.87201690673828
+          ],
+          "median_ms": 75.96876907348633,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 7
+          },
+          "round_medians_ms": [
+            55.977359771728516,
+            55.95052719116211,
+            55.948848724365234
+          ],
+          "median_ms": 55.95052719116211,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 8
+          },
+          "round_medians_ms": [
+            86.18188858032227,
+            85.96696090698242,
+            86.00484848022461
+          ],
+          "median_ms": 86.00484848022461,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            82.71020889282227,
+            82.60219192504883,
+            82.72114944458008
+          ],
+          "median_ms": 82.71020889282227,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 10
+          },
+          "round_medians_ms": [
+            88.32923126220703,
+            88.64785766601562,
+            88.88945388793945
+          ],
+          "median_ms": 88.64785766601562,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 11
+          },
+          "round_medians_ms": [
+            62.04419136047363,
+            61.850576400756836,
+            62.00763130187988
+          ],
+          "median_ms": 62.00763130187988,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 12
+          },
+          "round_medians_ms": [
+            93.7112808227539,
+            94.47928237915039,
+            93.84128189086914
+          ],
+          "median_ms": 93.84128189086914,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            61.944143295288086,
+            61.838144302368164,
+            61.90974426269531
+          ],
+          "median_ms": 61.90974426269531,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 14
+          },
+          "round_medians_ms": [
+            74.05652618408203,
+            74.02982330322266,
+            74.10411071777344
+          ],
+          "median_ms": 74.05652618408203,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            54.74105644226074,
+            52.61638259887695,
+            54.33019256591797
+          ],
+          "median_ms": 54.33019256591797,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "cuda",
+            "config_id": 16
+          },
+          "round_medians_ms": [
+            52.39023971557617,
+            52.10704040527344,
+            52.165409088134766
+          ],
+          "median_ms": 52.165409088134766,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "selected": {
+        "backend": "cuda",
+        "config_id": 16
+      }
+    }
+  ],
+  "scope": "Prequantized GEMM; group scaling and output conversion included. Input preparation, compilation and warmup excluded.",
+  "timing": "CUDA graphs, median of per-round medians, rotating candidate order, repeated inputs, no cache flush",
+  "native_configurations": [
+    {
+      "block_m": 64,
+      "block_n": 64,
+      "block_k": 128,
+      "num_stages": 2,
+      "num_warps": 4,
+      "scale_load": "register_prefetch",
+      "store_bits": 128
+    },
+    {
+      "block_m": 64,
+      "block_n": 64,
+      "block_k": 128,
+      "num_stages": 3,
+      "num_warps": 4,
+      "scale_load": "register_prefetch",
+      "store_bits": 128
+    },
+    {
+      "block_m": 128,
+      "block_n": 64,
+      "block_k": 128,
+      "num_stages": 2,
+      "num_warps": 4,
+      "scale_load": "register_prefetch",
+      "store_bits": 128
+    },
+    {
+      "block_m": 128,
+      "block_n": 64,
+      "block_k": 128,
+      "num_stages": 3,
+      "num_warps": 4,
+      "scale_load": "register_prefetch",
+      "store_bits": 128
+    },
+    {
+      "block_m": 64,
+      "block_n": 128,
+      "block_k": 128,
+      "num_stages": 2,
+      "num_warps": 4,
+      "scale_load": "register_prefetch",
+      "store_bits": 128
+    },
+    {
+      "block_m": 64,
+      "block_n": 128,
+      "block_k": 128,
+      "num_stages": 3,
+      "num_warps": 4,
+      "scale_load": "register_prefetch",
+      "store_bits": 128
+    },
+    {
+      "block_m": 128,
+      "block_n": 128,
+      "block_k": 128,
+      "num_stages": 2,
+      "num_warps": 8,
+      "scale_load": "register_prefetch",
+      "store_bits": 128
+    },
+    {
+      "block_m": 128,
+      "block_n": 128,
+      "block_k": 128,
+      "num_stages": 3,
+      "num_warps": 8,
+      "scale_load": "register_prefetch",
+      "store_bits": 128
+    },
+    {
+      "block_m": 64,
+      "block_n": 64,
+      "block_k": 128,
+      "num_stages": 2,
+      "num_warps": 4,
+      "scale_load": "async_shared",
+      "store_bits": 32
+    },
+    {
+      "block_m": 64,
+      "block_n": 64,
+      "block_k": 128,
+      "num_stages": 3,
+      "num_warps": 4,
+      "scale_load": "async_shared",
+      "store_bits": 32
+    },
+    {
+      "block_m": 128,
+      "block_n": 64,
+      "block_k": 128,
+      "num_stages": 2,
+      "num_warps": 4,
+      "scale_load": "async_shared",
+      "store_bits": 32
+    },
+    {
+      "block_m": 128,
+      "block_n": 64,
+      "block_k": 128,
+      "num_stages": 3,
+      "num_warps": 4,
+      "scale_load": "async_shared",
+      "store_bits": 32
+    },
+    {
+      "block_m": 64,
+      "block_n": 128,
+      "block_k": 128,
+      "num_stages": 2,
+      "num_warps": 4,
+      "scale_load": "async_shared",
+      "store_bits": 32
+    },
+    {
+      "block_m": 64,
+      "block_n": 128,
+      "block_k": 128,
+      "num_stages": 3,
+      "num_warps": 4,
+      "scale_load": "async_shared",
+      "store_bits": 32
+    },
+    {
+      "block_m": 128,
+      "block_n": 128,
+      "block_k": 128,
+      "num_stages": 2,
+      "num_warps": 8,
+      "scale_load": "async_shared",
+      "store_bits": 32
+    },
+    {
+      "block_m": 128,
+      "block_n": 128,
+      "block_k": 128,
+      "num_stages": 3,
+      "num_warps": 8,
+      "scale_load": "async_shared",
+      "store_bits": 32
+    },
+    {
+      "block_m": 128,
+      "block_n": 128,
+      "block_k": 128,
+      "num_stages": 3,
+      "num_warps": 8,
+      "scale_load": "async_shared",
+      "store_bits": 16
+    }
+  ],
+  "kernel_source_sha256": {
+    "triton.py": "0e4834f409c64c3cffb4481a985948239c8d737bb53b805270eabe15f029da21",
+    "cuda.py": "5b9e259e223cd666b0ed09470a4ccceb2cd616db957a204445f4f7a5154932fe",
+    "csrc/grain_cute.cu": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148"
+  },
+  "tuning_script_sha256": "6bbf60cf54f131361300790846168a24784b6cd80d8080ebb0705d4e3d1c42dc",
+  "native_build": {
+    "architecture": "sm_121",
+    "cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+    "tested_cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+    "nvcc_version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Aug_20_01:57:39_PM_PDT_2025\nCuda compilation tools, release 13.0, V13.0.88\nBuild cuda_13.0.r13.0/compiler.36424714_0",
+    "source_sha256": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148"
+  }
+}

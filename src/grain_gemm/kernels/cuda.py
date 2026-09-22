@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 _LIBRARY = Path(__file__).parent / "_native" / "libgrain_cuda.so"
-CONFIGS = (
+_TILES = (
     (64, 64, 128, 2, 4),
     (64, 64, 128, 3, 4),
     (128, 64, 128, 2, 4),
@@ -17,6 +17,17 @@ CONFIGS = (
     (64, 128, 128, 3, 4),
     (128, 128, 128, 2, 8),
     (128, 128, 128, 3, 8),
+)
+# IDs 0–7 use register-prefetched scales and a shared-memory output transpose;
+# 8–15 stage scales asynchronously and write adjacent BF16 pairs directly.
+CONFIGS = tuple(
+    dict(block_m=m, block_n=n, block_k=k, num_stages=stages,
+         num_warps=warps, scale_load=scale_load, store_bits=store_bits)
+    for scale_load, store_bits in (("register_prefetch", 128), ("async_shared", 32))
+    for m, n, k, stages, warps in _TILES
+) + (
+    dict(block_m=128, block_n=128, block_k=128, num_stages=3,
+         num_warps=8, scale_load="async_shared", store_bits=16),
 )
 
 

@@ -18,76 +18,118 @@ python -m pytest -q
 
 ## GB10 custom-kernel comparison
 
-The custom implementation has **118 passing tests on GB10**, including all eight
-native CUDA configurations, G256 minimum/long-K cases, unaligned-view fallback,
-CUDA Graph replay with changed inputs, and non-default-stream ordering.
+The optimized **C++/CuTe backend wins all 16 square sizes** against both the
+current tuned GrainGEMM Triton backend and PyTorch BF16 in this run. For
+**M = N = K = 1024, 2048, …, 16384, G256**, per-size speedups are
+**1.19–1.33× over Triton** and **1.54–2.03× over BF16**.
+Peak measured CuTe throughput is **173.98 TOPS**.
+These ranges describe individual sizes; no results are averaged across shapes.
 
-Compute Sanitizer 2025.3.1 also reported **0 memcheck errors** and **0 racecheck
-hazards** for all eight native configurations at K256/K4352 plus a Triton tail
-case. These focused checks are available in
-[`tests/sanitize_kernels.py`](../tests/sanitize_kernels.py):
+![CuTe versus GrainGEMM Triton and PyTorch BF16 on GB10, all 16 square sizes](../docs/assets/gb10_cute_g256_vs_triton_bf16.png)
+
+| M = N = K | CuTe INT8 TOPS | Triton INT8 TOPS | BF16 TFLOPS | CuTe / Triton | CuTe / BF16 |
+|---:|---:|---:|---:|---:|---:|
+| 1024 | 102.89 | 86.49 | 66.94 | 1.190× | 1.537× |
+| 2048 | 139.91 | 109.54 | 90.09 | 1.277× | 1.553× |
+| 3072 | 155.53 | 120.54 | 87.52 | 1.290× | 1.777× |
+| 4096 | 158.75 | 123.10 | 88.74 | 1.290× | 1.789× |
+| 5120 | 158.53 | 128.13 | 91.78 | 1.237× | 1.727× |
+| 6144 | 162.65 | 129.12 | 80.01 | 1.260× | 2.033× |
+| 7168 | 166.08 | 131.42 | 90.74 | 1.264× | 1.830× |
+| 8192 | 167.29 | 131.49 | 90.06 | 1.272× | 1.858× |
+| 9216 | 169.99 | 135.19 | 90.97 | 1.257× | 1.869× |
+| 10240 | 171.13 | 135.22 | 93.30 | 1.266× | 1.834× |
+| 11264 | 172.07 | 134.56 | 94.63 | 1.279× | 1.818× |
+| 12288 | 173.54 | 134.21 | 91.44 | 1.293× | 1.898× |
+| 13312 | 173.20 | 130.31 | 96.78 | 1.329× | 1.790× |
+| 14336 | 172.08 | 137.05 | 94.39 | 1.256× | 1.823× |
+| 15360 | 173.98 | 132.16 | 96.08 | 1.316× | 1.811× |
+| 16384 | 168.32 | 134.89 | 97.47 | 1.248× | 1.727× |
+
+The comparison **forces each backend**: CuTe never falls back to Triton. Both
+INT8 paths use identical prequantized inputs and FP32 scales; BF16 uses the
+corresponding original BF16 tensors. A is row-major, B is column-major, and all
+outputs are BF16. **Input quantization is excluded**. INT8 dot products, group
+scaling, FP32 accumulation and output conversion are included. Compilation,
+warmup, tuning and host dispatch are outside the timer; inputs are not packed.
+
+An offline search measures **17 CuTe and four Triton configurations**, each in
+three rounds with 20 ms captured batches. The best configuration for each backend
+and each size is stored separately. A **fresh five-round comparison** then uses
+100 ms captured batches, 50 untimed warmup calls per implementation, and rotating
+implementation order. The median of round medians is reported separately for
+each shape; the installed Triton helper replays each captured batch ten times.
+Shading shows the min–max of round medians, not confidence intervals. The results
+establish performance for these candidate sets, not a global limit of either
+programming system.
+
+Timing uses repeated inputs without a cache flush; clocks and power settings
+are not overridden. These are **GB10 GPU GEMM measurements**, excluding activation
+quantization and end-to-end inference overhead. They do not establish speedups
+on A100, H100 or Thor. Throughput is `2MNK / time`: integer **TOPS** for INT8 and
+floating-point **TFLOPS** for BF16 on the same operation-count scale.
+
+Both INT8 backends pass independent sampled CPU INT32 group-dot checks before
+timing. Each size also checks CUDA Graph replay after zeroing and restoring the
+activation. Full outputs are checked for finite values. Synthetic quantization
+error relative to BF16 is recorded separately; it does not establish model
+accuracy.
+
+- [Per-size CSV](results/gb10_cute_g256_square_sweep.csv): latencies, throughputs,
+  ratios, configurations and every timing round.
+- [Full comparison JSON](results/gb10_cute_g256_square_sweep.json): software,
+  source/build hashes, raw rounds, correctness, replay and quantization checks.
+- [Offline tuning JSON](results/gb10_cute_g256_tuning.json): all 21 candidates
+  at each of the 16 sizes, including raw rounds and correctness checks.
+- [Kernel design and native build](../docs/kernel_design.md): scale pipelines,
+  output stores, shared-memory limits and dispatch behavior.
+
+Reproduce after building the optional native backend:
 
 ```bash
+python benchmarks/compare_backends.py --output benchmarks/results/gb10_cute_g256_square_sweep.json
+python benchmarks/plot_backends.py --input benchmarks/results/gb10_cute_g256_square_sweep.json --output docs/assets/gb10_cute_g256_vs_triton_bf16.png --svg docs/assets/gb10_cute_g256_vs_triton_bf16.svg
+```
+
+Regenerate the per-size dispatch table on this GB10:
+
+```bash
+python benchmarks/tune_grain.py --output benchmarks/results/gb10_cute_g256_tuning.json --dispatch-output src/grain_gemm/kernels/configs/sm121_g256.json
+```
+
+Then rerun the separate comparison. Both measurement scripts accept
+`--sizes 1024 2048 4096` for a subset; the plotting script requires all 16 sizes.
+The forced comparison requires a native build and fails if it is unavailable.
+The public `backend="auto"` API still uses Triton when native code is unavailable.
+Rankings can change with the toolchain, thermal state and input shape.
+
+### Kernel validation
+
+**156 tests pass on GB10**, covering all 17 native configurations, minimum and
+long K, signed/zero scales and INT8 extrema, partial CTA bands, unaligned-view
+fallback, non-default streams, and CUDA Graph replay. A cancellation regression
+checks an analytically exact `2^-36` result with zero tolerance for both backends;
+ordinary CPU comparisons retain their existing tolerances.
+
+Compute Sanitizer 2025.3.1 reports **0 memcheck errors** and **0 racecheck hazards**
+for all 17 configurations at K256/K4352 and a Triton tail case. Reproduce with:
+
+```bash
+python -m pytest -q
 compute-sanitizer --tool memcheck --error-exitcode 1 python tests/sanitize_kernels.py
 compute-sanitizer --tool racecheck --error-exitcode 1 python tests/sanitize_kernels.py
 ```
 
-The following sweep measures **M = N = K from 1024 to 16384, step 1024, G256**.
-**All 16 sizes are faster than BF16 in this run**, with per-size speedups from 1.21× to 1.69×.
-Each size is reported separately. The chart compares GrainGEMM with PyTorch BF16
-across all 16 sizes. The raw CSV and JSON also retain the unchanged SGLang default
-baseline, measured in the same experiment.
+### Earlier mixed-backend measurements
 
-![GrainGEMM versus PyTorch BF16 on GB10, all 16 square sizes](../docs/assets/gb10_grain_g256_vs_baselines.png)
-
-GrainGEMM uses the checked-in per-size dispatch table: the fastest of **four
-Triton and eight CUDA/CuTe candidates** in an offline search of three rounds per
-candidate. The selected configuration is then evaluated in a **separate five-round
-comparison**, rotating implementation order. Native CuTe is selected at 4096;
-the measured Triton configurations are selected for the other 15 square sizes.
-The best Triton fallback is also stored for systems without the native build.
-This is the best measured candidate set, not proof of a global performance limit.
-
-All three paths use the same original BF16 random inputs, row-major A,
-column-major B, and BF16 output. Both INT8 paths use the same prequantized tensors
-and FP32 scales. **Input quantization is excluded**; INT8 dot products, group
-scaling, cross-group FP32 accumulation and BF16 output are included. Compilation,
-warmup, tuning, and host dispatch are outside the timer. There is no hidden input
-packing. Both INT8 implementations pass independent sampled CPU INT32 group-dot
-checks before timing. Synthetic quantization differences are recorded separately
-and do not establish model accuracy.
-
-Timing uses `triton.testing.do_bench_cudagraph`, 100 ms captured batches and five
-rounds, reporting the median of round medians. The installed Triton helper replays
-each captured batch ten times. Inputs are reused without a cache flush; clocks
-and power settings are not overridden. These are steady-state GPU GEMM results
-on **GB10**, not end-to-end inference or A100/H100/Thor measurements. Throughput
-is `2MNK/time`: **TOPS for INT8, TFLOPS for BF16**, on the same operation-count scale.
-
-- [Per-size CSV](results/gb10_grain_g256_square_sweep.csv): all three latencies,
-  throughputs, per-round timings, ratios and selected configurations.
-- [Full comparison JSON](results/gb10_grain_g256_square_sweep.json): software,
-  source hashes, every timing round, correctness and quantization differences.
-- [Offline tuning JSON](results/gb10_g256_tuning.json): every candidate at every
-  size, including its timing rounds and independent correctness check.
-
-Reproduce after following the [optional native build instructions](../docs/kernel_design.md#build-the-optional-gb10-cuda-backend):
-
-```bash
-python benchmarks/compare_grain.py --output benchmarks/results/gb10_grain_g256_square_sweep.json
-python benchmarks/plot_grain.py --input benchmarks/results/gb10_grain_g256_square_sweep.json --output docs/assets/gb10_grain_g256_vs_baselines.png --svg docs/assets/gb10_grain_g256_vs_baselines.svg
-```
-
-To rerun the search for this GB10 and regenerate its dispatch table:
-
-```bash
-python benchmarks/tune_grain.py --output benchmarks/results/gb10_g256_tuning.json --dispatch-output src/grain_gemm/kernels/configs/sm121_g256.json
-```
-
-Then rerun the separate comparison. Timing rankings can change with toolchain,
-clocks, thermal state and input shape. `--sizes 1024 2048 4096` selects a subset in
-either script. Without the optional native build, the search and comparison use
-Triton; such a run must not be labeled as a measurement of the CuTe backend.
+The previous mixed-backend sweep selected CuTe only at 4096 and Triton at the
+other 15 sizes. Its unchanged artifacts remain available for historical context:
+[chart](../docs/assets/gb10_grain_g256_vs_baselines.png),
+[CSV](results/gb10_grain_g256_square_sweep.csv),
+[comparison JSON](results/gb10_grain_g256_square_sweep.json), and
+[tuning JSON](results/gb10_g256_tuning.json). The raw comparison also retains its
+SGLang baseline; the chart shows only GrainGEMM and BF16. Those measurements
+predate the current CuTe kernels and dispatch table.
 
 ## Group-size benchmark
 
