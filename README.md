@@ -63,7 +63,49 @@ For a fixed K, this conversion-and-scaling work occurs `ceil(K / G)` times. **G2
 
 ## Development status
 
-This repository currently contains an initial project scaffold. The recommendation above records project experimental observations; GPU kernels and reproducible benchmark results have not yet been published here.
+The repository includes a standalone SGLang-derived Triton baseline, correctness tests, and a benchmark entry point. GrainGEMM-specific optimized kernels and performance results for A100, H100, and Thor are still pending. The G256 recommendation above records project experimental observations and is not a measured comparison against this baseline.
+
+## SGLang Triton baseline
+
+[`sglang_int8_gemm`](src/grain_gemm/baselines/sglang.py) extracts SGLang's INT8 kernel at [commit `8ac19cc`](https://github.com/sgl-project/sglang/blob/8ac19cc19f8ade51ed203478f17c9a09c706d730/python/sglang/kernels/ops/quantization/int8_kernel.py). It runs independently of the SGLang package. The original kernel computation is retained; GrainGEMM supplies the input validation and launch wrapper. See [third-party notices](THIRD_PARTY_NOTICES.md) for attribution and the upstream Apache-2.0 license.
+
+- Inputs: INT8 `A[M, K]` and `B[K, N]`, with FP32 scales `[M, ceil(K/G)]` and `[ceil(K/G), N]` on the same CUDA device.
+- Groups: **32, 64, 128, 256**; the default is **256**. The final group may be shorter than G.
+- Accumulation: one INT32 dot product per complete K-group (or masked tail), followed by FP32 scaling and accumulation. Output may be FP32 (default), FP16, or BF16.
+- Layout: transposed positive-stride views are accepted without an implicit copy. For example, weights stored as `[N, K]` can be passed as `weight.T`.
+
+The wrapper sets `group_n=1` and `BLOCK_SIZE_K=G`. Its M/N compute tiles are independent of the quantization groups, avoiding a one-column compute tile when weights have per-column scales. The default launch configuration is a starting baseline, not an autotuned SGLang result. `block_m`, `block_n`, `num_warps`, and `num_stages` can be overridden for experiments.
+
+Use a CUDA-enabled PyTorch build and a compatible Triton version on Linux. Triton's CUDA driver build also needs a C compiler and matching Python development headers.
+
+```bash
+python -m pip install -e ".[baseline,test]"
+```
+
+Example using prequantized inputs and their dequantization scales:
+
+```python
+import torch
+from grain_gemm.baselines import sglang_int8_gemm
+
+M, N, K, G = 128, 1024, 4096, 256
+a = torch.randint(-127, 128, (M, K), device="cuda", dtype=torch.int8)
+b = torch.randint(-127, 128, (N, K), device="cuda", dtype=torch.int8).T
+scale_a = torch.full((M, K // G), 1 / 127, device="cuda")
+scale_b = torch.full((K // G, N), 1 / 127, device="cuda")
+c = sglang_int8_gemm(a, b, scale_a, scale_b, group_size=G)
+```
+
+Run correctness checks and compare group sizes:
+
+```bash
+python -m pytest -q
+python benchmarks/bench_sglang.py --m 128 --n 4096 --k 4096 --group-size 32 64 128 256
+```
+
+The benchmark checks up to 32 evenly spaced output rows and columns against independent CPU INT32 dot products before timing. It reports median CUDA-graph GEMM latency with repeated inputs and no cache flush, excluding compilation, warmup, and input preparation. It does not measure activation quantization or end-to-end inference latency. The group-size sweep uses synthetic inputs and is not a model-accuracy evaluation. Use `--output results.json` to save the GPU, software versions, launch configuration, checks, and measurements.
+
+Initial validation on **GB10**, with PyTorch 2.14.0+cu130 and Triton 3.8.0: **26 tests passed**. An [example benchmark report](benchmarks/results/gb10_m128_n4096_k4096_fp32.json) records all four group sizes at `M=128, N=4096, K=4096`. G64 was fastest in this single run with the default untuned configuration; this does not establish a general group-size ranking or performance on the target GPUs.
 
 ## Local development
 

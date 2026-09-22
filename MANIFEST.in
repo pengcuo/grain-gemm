@@ -1,0 +1,3 @@
+include benchmarks/*.py
+include benchmarks/results/*.json
+include tests/*.py

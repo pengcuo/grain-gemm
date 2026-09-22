@@ -1,0 +1,86 @@
+{
+  "baseline": "sglang_int8_gemm",
+  "gpu": "NVIDIA GB10",
+  "compute_capability": [
+    12,
+    1
+  ],
+  "software": {
+    "python": "3.12.3",
+    "torch": "2.14.0+cu130",
+    "triton": "3.8.0",
+    "cuda": "13.0"
+  },
+  "shape": {
+    "m": 128,
+    "n": 4096,
+    "k": 4096
+  },
+  "layout": {
+    "a": "row-major",
+    "b": "column-major",
+    "scales": "row-major"
+  },
+  "output_dtype": "fp32",
+  "seed": 2026,
+  "launch_config": {
+    "block_m": 32,
+    "block_n": 64,
+    "num_warps": 4,
+    "num_stages": 2
+  },
+  "timing": {
+    "method": "triton.testing.do_bench_cudagraph",
+    "statistic": "median",
+    "rep_ms": 100,
+    "scope": "prequantized GEMM only; compilation, warmup, input preparation, and quantization excluded",
+    "cache_policy": "repeated inputs; no cache flush between launches"
+  },
+  "results": [
+    {
+      "group_size": 32,
+      "block_k": 32,
+      "latency_ms": 0.1051681977010368,
+      "effective_int8_tops": 40.83903109388037,
+      "correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 7.62939453125e-06
+      }
+    },
+    {
+      "group_size": 64,
+      "block_k": 64,
+      "latency_ms": 0.06348770119787711,
+      "effective_int8_tops": 67.65038290823506,
+      "correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 7.62939453125e-06
+      }
+    },
+    {
+      "group_size": 128,
+      "block_k": 128,
+      "latency_ms": 0.07692734959026495,
+      "effective_int8_tops": 55.83147370702502,
+      "correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 7.62939453125e-06
+      }
+    },
+    {
+      "group_size": 256,
+      "block_k": 256,
+      "latency_ms": 0.07277531367165288,
+      "effective_int8_tops": 59.01681599584718,
+      "correctness": {
+        "checked_rows": 32,
+        "checked_columns": 32,
+        "max_abs_error": 5.7220458984375e-06
+      }
+    }
+  ],
+  "notes": "Single-run baseline smoke benchmark on GB10, with the default untuned launch configuration. This is not an A100/H100/Thor result or an end-to-end inference benchmark."
+}
