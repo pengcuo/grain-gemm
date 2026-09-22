@@ -16,7 +16,7 @@ For `A[M, K] @ B[K, N]`:
 
 For group size `G`, the scale shapes are `[M, ceil(K/G)]` for A and `[ceil(K/G), N]` for B. The intended operation is:
 
-$$
+```math
 C_{mn}
 = \sum_{g=0}^{\lceil K/G \rceil - 1}
 s^A_{mg}\,s^B_{gn}\,
@@ -26,7 +26,7 @@ s^A_{mg}\,s^B_{gn}\,
 A^{\mathrm{INT8}}_{mk}\,B^{\mathrm{INT8}}_{kn}
 }_{\text{INT32 accumulation}}
 \right)
-$$
+```
 
 Here, $s^A_{mg}$ and $s^B_{gn}$ correspond to `scale_A[m, g]` and `scale_B[g, n]`. The outer weighted sum accumulates in FP32.
 
