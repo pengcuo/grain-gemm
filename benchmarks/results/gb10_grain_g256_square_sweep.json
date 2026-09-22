@@ -1,0 +1,2500 @@
+{
+  "benchmark": "GrainGEMM and SGLang INT8 versus PyTorch BF16 square GEMM sweep",
+  "started_at_utc": "2026-09-22T08:03:44.641857+00:00",
+  "expected_sizes": [
+    1024,
+    2048,
+    3072,
+    4096,
+    5120,
+    6144,
+    7168,
+    8192,
+    9216,
+    10240,
+    11264,
+    12288,
+    13312,
+    14336,
+    15360,
+    16384
+  ],
+  "group_size": 256,
+  "seed": 2026,
+  "gpu": "NVIDIA GB10",
+  "compute_capability": [
+    12,
+    1
+  ],
+  "gpu_properties": {
+    "cuda_device_index": 0,
+    "multiprocessor_count": 48,
+    "total_memory_bytes": 130660913152
+  },
+  "software": {
+    "python": "3.12.3",
+    "torch": "2.14.0+cu130",
+    "triton": "3.8.0",
+    "cuda": "13.0",
+    "driver": "580.178.04",
+    "grain_gemm": "0.0.0"
+  },
+  "source": {
+    "git_commit": "a27062187594ff8ac068ce3c5676e64268a6c785",
+    "git_status_porcelain": "M .gitignore\n M MANIFEST.in\n M README.md\n M THIRD_PARTY_NOTICES.md\n M pyproject.toml\n M src/grain_gemm/__init__.py\n?? benchmarks/compare_grain.py\n?? benchmarks/plot_grain.py\n?? benchmarks/results/gb10_g256_tuning.json\n?? benchmarks/tune_grain.py\n?? docs/kernel_design.md\n?? licenses/CUTLASS-LICENSE\n?? src/grain_gemm/gemm.py\n?? src/grain_gemm/kernels/\n?? tests/test_int8_gemm.py\n?? tools/",
+    "comparison_script_sha256": "0f264ddbf722cde3a14dfdc79c184880f44524728e65a5c67704dfef38f666e4",
+    "check_sample_script_sha256": "0e7ea663757e16b37f5bc088459a81d20dd0ea8e30f81729da13f0108a6d49bd",
+    "package_source_sha256": {
+      "grain_gemm/__init__.py": "22c5685605c9d04d8168009cbead08dcb1d9000aaf606c4df633bb1f40c03d42",
+      "grain_gemm/baselines/__init__.py": "b045e960f98bbc0d0ffc1d9ad4ad3e9ecff31d859fd5761dd0f20423dd14c211",
+      "grain_gemm/baselines/sglang.py": "cde6cf5e9cef6bb66a8da2af5cdb7a74bd744eee4ca50686bc39dae661953b81",
+      "grain_gemm/gemm.py": "b4558290c013446339f7af55adbff3e47a61f6f27d0a158acbeb8e62d3fd5cc9",
+      "grain_gemm/kernels/__init__.py": "df3df411d10614aabefa0a3893e37899c67b80d984a70f2d82b6f334658f69ab",
+      "grain_gemm/kernels/_native/build.json": "ed490b27acb4ee5678da50246d7fc664afc82370048e95d4b0a4d2badc908fa0",
+      "grain_gemm/kernels/configs/sm121_g256.json": "12c97b41e8042a28674ea0bf0ae61c07e14c691d8c472a222d7f64537240f2ee",
+      "grain_gemm/kernels/csrc/grain_cute.cu": "36671a660004e59caed5f7f46351c8bf5e1d3e3a1422602f033dce0e49eaba9a",
+      "grain_gemm/kernels/cuda.py": "8bfbc2555de00cfbafdd160f31642a58b728fea287ae2f49548ed2d04aeb822d",
+      "grain_gemm/kernels/triton.py": "0e4834f409c64c3cffb4481a985948239c8d737bb53b805270eabe15f029da21"
+    }
+  },
+  "torch_allow_bf16_reduced_precision_reduction": true,
+  "timing": {
+    "method": "triton.testing.do_bench_cudagraph",
+    "statistic": "median of per-round medians, separately for each size",
+    "rounds": 5,
+    "rep_ms": 100,
+    "warmup_calls_per_implementation": 50,
+    "measurement_order": "rotates implementation order each round; exact orders saved per case",
+    "scope": "GPU GEMM execution including group scaling, accumulation, and BF16 output",
+    "includes_input_quantization": false,
+    "includes_compilation_or_autotuning": false,
+    "includes_warmup": false,
+    "includes_host_dispatch": false,
+    "cache_policy": "repeated inputs; no cache flush",
+    "rep_ms_note": "Target duration of each captured batch; graph replay count follows installed Triton."
+  },
+  "quantization": {
+    "input_dtype": "bfloat16",
+    "quantized_dtype": "int8",
+    "scale_dtype": "float32",
+    "method": "per row/column and K-group: max(abs(x)).clamp_min(1e-12)/127; round and clamp to [-127,127]",
+    "performed_before_timing": true
+  },
+  "complete": true,
+  "reports": [
+    {
+      "timestamp_utc": "2026-09-22T08:03:57.672015+00:00",
+      "shape": {
+        "m": 1024,
+        "n": 1024,
+        "k": 1024
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          1024,
+          1
+        ],
+        "b": [
+          1,
+          1024
+        ],
+        "scale_a": [
+          4,
+          1
+        ],
+        "scale_b": [
+          1024,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 128,
+        "num_warps": 8,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.010129697620868683,
+            "max_abs_error": 1.625
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010129695758223534,
+            "max_abs_error": 1.625
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            0.024557793516568463,
+            0.02456990476056333,
+            0.024533086267146904,
+            0.024576605089556565,
+            0.024561564589655676
+          ],
+          "median_ms": 0.024561564589655676,
+          "min_ms": 0.024533086267146904,
+          "max_ms": 0.024576605089556565,
+          "effective_tops": 87.43268940222286
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            0.0347031090647129,
+            0.03463546897464902,
+            0.03459799252097915,
+            0.03476956425880899,
+            0.03471353153615657
+          ],
+          "median_ms": 0.0347031090647129,
+          "min_ms": 0.03459799252097915,
+          "max_ms": 0.03476956425880899,
+          "effective_tops": 61.88159233789292
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            0.03198374424532305,
+            0.032000352430713266,
+            0.0320939628595201,
+            0.032131828413419196,
+            0.032114121147358635
+          ],
+          "median_ms": 0.0320939628595201,
+          "min_ms": 0.03198374424532305,
+          "max_ms": 0.032131828413419196,
+          "effective_tflops": 66.91238652577263
+        }
+      },
+      "grain_speedup_over_bf16": 1.306674204013728,
+      "grain_speedup_over_sglang": 1.4129030314025037,
+      "sglang_speedup_over_bf16": 0.9248152031471482
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:04:12.986292+00:00",
+      "shape": {
+        "m": 2048,
+        "n": 2048,
+        "k": 2048
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          2048,
+          1
+        ],
+        "b": [
+          1,
+          2048
+        ],
+        "scale_a": [
+          8,
+          1
+        ],
+        "scale_b": [
+          2048,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 128,
+        "num_warps": 8,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.001953125
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.001953125
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.010112195275723934,
+            "max_abs_error": 2.5
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010112198069691658,
+            "max_abs_error": 2.5
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            0.1569114406082323,
+            0.15656097095233562,
+            0.15666273575794848,
+            0.15680157082476287,
+            0.15641760409162608
+          ],
+          "median_ms": 0.15666273575794848,
+          "min_ms": 0.15641760409162608,
+          "max_ms": 0.1569114406082323,
+          "effective_tops": 109.66149097858045
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            0.24356393417694167,
+            0.24403697529165552,
+            0.24403010213316367,
+            0.2436269620569741,
+            0.24404602802445735
+          ],
+          "median_ms": 0.24403010213316367,
+          "min_ms": 0.24356393417694167,
+          "max_ms": 0.24404602802445735,
+          "effective_tops": 70.40061465296276
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            0.18754607306586374,
+            0.188125984064973,
+            0.1900594243199834,
+            0.1891941267625872,
+            0.18995577329164975
+          ],
+          "median_ms": 0.1891941267625872,
+          "min_ms": 0.18754607306586374,
+          "max_ms": 0.1900594243199834,
+          "effective_tflops": 90.80551007568215
+        }
+      },
+      "grain_speedup_over_bf16": 1.2076523868120195,
+      "grain_speedup_over_sglang": 1.5576780333403728,
+      "sglang_speedup_over_bf16": 0.7752901183450996
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:04:28.332985+00:00",
+      "shape": {
+        "m": 3072,
+        "n": 3072,
+        "k": 3072
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          3072,
+          1
+        ],
+        "b": [
+          1,
+          3072
+        ],
+        "scale_a": [
+          12,
+          1
+        ],
+        "scale_b": [
+          3072,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 128,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.010117604397237301,
+            "max_abs_error": 3.0
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010117602534592152,
+            "max_abs_error": 3.0
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            0.47662135789979176,
+            0.47804148163275695,
+            0.4782031797013193,
+            0.4767652867914556,
+            0.47719365245891066
+          ],
+          "median_ms": 0.47719365245891066,
+          "min_ms": 0.47662135789979176,
+          "max_ms": 0.4782031797013193,
+          "effective_tops": 121.50634904137291
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            0.7952991667247954,
+            0.8065586090087891,
+            0.8145323253813244,
+            0.8158382234119235,
+            0.8223893301827567
+          ],
+          "median_ms": 0.8145323253813244,
+          "min_ms": 0.7952991667247954,
+          "max_ms": 0.8223893301827567,
+          "effective_tops": 71.184478122284
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            0.6640199109127647,
+            0.6674579089840516,
+            0.6702330096874362,
+            0.6664183088343778,
+            0.6647011606316817
+          ],
+          "median_ms": 0.6664183088343778,
+          "min_ms": 0.6640199109127647,
+          "max_ms": 0.6702330096874362,
+          "effective_tflops": 87.00550049024845
+        }
+      },
+      "grain_speedup_over_bf16": 1.3965364069710893,
+      "grain_speedup_over_sglang": 1.7069219617322144,
+      "sglang_speedup_over_bf16": 0.818160664799145
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:04:44.403625+00:00",
+      "shape": {
+        "m": 4096,
+        "n": 4096,
+        "k": 4096
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          4096,
+          1
+        ],
+        "b": [
+          1,
+          4096
+        ],
+        "scale_a": [
+          16,
+          1
+        ],
+        "scale_b": [
+          4096,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "cuda",
+        "config_id": 7
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.010123071260750294,
+            "max_abs_error": 3.625
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010123071260750294,
+            "max_abs_error": 3.625
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            1.0601866711145158,
+            1.0593714858546401,
+            1.0579398569434582,
+            1.055135667938547,
+            1.058067398841935
+          ],
+          "median_ms": 1.058067398841935,
+          "min_ms": 1.055135667938547,
+          "max_ms": 1.0601866711145158,
+          "effective_tops": 129.89621797479847
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            2.091101592441775,
+            2.0280195871988935,
+            2.0929682029868073,
+            2.107039698848018,
+            2.0988360184889574
+          ],
+          "median_ms": 2.0929682029868073,
+          "min_ms": 2.0280195871988935,
+          "max_ms": 2.107039698848018,
+          "effective_tops": 65.66700501033189
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            1.568485142634465,
+            1.5609854495886601,
+            1.566625213623047,
+            1.5669323705857798,
+            1.5786722775163322
+          ],
+          "median_ms": 1.5669323705857798,
+          "min_ms": 1.5609854495886601,
+          "max_ms": 1.5786722775163322,
+          "effective_tflops": 87.71211575686576
+        }
+      },
+      "grain_speedup_over_bf16": 1.4809381446784984,
+      "grain_speedup_over_sglang": 1.9781048024706,
+      "sglang_speedup_over_bf16": 0.7486651580992302
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:05:00.559494+00:00",
+      "shape": {
+        "m": 5120,
+        "n": 5120,
+        "k": 5120
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          5120,
+          1
+        ],
+        "b": [
+          1,
+          5120
+        ],
+        "scale_a": [
+          20,
+          1
+        ],
+        "scale_b": [
+          5120,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.010117271915078163,
+            "max_abs_error": 4.5
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010117272846400738,
+            "max_abs_error": 4.5
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            2.0836152835768096,
+            2.0942266814562736,
+            2.081318524419045,
+            2.0975911566551693,
+            2.0847389843999125
+          ],
+          "median_ms": 2.0847389843999125,
+          "min_ms": 2.081318524419045,
+          "max_ms": 2.0975911566551693,
+          "effective_tops": 128.76214145209576
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            4.153998741736778,
+            3.8754494278519243,
+            4.08736009950991,
+            3.9683945065452937,
+            4.152968039879433
+          ],
+          "median_ms": 4.08736009950991,
+          "min_ms": 3.8754494278519243,
+          "max_ms": 4.153998741736778,
+          "effective_tops": 65.6745306174972
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            2.8843747244940863,
+            2.8861600160598755,
+            2.880675615583147,
+            2.8830166407993865,
+            2.8797119988335504
+          ],
+          "median_ms": 2.8830166407993865,
+          "min_ms": 2.8797119988335504,
+          "max_ms": 2.8861600160598755,
+          "effective_tflops": 93.10922878529405
+        }
+      },
+      "grain_speedup_over_bf16": 1.382914917585837,
+      "grain_speedup_over_sglang": 1.9606099996669115,
+      "sglang_speedup_over_bf16": 0.705349313642581
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:05:16.746629+00:00",
+      "shape": {
+        "m": 6144,
+        "n": 6144,
+        "k": 6144
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          6144,
+          1
+        ],
+        "b": [
+          1,
+          6144
+        ],
+        "scale_a": [
+          24,
+          1
+        ],
+        "scale_b": [
+          6144,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.010118682868778706,
+            "max_abs_error": 4.5
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010118681006133556,
+            "max_abs_error": 4.5
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            3.5431495949074074,
+            3.536869730268206,
+            3.5514132635934015,
+            3.5492179577167215,
+            3.5320426093207464
+          ],
+          "median_ms": 3.5431495949074074,
+          "min_ms": 3.5320426093207464,
+          "max_ms": 3.5514132635934015,
+          "effective_tops": 130.91642211062836
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            7.067478434244792,
+            7.116975911458333,
+            7.215645423302284,
+            7.121463521321615,
+            7.115540313720703
+          ],
+          "median_ms": 7.116975911458333,
+          "min_ms": 7.067478434244792,
+          "max_ms": 7.215645423302284,
+          "effective_tops": 65.17606266183802
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            6.036549123128255,
+            6.00010019938151,
+            6.00127911567688,
+            5.987132771809896,
+            5.997313976287842
+          ],
+          "median_ms": 6.00010019938151,
+          "min_ms": 5.987132771809896,
+          "max_ms": 6.036549123128255,
+          "effective_tflops": 77.30812029036021
+        }
+      },
+      "grain_speedup_over_bf16": 1.6934368811312663,
+      "grain_speedup_over_sglang": 2.0086580373822236,
+      "sglang_speedup_over_bf16": 0.8430687800588657
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:05:33.467615+00:00",
+      "shape": {
+        "m": 7168,
+        "n": 7168,
+        "k": 7168
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          7168,
+          1
+        ],
+        "b": [
+          1,
+          7168
+        ],
+        "scale_a": [
+          28,
+          1
+        ],
+        "scale_b": [
+          7168,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.00048828125
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.01011700090020895,
+            "max_abs_error": 5.0
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010117001831531525,
+            "max_abs_error": 5.0
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            5.575115203857422,
+            5.537528542911305,
+            5.540184469784007,
+            5.537920783547794,
+            5.576895096722771
+          ],
+          "median_ms": 5.540184469784007,
+          "min_ms": 5.537528542911305,
+          "max_ms": 5.576895096722771,
+          "effective_tops": 132.9534955525979
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            11.433314005533854,
+            11.304554833306206,
+            11.284922705756294,
+            11.302380084991455,
+            11.274234771728516
+          ],
+          "median_ms": 11.302380084991455,
+          "min_ms": 11.274234771728516,
+          "max_ms": 11.433314005533854,
+          "effective_tops": 65.17095388095478
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            8.062671979268393,
+            8.042739868164062,
+            8.067960565740412,
+            8.081308046976725,
+            8.105761528015137
+          ],
+          "median_ms": 8.067960565740412,
+          "min_ms": 8.042739868164062,
+          "max_ms": 8.105761528015137,
+          "effective_tflops": 91.29778030792866
+        }
+      },
+      "grain_speedup_over_bf16": 1.456262081117121,
+      "grain_speedup_over_sglang": 2.040072879636821,
+      "sglang_speedup_over_bf16": 0.7138284595873694
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:05:50.389488+00:00",
+      "shape": {
+        "m": 8192,
+        "n": 8192,
+        "k": 8192
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          8192,
+          1
+        ],
+        "b": [
+          1,
+          8192
+        ],
+        "scale_a": [
+          32,
+          1
+        ],
+        "scale_b": [
+          8192,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.010117913596332073,
+            "max_abs_error": 5.25
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010117913596332073,
+            "max_abs_error": 5.25
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            8.459552071311258,
+            8.510794206099078,
+            8.514740337025035,
+            8.51814824884588,
+            8.53611928766424
+          ],
+          "median_ms": 8.514740337025035,
+          "min_ms": 8.459552071311258,
+          "max_ms": 8.53611928766424,
+          "effective_tops": 129.13037676497817
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            17.219593811035157,
+            17.27430038452148,
+            17.095875549316403,
+            17.186265563964845,
+            15.471293131510416
+          ],
+          "median_ms": 17.186265563964845,
+          "min_ms": 15.471293131510416,
+          "max_ms": 17.27430038452148,
+          "effective_tops": 63.97618049620923
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            12.194329398018972,
+            12.155291421072823,
+            12.156980037689209,
+            12.17989730834961,
+            12.159703731536865
+          ],
+          "median_ms": 12.159703731536865,
+          "min_ms": 12.155291421072823,
+          "max_ms": 12.194329398018972,
+          "effective_tflops": 90.42256719827438
+        }
+      },
+      "grain_speedup_over_bf16": 1.4280768702554874,
+      "grain_speedup_over_sglang": 2.018413349522007,
+      "sglang_speedup_over_bf16": 0.7075244872878387
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:06:08.398410+00:00",
+      "shape": {
+        "m": 9216,
+        "n": 9216,
+        "k": 9216
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          9216,
+          1
+        ],
+        "b": [
+          1,
+          9216
+        ],
+        "scale_a": [
+          36,
+          1
+        ],
+        "scale_b": [
+          9216,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.010118824429810047,
+            "max_abs_error": 6.0
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010118821635842323,
+            "max_abs_error": 6.0
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            11.454505920410156,
+            11.494091987609863,
+            11.499431610107422,
+            11.50374984741211,
+            11.497925758361816
+          ],
+          "median_ms": 11.497925758361816,
+          "min_ms": 11.454505920410156,
+          "max_ms": 11.50374984741211,
+          "effective_tops": 136.1563478746143
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            24.439180374145508,
+            23.570555686950684,
+            25.101370493570965,
+            25.199242909749348,
+            24.534855842590332
+          ],
+          "median_ms": 24.534855842590332,
+          "min_ms": 23.570555686950684,
+          "max_ms": 25.199242909749348,
+          "effective_tops": 63.80781649731171
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            17.1762077331543,
+            17.21479034423828,
+            17.171558380126953,
+            17.169456481933594,
+            17.19887008666992
+          ],
+          "median_ms": 17.1762077331543,
+          "min_ms": 17.169456481933594,
+          "max_ms": 17.21479034423828,
+          "effective_tflops": 91.1444251090519
+        }
+      },
+      "grain_speedup_over_bf16": 1.49385272562427,
+      "grain_speedup_over_sglang": 2.1338506055970545,
+      "sglang_speedup_over_bf16": 0.7000737173005079
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:06:27.516183+00:00",
+      "shape": {
+        "m": 10240,
+        "n": 10240,
+        "k": 10240
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          10240,
+          1
+        ],
+        "b": [
+          1,
+          10240
+        ],
+        "scale_a": [
+          40,
+          1
+        ],
+        "scale_b": [
+          10240,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.25
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.010118783451616764,
+            "max_abs_error": 6.03125
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010118785314261913,
+            "max_abs_error": 6.03125
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            15.706509272257488,
+            15.711727778116863,
+            15.712039947509766,
+            15.786863962809246,
+            15.726984024047852
+          ],
+          "median_ms": 15.712039947509766,
+          "min_ms": 15.706509272257488,
+          "max_ms": 15.786863962809246,
+          "effective_tops": 136.6775832529855
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            33.00783157348633,
+            34.6024169921875,
+            34.17841720581055,
+            32.916208267211914,
+            34.59053611755371
+          ],
+          "median_ms": 34.17841720581055,
+          "min_ms": 32.916208267211914,
+          "max_ms": 34.6024169921875,
+          "effective_tops": 62.83157101947115
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            22.836715698242188,
+            22.94910430908203,
+            22.960000038146973,
+            22.979960441589355,
+            22.824292182922363
+          ],
+          "median_ms": 22.94910430908203,
+          "min_ms": 22.824292182922363,
+          "max_ms": 22.979960441589355,
+          "effective_tflops": 93.57592431832472
+        }
+      },
+      "grain_speedup_over_bf16": 1.4606062857368998,
+      "grain_speedup_over_sglang": 2.1753010633878613,
+      "sglang_speedup_over_bf16": 0.6714501777800447
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:06:49.381465+00:00",
+      "shape": {
+        "m": 11264,
+        "n": 11264,
+        "k": 11264
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          11264,
+          1
+        ],
+        "b": [
+          1,
+          11264
+        ],
+        "scale_a": [
+          44,
+          1
+        ],
+        "scale_b": [
+          11264,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.5
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.010118783451616764,
+            "max_abs_error": 6.0
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.01011878252029419,
+            "max_abs_error": 6.0
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            21.007248878479004,
+            21.198476791381836,
+            21.0385799407959,
+            21.0864839553833,
+            21.12875270843506
+          ],
+          "median_ms": 21.0864839553833,
+          "min_ms": 21.007248878479004,
+          "max_ms": 21.198476791381836,
+          "effective_tops": 135.55132005581643
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            44.5664005279541,
+            45.07312774658203,
+            45.68168067932129,
+            45.04479217529297,
+            45.95333480834961
+          ],
+          "median_ms": 45.07312774658203,
+          "min_ms": 44.5664005279541,
+          "max_ms": 45.95333480834961,
+          "effective_tops": 63.41474129681958
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            30.186682383219402,
+            30.279722849527996,
+            30.25155766805013,
+            30.09260813395182,
+            30.089029947916664
+          ],
+          "median_ms": 30.186682383219402,
+          "min_ms": 30.089029947916664,
+          "max_ms": 30.279722849527996,
+          "effective_tflops": 94.6874750660547
+        }
+      },
+      "grain_speedup_over_bf16": 1.4315654732714629,
+      "grain_speedup_over_sglang": 2.137536435280147,
+      "sglang_speedup_over_bf16": 0.6697268171168465
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:07:11.718744+00:00",
+      "shape": {
+        "m": 12288,
+        "n": 12288,
+        "k": 12288
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          12288,
+          1
+        ],
+        "b": [
+          1,
+          12288
+        ],
+        "scale_a": [
+          48,
+          1
+        ],
+        "scale_b": [
+          12288,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.010116824880242348,
+            "max_abs_error": 7.0
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010116824880242348,
+            "max_abs_error": 7.0
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            27.79344050089518,
+            27.517359415690105,
+            27.614635467529297,
+            27.541615804036457,
+            27.51422882080078
+          ],
+          "median_ms": 27.541615804036457,
+          "min_ms": 27.51422882080078,
+          "max_ms": 27.79344050089518,
+          "effective_tops": 134.73616690274733
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            58.24652862548828,
+            57.8790225982666,
+            59.102928161621094,
+            57.52400016784668,
+            53.16545486450195
+          ],
+          "median_ms": 57.8790225982666,
+          "min_ms": 53.16545486450195,
+          "max_ms": 59.102928161621094,
+          "effective_tops": 64.11393242592757
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            40.5677604675293,
+            40.5173282623291,
+            40.53749656677246,
+            40.546695709228516,
+            40.57192802429199
+          ],
+          "median_ms": 40.546695709228516,
+          "min_ms": 40.5173282623291,
+          "max_ms": 40.57192802429199,
+          "effective_tflops": 91.52044769210138
+        }
+      },
+      "grain_speedup_over_bf16": 1.4721974192700071,
+      "grain_speedup_over_sglang": 2.101511509349569,
+      "sglang_speedup_over_bf16": 0.7005421634477088
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:07:38.054545+00:00",
+      "shape": {
+        "m": 13312,
+        "n": 13312,
+        "k": 13312
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          13312,
+          1
+        ],
+        "b": [
+          1,
+          13312
+        ],
+        "scale_a": [
+          52,
+          1
+        ],
+        "scale_b": [
+          13312,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.010118191130459309,
+            "max_abs_error": 6.5
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010118190199136734,
+            "max_abs_error": 6.5
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            35.73720741271973,
+            35.79180908203125,
+            35.78683090209961,
+            35.786447525024414,
+            35.80267906188965
+          ],
+          "median_ms": 35.78683090209961,
+          "min_ms": 35.73720741271973,
+          "max_ms": 35.80267906188965,
+          "effective_tops": 131.8368085613078
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            70.82695770263672,
+            71.87502670288086,
+            73.62769317626953,
+            75.96468734741211,
+            71.80273818969727
+          ],
+          "median_ms": 71.87502670288086,
+          "min_ms": 70.82695770263672,
+          "max_ms": 75.96468734741211,
+          "effective_tops": 65.64201491234917
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            48.47432899475098,
+            48.69926452636719,
+            48.459224700927734,
+            48.61352729797363,
+            48.56061553955078
+          ],
+          "median_ms": 48.56061553955078,
+          "min_ms": 48.459224700927734,
+          "max_ms": 48.69926452636719,
+          "effective_tflops": 97.15736759583186
+        }
+      },
+      "grain_speedup_over_bf16": 1.3569409281418583,
+      "grain_speedup_over_sglang": 2.008421111651548,
+      "sglang_speedup_over_bf16": 0.6756257043255387
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:08:07.299472+00:00",
+      "shape": {
+        "m": 14336,
+        "n": 14336,
+        "k": 14336
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          14336,
+          1
+        ],
+        "b": [
+          1,
+          14336
+        ],
+        "scale_a": [
+          56,
+          1
+        ],
+        "scale_b": [
+          14336,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.0101175457239151,
+            "max_abs_error": 7.0
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010117544792592525,
+            "max_abs_error": 7.0
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            42.60441780090332,
+            42.83015251159668,
+            42.61665725708008,
+            42.69472694396973,
+            42.7896728515625
+          ],
+          "median_ms": 42.69472694396973,
+          "min_ms": 42.60441780090332,
+          "max_ms": 42.83015251159668,
+          "effective_tops": 138.01927197813578
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            93.48041534423828,
+            92.95624160766602,
+            92.48438262939453,
+            88.1450424194336,
+            93.18310546875
+          ],
+          "median_ms": 92.95624160766602,
+          "min_ms": 88.1450424194336,
+          "max_ms": 93.48041534423828,
+          "effective_tops": 63.39214051900776
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            61.74942398071289,
+            61.57889747619629,
+            61.664655685424805,
+            62.2423210144043,
+            61.62193489074707
+          ],
+          "median_ms": 61.664655685424805,
+          "min_ms": 61.57889747619629,
+          "max_ms": 62.2423210144043,
+          "effective_tflops": 95.56033459706498
+        }
+      },
+      "grain_speedup_over_bf16": 1.4443154951277752,
+      "grain_speedup_over_sglang": 2.1772300295925726,
+      "sglang_speedup_over_bf16": 0.6633729442901591
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:08:40.730406+00:00",
+      "shape": {
+        "m": 15360,
+        "n": 15360,
+        "k": 15360
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          15360,
+          1
+        ],
+        "b": [
+          1,
+          15360
+        ],
+        "scale_a": [
+          60,
+          1
+        ],
+        "scale_b": [
+          15360,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.010120480321347713,
+            "max_abs_error": 8.0
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010120480321347713,
+            "max_abs_error": 8.0
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            54.393327713012695,
+            54.63115310668945,
+            54.55164909362793,
+            54.60416030883789,
+            54.56204795837402
+          ],
+          "median_ms": 54.56204795837402,
+          "min_ms": 54.393327713012695,
+          "max_ms": 54.63115310668945,
+          "effective_tops": 132.83514060046633
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            115.72542190551758,
+            114.74580764770508,
+            115.97481536865234,
+            114.79414367675781,
+            115.2597427368164
+          ],
+          "median_ms": 115.2597427368164,
+          "min_ms": 114.74580764770508,
+          "max_ms": 115.97481536865234,
+          "effective_tops": 62.88194941185577
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            74.92289352416992,
+            74.56598663330078,
+            75.10743713378906,
+            74.74515151977539,
+            75.12964630126953
+          ],
+          "median_ms": 74.92289352416992,
+          "min_ms": 74.56598663330078,
+          "max_ms": 75.12964630126953,
+          "effective_tflops": 96.73621734406044
+        }
+      },
+      "grain_speedup_over_bf16": 1.3731686461133095,
+      "grain_speedup_over_sglang": 2.1124526488585857,
+      "sglang_speedup_over_bf16": 0.650035231253713
+    },
+    {
+      "timestamp_utc": "2026-09-22T08:09:20.447766+00:00",
+      "shape": {
+        "m": 16384,
+        "n": 16384,
+        "k": 16384
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          16384,
+          1
+        ],
+        "b": [
+          1,
+          16384
+        ],
+        "scale_a": [
+          64,
+          1
+        ],
+        "scale_b": [
+          16384,
+          1
+        ]
+      },
+      "grain_kernel_config": {
+        "policy": "sm121_g256_measured",
+        "compute_capability": [
+          12,
+          1
+        ],
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "sglang_config": {
+        "block_m": 32,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2
+      },
+      "sglang_config_autotuned": false,
+      "measurement_order": [
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "grain_int8_gemm",
+          "sglang_int8_gemm"
+        ],
+        [
+          "grain_int8_gemm",
+          "sglang_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "sglang_int8_gemm",
+          "torch_mm_bf16",
+          "grain_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "grain_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.125
+        },
+        "sglang_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.125
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "grain_int8_gemm": {
+            "relative_rms_error": 0.010119199752807617,
+            "max_abs_error": 8.0
+          },
+          "sglang_int8_gemm": {
+            "relative_rms_error": 0.010119198821485043,
+            "max_abs_error": 8.0
+          }
+        }
+      },
+      "results": {
+        "grain_int8_gemm": {
+          "round_medians_ms": [
+            63.69865608215332,
+            63.66223907470703,
+            63.7181453704834,
+            63.37836837768555,
+            63.721872329711914
+          ],
+          "median_ms": 63.69865608215332,
+          "min_ms": 63.37836837768555,
+          "max_ms": 63.721872329711914,
+          "effective_tops": 138.08914603886646
+        },
+        "sglang_int8_gemm": {
+          "round_medians_ms": [
+            139.66825103759766,
+            133.51323699951172,
+            135.21022033691406,
+            134.79718780517578,
+            133.22300720214844
+          ],
+          "median_ms": 134.79718780517578,
+          "min_ms": 133.22300720214844,
+          "max_ms": 139.66825103759766,
+          "effective_tops": 65.25427692839641
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            89.04523086547852,
+            90.72163391113281,
+            89.91119766235352,
+            89.63500595092773,
+            89.39628601074219
+          ],
+          "median_ms": 89.63500595092773,
+          "min_ms": 89.04523086547852,
+          "max_ms": 90.72163391113281,
+          "effective_tflops": 98.13234158787891
+        }
+      },
+      "grain_speedup_over_bf16": 1.4071726385455265,
+      "grain_speedup_over_sglang": 2.116170043388755,
+      "sglang_speedup_over_bf16": 0.6649619877862618
+    }
+  ],
+  "updated_at_utc": "2026-09-22T08:09:20.449593+00:00",
+  "completed_at_utc": "2026-09-22T08:09:20.449579+00:00"
+}

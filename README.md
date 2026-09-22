@@ -4,7 +4,7 @@ INT8 activation × INT8 weight (W8A8) GEMM with scales grouped along the reducti
 
 Python package: `grain_gemm`.
 
-## Planned scope
+## Operation
 
 For `A[M, K] @ B[K, N]`:
 
@@ -63,7 +63,34 @@ For a fixed K, this conversion-and-scaling work occurs `ceil(K / G)` times. **G2
 
 ## Development status
 
-The repository includes a standalone SGLang-derived Triton baseline, correctness tests, and a benchmark entry point. GrainGEMM-specific optimized kernels and performance results for A100, H100, and Thor are still pending. The G256 recommendation above records project experimental observations and is not a measured comparison against this baseline.
+GrainGEMM includes a custom Triton kernel and an optional native CUDA/CuTe kernel, with a measured G256 dispatch table for **GB10 (SM121)**. The public API selects a backend and launch configuration by architecture, shape, dtype, and layout. A100, H100, and Thor use the portable Triton path pending validation and dedicated tuning on those GPUs. The standalone SGLang kernel is retained as a baseline.
+
+## GrainGEMM API
+
+```bash
+python -m pip install -e ".[runtime]"
+```
+
+```python
+import torch
+from grain_gemm import int8_gemm
+
+# Prequantized A[M, K], B[K, N], and their FP32 dequantization scales.
+c = int8_gemm(a, b, scale_a, scale_b, group_size=256,
+              output_dtype=torch.bfloat16)
+```
+
+`backend="auto"` uses the measured GB10 configuration where applicable. The
+optional CuTe backend requires a local CUDA build; otherwise the API uses Triton.
+`backend="triton"` or `backend="cuda"` explicitly selects an implementation.
+Group sizes 32/64/128/256, positive-stride views, K tails, and FP32/FP16/BF16
+outputs are supported through the Triton path. The native fast path currently
+supports G256 and BF16 output with aligned row-major A, column-major B,
+contiguous scales, M/N multiples of 64, and K a multiple of 256.
+
+See [Kernel design and native build](docs/kernel_design.md) for the implementation,
+CUTLASS build instructions, and dispatch behavior. Inputs must already be
+quantized; the API does not perform quantization or provide autograd.
 
 ## SGLang Triton baseline
 

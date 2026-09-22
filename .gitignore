@@ -13,3 +13,6 @@ htmlcov/
 .env
 .env.*
 .DS_Store
+
+# Locally compiled CUDA library and build metadata
+src/grain_gemm/kernels/_native/

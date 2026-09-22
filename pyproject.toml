@@ -9,7 +9,7 @@ description = "INT8 GEMM with per-row and per-column K-group scaling"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
-license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md", "licenses/SGLang-LICENSE"]
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md", "licenses/SGLang-LICENSE", "licenses/CUTLASS-LICENSE"]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Programming Language :: Python :: 3",
@@ -17,6 +17,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+runtime = ["torch>=2.5", "triton>=3.1", "numpy>=1.24"]
 baseline = ["torch>=2.5", "triton>=3.1", "numpy>=1.24"]
 test = ["pytest>=8"]
 plot = ["matplotlib>=3.8"]
@@ -29,3 +30,9 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.setuptools.package-data]
+grain_gemm = ["kernels/configs/*.json", "kernels/csrc/*.cu"]
+
+[tool.setuptools.exclude-package-data]
+grain_gemm = ["kernels/_native/*"]

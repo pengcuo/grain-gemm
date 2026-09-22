@@ -19,3 +19,18 @@ and `BLOCK_SIZE_K=group_size`. Compute tiles along M and N are independent
 of the quantization group size. SGLang imports, configuration lookup, and
 unrelated quantization kernels are omitted. These are GrainGEMM adaptations,
 not an upstream SGLang performance configuration or endorsement.
+
+## CUTLASS CuTe CUDA implementation
+
+`src/grain_gemm/kernels/csrc/grain_cute.cu` adapts the
+[CUTLASS SM80 CuTe GEMM tutorial](https://github.com/NVIDIA/cutlass/blob/098de2a652cf8f00fd70b2df54051c7eccbb855a/examples/cute/tutorial/sgemm_sm80.cu),
+commit `098de2a652cf8f00fd70b2df54051c7eccbb855a`.
+The upstream copyright and BSD-3-Clause notice are retained in the source;
+the full license is included in [licenses/CUTLASS-LICENSE](licenses/CUTLASS-LICENSE).
+
+GrainGEMM changes the operands to signed INT8, accumulates each 256-element
+K-group in INT32, applies row/column scales into an FP32 running accumulator,
+and writes BF16 output. It adds launch configurations, tile scheduling, and a
+C ABI launcher. CUTLASS headers are an external build dependency; they are not
+vendored into this repository. The SGLang baseline remains a separate reference
+implementation.

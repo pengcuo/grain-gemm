@@ -5,3 +5,8 @@ include benchmarks/results/*.csv
 include docs/assets/*.png
 include docs/assets/*.svg
 include tests/*.py
+include tools/build_cuda.py
+recursive-include src/grain_gemm/kernels/csrc *.cu
+recursive-include src/grain_gemm/kernels/configs *.json
+prune src/grain_gemm/kernels/_native
+include docs/*.md

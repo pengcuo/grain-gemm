@@ -1,0 +1,82 @@
+"""Optional native CuTe INT8 G256 kernels, built explicitly with tools/build_cuda.py."""
+
+import ctypes
+import hashlib
+import json
+from functools import lru_cache
+from pathlib import Path
+
+
+_LIBRARY = Path(__file__).parent / "_native" / "libgrain_cuda.so"
+CONFIGS = (
+    (64, 64, 128, 2, 4),
+    (64, 64, 128, 3, 4),
+    (128, 64, 128, 2, 4),
+    (128, 64, 128, 3, 4),
+    (64, 128, 128, 2, 4),
+    (64, 128, 128, 3, 4),
+    (128, 128, 128, 2, 8),
+    (128, 128, 128, 3, 8),
+)
+
+
+@lru_cache(maxsize=1)
+def _load_library():
+    if not _LIBRARY.is_file():
+        raise RuntimeError(
+            "The optional GrainGEMM CUDA library has not been built. From the "
+            "repository root, run: python tools/build_cuda.py "
+            "--cutlass-dir /path/to/cutlass --arch sm_121"
+        )
+    manifest = _LIBRARY.with_name("build.json")
+    source = Path(__file__).parent / "csrc" / "grain_cute.cu"
+    try:
+        info = json.loads(manifest.read_text())
+    except (OSError, ValueError) as exc:
+        raise RuntimeError("Native build metadata is missing or invalid; rebuild with tools/build_cuda.py") from exc
+    if (info.get("architecture") != "sm_121"
+            or info.get("source_sha256") != hashlib.sha256(source.read_bytes()).hexdigest()):
+        raise RuntimeError("Native library is stale or targets a different architecture; rebuild for sm_121")
+    try:
+        library = ctypes.CDLL(str(_LIBRARY))
+    except OSError as exc:
+        raise RuntimeError(f"Cannot load GrainGEMM CUDA library {_LIBRARY}: {exc}") from exc
+    library.grain_cute_g256.argtypes = [ctypes.c_void_p] * 5 + [ctypes.c_int] * 4 + [ctypes.c_void_p]
+    library.grain_cute_g256.restype = ctypes.c_int
+    library.grain_cuda_error_string.argtypes = [ctypes.c_int]
+    library.grain_cuda_error_string.restype = ctypes.c_char_p
+    return library
+
+
+def is_available():
+    """Whether the optional native library exists and can be loaded locally."""
+    try:
+        _load_library()
+    except (RuntimeError, AttributeError):
+        return False
+    return True
+
+
+def launch(a, b, scale_a, scale_b, out, config_id=0):
+    """Launch on the current PyTorch CUDA stream; the public API validates tensors.
+
+    B is logical [K, N] with contiguous [N, K] backing storage; scale_b is
+    contiguous [K / 256, N]. No transpose, packing, or allocation occurs here.
+    """
+    import torch
+
+    if isinstance(config_id, bool) or not isinstance(config_id, int) or not 0 <= config_id < len(CONFIGS):
+        raise ValueError(f"config_id must be an integer in [0, {len(CONFIGS) - 1}]")
+    library = _load_library()
+    m, k = a.shape
+    n = b.shape[1]
+    with torch.cuda.device(a.device):
+        stream = torch.cuda.current_stream(a.device).cuda_stream
+        status = library.grain_cute_g256(
+            a.data_ptr(), b.data_ptr(), scale_a.data_ptr(), scale_b.data_ptr(),
+            out.data_ptr(), m, n, k, config_id, stream,
+        )
+    if status:
+        message = library.grain_cuda_error_string(status).decode("utf-8", errors="replace")
+        raise RuntimeError(f"GrainGEMM CUDA launch failed ({status}): {message}")
+    return out
