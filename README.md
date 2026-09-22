@@ -67,18 +67,67 @@ GrainGEMM includes a custom Triton kernel and an optional native CUDA/CuTe kerne
 
 ## GrainGEMM API
 
+Run from the repository root with CUDA-enabled PyTorch and an SM80-or-newer
+NVIDIA GPU:
+
 ```bash
 python -m pip install -e ".[runtime]"
 ```
+
+This complete example starts with BF16 activations `x[M, K]` and a linear-layer
+weight `weight[N, K]`. Replace the random tensors with your own activations and
+weights. The helper quantizes each row independently in groups along K; it is
+example code, not part of the `grain_gemm` API.
 
 ```python
 import torch
 from grain_gemm import int8_gemm
 
-# Prequantized A[M, K], B[K, N], and their FP32 dequantization scales.
-c = int8_gemm(a, b, scale_a, scale_b, group_size=256,
-              output_dtype=torch.bfloat16)
+
+def quantize_k_groups(x, group_size):
+    # This simple helper requires complete K groups.
+    assert x.ndim == 2 and x.shape[1] % group_size == 0
+    blocks = x.float().reshape(x.shape[0], -1, group_size)
+    scales = blocks.abs().amax(dim=-1).clamp_min(1e-12) / 127
+    quantized = (blocks / scales[..., None]).round().clamp(-127, 127)
+    return quantized.to(torch.int8).reshape(x.shape).contiguous(), scales.contiguous()
+
+
+M, N, K, G = 1024, 1024, 1024, 256
+torch.manual_seed(2026)
+x = torch.randn((M, K), device="cuda", dtype=torch.bfloat16)
+weight = torch.randn((N, K), device="cuda", dtype=torch.bfloat16)
+
+a, scale_a = quantize_k_groups(x, G)                  # [M, K], [M, K/G]
+weight_int8, weight_scales = quantize_k_groups(weight, G)
+b = weight_int8.T                                    # [K, N], column-major view
+scale_b = weight_scales.T.contiguous()                # [K/G, N], FP32
+
+c = int8_gemm(
+    a, b, scale_a, scale_b, group_size=G,
+    output_dtype=torch.bfloat16,
+)
+print(c.shape, c.dtype)  # torch.Size([1024, 1024]) torch.bfloat16
 ```
+
+For each group, the helper uses symmetric INT8 quantization with
+`scale = max(abs(values)) / 127`, a positive floor for zero groups, and
+`q = round(values / scale)` clipped to `[-127, 127]`. The FP32 scales restore
+the approximate original values through `values ≈ q * scale`.
+
+| Tensor | Dtype | Shape in this example | Meaning |
+| --- | --- | --- | --- |
+| `a` | INT8 | `[M, K]` | Quantized activations from `x` |
+| `b` | INT8 | `[K, N]` | Transposed quantized weights; each column corresponds to one row of `weight` |
+| `scale_a` | FP32 | `[M, K/G]` | One activation scale per row and K group |
+| `scale_b` | FP32 | `[K/G, N]` | One weight scale per K group and column of `b` |
+| `c` | BF16 | `[M, N]` | Output allocated and returned by `int8_gemm`, approximating `x @ weight.T` |
+
+`c` includes quantization error relative to multiplying the original BF16 inputs.
+Keeping `b = weight_int8.T` preserves the column-major layout used by the native
+backend; the transposed weight scales are made contiguous separately. The helper
+above requires `K % G == 0`; the Triton GEMM implementation also supports partial
+final groups with scale shapes `[M, ceil(K/G)]` and `[ceil(K/G), N]`.
 
 `backend="auto"` uses the measured GB10 configuration where applicable. The
 optional CuTe backend requires a local CUDA build; otherwise the API uses Triton.
