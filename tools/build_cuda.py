@@ -18,19 +18,24 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cutlass-dir", type=Path, required=True,
                         help=f"Local CUTLASS checkout; tested commit: {CUTLASS_COMMIT}")
-    parser.add_argument("--arch", default="sm_121", help="Only sm_121 is supported (GB10-only native implementation)")
+    parser.add_argument("--arch", default="sm_121",
+                        help="CUDA target: sm_121 (GB10, default) or sm_120 (experimental, unvalidated)")
     parser.add_argument("--nvcc", help="CUDA compiler path; otherwise resolve nvcc or /usr/local/cuda/bin/nvcc")
     args = parser.parse_args()
-    if args.arch != "sm_121":
-        parser.error("This is a GB10-only native implementation; --arch must be sm_121. "
-                     "Other architectures require a separate implementation.")
+    if args.arch not in ("sm_120", "sm_121"):
+        parser.error("--arch must be sm_121 (GB10) or sm_120 (experimental). "
+                     "Other architectures require separate support and validation.")
+    if args.arch == "sm_120":
+        print("Experimental SM120 build: RTX 50-series correctness and performance "
+              "have not been validated. Select backend='cuda' explicitly; "
+              "auto continues to use Triton on SM120.", flush=True)
     cutlass = args.cutlass_dir.expanduser().resolve()
     if not (cutlass / "include" / "cute" / "tensor.hpp").is_file():
         parser.error(f"CUTLASS CuTe headers were not found under {cutlass / 'include'}")
     nvcc = args.nvcc or shutil.which("nvcc") or "/usr/local/cuda/bin/nvcc"
     if not Path(nvcc).is_file() and shutil.which(nvcc) is None:
         parser.error(f"CUDA compiler was not found: {nvcc}")
-    source = ROOT / "src/grain_gemm/kernels/csrc/grain_cute.cu"
+    source = ROOT / "src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu"
     output_dir = ROOT / "src/grain_gemm/kernels/_native"
     output_dir.mkdir(parents=True, exist_ok=True)
     output = output_dir / "libgrain_cuda.so"

@@ -8,7 +8,7 @@
 
 **单项源代码改动与机器码证据**
 
-[正式 host launcher](../../../../src/grain_gemm/kernels/csrc/grain_cutlass.cu#L49) 已要求 K 为正且是 256 的倍数，但这项 host 检查不等于设备编译器获得同样的范围信息。[实验代码](../../../../experiments/cutlass/variants/minimum_k_guard/grain_cutlass_kernel.hpp#L68) 在读取 K 后、任何预取之前增加：
+[正式 host launcher](../../../../src/grain_gemm/kernels/csrc/sm12x/cutlass/int8_g256.cu#L49) 已要求 K 为正且是 256 的倍数，但这项 host 检查不等于设备编译器获得同样的范围信息。[实验代码](../../../../experiments/cutlass/variants/minimum_k_guard/grain_cutlass_kernel.hpp#L68) 在读取 K 后、任何预取之前增加：
 
 ```cpp
 if (K < 256) return;

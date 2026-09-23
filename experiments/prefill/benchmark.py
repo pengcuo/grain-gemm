@@ -326,7 +326,7 @@ def main():
                     script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                     device_check_sha256=hashlib.sha256(Path(require_gb10.__code__.co_filename).read_bytes()).hexdigest(),
                     kernel_hashes={str(path.relative_to(package)): hashlib.sha256(path.read_bytes()).hexdigest()
-                                   for path in (package/'gemm.py', package/'kernels/triton.py', package/'kernels/cuda.py', package/'kernels/csrc/grain_cute.cu', package/'kernels/configs/sm121_g256.json')},
+                                   for path in (package/'gemm.py', package/'kernels/triton.py', package/'kernels/cuda.py', package/'kernels/csrc/sm12x/int8_g256_cute.cu', package/'kernels/configs/gb10_sm121_g256.json')},
                     native_build=json.loads((package/'kernels/_native/build.json').read_text()),
                     native_library_sha256=hashlib.sha256((package/'kernels/_native/libgrain_cuda.so').read_bytes()).hexdigest()),
         native_configurations=list(cuda.CONFIGS), triton_candidates=triton_candidates(), cases=[])

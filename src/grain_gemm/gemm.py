@@ -52,14 +52,14 @@ def _validate(a, b, scale_a, scale_b, group_size, output_dtype):
 
 @lru_cache(maxsize=1)
 def _dispatch_table():
-    path = Path(__file__).with_name("kernels") / "configs" / "sm121_g256.json"
+    path = Path(__file__).with_name("kernels") / "configs" / "gb10_sm121_g256.json"
     return json.loads(path.read_text()) if path.exists() else {"square_configs": {}}
 
 
 @lru_cache(maxsize=1)
 def _cutlass_dispatch_table():
     """Measurements for explicit CUTLASS selection, independent of auto policy."""
-    path = Path(__file__).with_name("kernels") / "configs" / "sm121_g256_cutlass.json"
+    path = Path(__file__).with_name("kernels") / "configs" / "gb10_sm121_g256_cutlass.json"
     return json.loads(path.read_text()) if path.exists() else {"configs": {}}
 
 
@@ -83,16 +83,18 @@ def get_kernel_config(a, b, *, group_size=256, output_dtype=torch.bfloat16,
     tensors for an exact dispatch description. Omitted scales disable selection
     of the native fast path.
     The measured table is specific to SM121/G256/BF16 and the documented layout;
-    other architectures and shapes retain a portable Triton implementation.
+    other architectures and shapes retain a portable Triton implementation in
+    auto mode. SM120 native builds are experimental and require explicit selection.
     """
     if backend not in ("auto", "triton", "cuda", "cutlass"):
         raise ValueError("backend must be 'auto', 'triton', 'cuda', or 'cutlass'")
     capability = torch.cuda.get_device_capability(a.device)
+    architecture = f"sm_{capability[0]}{capability[1]}"
     m, k = a.shape
     n = b.shape[1]
     aligned = (a.stride() == (k, 1) and b.stride() == (1, k)
                and k % 256 == 0 and min(m, n) >= 64)
-    table = _dispatch_table()
+    table = _dispatch_table() if capability == (12, 1) else {"square_configs": {}}
     entry = None
     if (capability == (12, 1) and group_size == 256
             and aligned and output_dtype == torch.bfloat16):
@@ -112,37 +114,40 @@ def get_kernel_config(a, b, *, group_size=256, output_dtype=torch.bfloat16,
         policy = "sm121_g256_measured"
     if backend == "cutlass":
         from .kernels import cutlass
-        if capability != (12, 1) or not _native_compatible(
+        if capability not in ((12, 0), (12, 1)) or not _native_compatible(
                 a, b, scale_a, scale_b, group_size, output_dtype):
-            raise ValueError("cutlass requires SM121, G256, BF16 output, M/N multiples of 64, "
+            raise ValueError("cutlass requires SM120 or SM121, G256, BF16 output, M/N multiples of 64, "
                              "K a positive multiple of 256, aligned contiguous A and B.T, "
                              "and contiguous FP32 scales")
-        if not cutlass.is_available():
-            raise RuntimeError("CUTLASS kernel is not built; run tools/build_cutlass.py --cutlass-dir PATH")
-        cutlass_entry = _cutlass_dispatch_table().get("configs", {}).get(f"{m}x{n}x{k}")
+        if not cutlass.is_available(device=a.device):
+            raise RuntimeError(f"CUTLASS kernel is not built or does not match the source/device; "
+                               f"run tools/build_cutlass.py --cutlass-dir PATH --arch {architecture}")
+        cutlass_entry = (_cutlass_dispatch_table().get("configs", {}).get(f"{m}x{n}x{k}")
+                         if capability == (12, 1) else None)
         measured = (cutlass_entry["config"] if cutlass_entry else
                     entry.get("cutlass") if entry else None)
         config = dict(measured or dict(backend="cutlass", config_id=(
-            7 if m % 128 == n % 128 == 0 else 0)))
-        policy = "sm121_g256_measured" if measured else "sm121_g256_cutlass_explicit"
+            7 if capability == (12, 1) and m % 128 == n % 128 == 0 else 0)))
+        policy = "sm121_g256_measured" if measured else f"{architecture.replace('_', '')}_g256_cutlass_explicit"
         return dict(policy=policy, compute_capability=list(capability), **config)
     wants_native = backend == "cuda" or (backend == "auto" and entry
                                         and entry["selected"]["backend"] == "cuda")
     if wants_native:
         from .kernels import cuda
-        supported = (capability == (12, 1) and _native_compatible(
+        supported = (capability in ((12, 0), (12, 1)) and _native_compatible(
             a, b, scale_a, scale_b, group_size, output_dtype))
         if backend == "cuda" and not supported:
-            raise ValueError("cuda requires SM121, G256, BF16 output, M/N multiples of 64, "
+            raise ValueError("cuda requires SM120 or SM121, G256, BF16 output, M/N multiples of 64, "
                              "K a positive multiple of 256, aligned contiguous A and B.T, "
                              "and contiguous FP32 scales")
-        if supported and cuda.is_available():
+        if supported and cuda.is_available(device=a.device):
             config_id = (entry.get("cuda", entry["selected"]).get("config_id", 7)
-                         if entry else (7 if m % 128 == n % 128 == 0 else 0))
+                         if entry else (7 if capability == (12, 1) and m % 128 == n % 128 == 0 else 0))
             config = dict(backend="cuda", config_id=config_id)
-            policy = "sm121_g256_measured" if entry else "sm121_g256_explicit"
+            policy = "sm121_g256_measured" if entry else f"{architecture.replace('_', '')}_g256_explicit"
         elif backend == "cuda":
-            raise RuntimeError("CUDA kernel is not built; run tools/build_cuda.py --cutlass-dir PATH")
+            raise RuntimeError(f"CUDA kernel is not built or does not match the source/device; "
+                               f"run tools/build_cuda.py --cutlass-dir PATH --arch {architecture}")
     return dict(policy=policy, compute_capability=list(capability), **config)
 
 
@@ -160,7 +165,8 @@ def int8_gemm(a, b, scale_a, scale_b, *, group_size=256,
     backend='triton' explicitly selects Triton; backend='cuda' requires the optional
     native CuTe build and its supported layout. backend='cutlass' explicitly
     selects the optional CUTLASS collective backend with the same native layout.
-    Auto falls back to Triton when
+    SM120 native builds require explicit backend selection; auto stays on Triton
+    until target-specific measurements are available. Auto falls back to Triton when
     the native build or layout is unavailable. Warm up the
     function before capturing it in a CUDA graph. No tuning runs occur inside
     this call.

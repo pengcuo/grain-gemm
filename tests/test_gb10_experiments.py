@@ -1,6 +1,8 @@
 """CPU-only checks for the GB10 experimental-device and build boundaries."""
 
 import importlib.util
+import hashlib
+import json
 import ctypes
 import os
 from pathlib import Path
@@ -15,6 +17,7 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+NATIVE_BUILD_SCRIPTS = ("tools/build_cuda.py", "tools/build_cutlass.py")
 BUILD_SCRIPTS = (
     "tools/build_cuda.py",
     "tools/build_cutlass.py",
@@ -158,7 +161,7 @@ def tree_paths(root):
     return {path.relative_to(root) for path in root.rglob("*")}
 
 
-@pytest.mark.parametrize("arch", ["sm_110", "sm_120", "sm_90", "sm_121a"])
+@pytest.mark.parametrize("arch", ["sm_110", "sm_90", "sm_121a"])
 def test_build_rejects_other_architectures_before_side_effects(isolated_build, arch):
     script, headers, nvcc, directory = isolated_build
     before = tree_paths(directory)
@@ -168,9 +171,76 @@ def test_build_rejects_other_architectures_before_side_effects(isolated_build, a
         cwd=directory, capture_output=True, text=True, timeout=15,
     )
     assert result.returncode != 0
-    assert "GB10" in result.stderr and "sm_121" in result.stderr
+    assert "sm_121" in result.stderr
     assert not (directory / "nvcc_was_called").exists()
     assert tree_paths(directory) == before, "Rejected architecture created build artifacts"
+
+
+@pytest.mark.parametrize("isolated_build", BUILD_SCRIPTS[2:], indirect=True)
+def test_gb10_experiment_builds_still_reject_sm120(isolated_build):
+    script, headers, nvcc, directory = isolated_build
+    before = tree_paths(directory)
+    result = subprocess.run(
+        [sys.executable, "-S", "-B", "-O", str(script),
+         "--cutlass-dir", str(headers), "--nvcc", str(nvcc), "--arch", "sm_120"],
+        cwd=directory, capture_output=True, text=True, timeout=15,
+    )
+    assert result.returncode != 0
+    assert "GB10" in result.stderr and "sm_121" in result.stderr
+    assert not (directory / "nvcc_was_called").exists()
+    assert tree_paths(directory) == before
+
+
+@pytest.mark.parametrize("isolated_build", NATIVE_BUILD_SCRIPTS, indirect=True)
+@pytest.mark.parametrize("arch", ["sm_120", "sm_121"])
+def test_native_build_records_requested_target_without_gpu(isolated_build, arch):
+    script, headers, nvcc, directory = isolated_build
+    source = directory / "repo/src/grain_gemm/kernels/csrc"
+    source.mkdir(parents=True)
+    contents = {
+        "sm12x/int8_g256_cute.cu": "// isolated CuTe source\n",
+        "sm12x/cutlass/int8_g256.cu": "// isolated CUTLASS source\n",
+        "sm12x/cutlass/collective.hpp": "// isolated collective source\n",
+        "sm12x/cutlass/epilogue.hpp": "// isolated epilogue source\n",
+        "sm12x/cutlass/kernel.hpp": "// isolated kernel source\n",
+    }
+    for name, content in contents.items():
+        (source / name).parent.mkdir(parents=True, exist_ok=True)
+        (source / name).write_text(content)
+    nvcc.write_text(
+        f"#!{sys.executable}\n"
+        "from pathlib import Path\n"
+        "import json, sys\n"
+        "if '--version' in sys.argv:\n"
+        "    print('Fake CUDA compiler for CPU-only build contract test')\n"
+        "    raise SystemExit(0)\n"
+        "Path(__file__).with_name('compiler_args.json').write_text(json.dumps(sys.argv[1:]))\n"
+        "Path(sys.argv[sys.argv.index('-o') + 1]).write_bytes(b'test-native-library')\n"
+    )
+    result = subprocess.run(
+        [sys.executable, "-S", "-B", str(script), "--cutlass-dir", str(headers),
+         "--nvcc", str(nvcc), "--arch", arch],
+        cwd=directory, env=dict(os.environ, CUDA_VISIBLE_DEVICES=""),
+        capture_output=True, text=True, timeout=15,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    flags = json.loads((directory / "compiler_args.json").read_text())
+    assert f"-arch={arch}" in flags
+    native = directory / "repo/src/grain_gemm/kernels/_native"
+    backend = "cuda" if script.name == "build_cuda.py" else "cutlass"
+    manifests = list(native.rglob("build.json" if backend == "cuda" else "cutlass_build.json"))
+    assert len(manifests) == 1
+    manifest = json.loads(manifests[0].read_text())
+    assert manifest["architecture"] == arch
+    if backend == "cuda":
+        expected = hashlib.sha256(contents["sm12x/int8_g256_cute.cu"].encode()).hexdigest()
+    else:
+        expected = {Path(name).name: hashlib.sha256(content.encode()).hexdigest()
+                    for name, content in contents.items()
+                    if name.startswith("sm12x/cutlass/")}
+    assert manifest["source_sha256"] == expected
+    library = manifests[0].with_name(f"libgrain_{backend}.so")
+    assert library.read_bytes() == b"test-native-library"
 
 
 def test_build_help_needs_no_cuda_or_optional_dependencies(isolated_build):

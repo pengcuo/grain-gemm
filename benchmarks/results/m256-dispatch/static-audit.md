@@ -26,11 +26,11 @@ The mapping is decoded from demangled kernel template arguments, not guessed fro
 Relevant source locations:
 
 - [src/grain_gemm/kernels/cuda.py](../../../src/grain_gemm/kernels/cuda.py#L12): tile/config registry.
-- [src/grain_gemm/kernels/csrc/grain_cute.cu](../../../src/grain_gemm/kernels/csrc/grain_cute.cu#L55): shared storage and async scale-ring specialization.
-- [src/grain_gemm/kernels/csrc/grain_cute.cu](../../../src/grain_gemm/kernels/csrc/grain_cute.cu#L337): INT32-to-FP32 group accumulation/scaling.
-- [src/grain_gemm/kernels/csrc/grain_cute.cu](../../../src/grain_gemm/kernels/csrc/grain_cute.cu#L402): signed INT8 tensor MMA atom.
-- [src/grain_gemm/kernels/csrc/grain_cute.cu](../../../src/grain_gemm/kernels/csrc/grain_cute.cu#L410): dynamic shared-memory size and launch.
-- [src/grain_gemm/kernels/csrc/grain_cute.cu](../../../src/grain_gemm/kernels/csrc/grain_cute.cu#L437): config dispatch mapping.
+- [src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu](../../../src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu#L55): shared storage and async scale-ring specialization.
+- [src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu](../../../src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu#L337): INT32-to-FP32 group accumulation/scaling.
+- [src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu](../../../src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu#L402): signed INT8 tensor MMA atom.
+- [src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu](../../../src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu#L410): dynamic shared-memory size and launch.
+- [src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu](../../../src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu#L437): config dispatch mapping.
 
 Archived artifacts:
 

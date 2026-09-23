@@ -14,8 +14,8 @@ ALL_CONFIGS = range(len(CUTLASS_CONFIGS))
 
 
 def require_cutlass():
-    if not torch.cuda.is_available() or torch.cuda.get_device_capability() != (12, 1):
-        pytest.skip("The optional CUTLASS backend requires SM121")
+    if not torch.cuda.is_available() or torch.cuda.get_device_capability() not in ((12, 0), (12, 1)):
+        pytest.skip("The optional CUTLASS backend requires SM120 or SM121")
     from grain_gemm.kernels import cutlass
 
     if not cutlass.is_available():
@@ -47,7 +47,7 @@ def simulated_cutlass(monkeypatch):
     from grain_gemm.kernels import cutlass
 
     monkeypatch.setattr(torch.cuda, "get_device_capability", lambda device=None: (12, 1))
-    monkeypatch.setattr(cutlass, "is_available", lambda: True)
+    monkeypatch.setattr(cutlass, "is_available", lambda device=None: True)
     return cutlass
 
 
@@ -71,7 +71,7 @@ def test_cutlass_uses_its_own_measured_configuration(simulated_cutlass, monkeypa
     import grain_gemm.gemm as implementation
     from grain_gemm.kernels import cuda as cute
 
-    monkeypatch.setattr(cute, "is_available", lambda: True)
+    monkeypatch.setattr(cute, "is_available", lambda device=None: True)
     # Missing the independent optimization table must preserve the original
     # backend-specific measurements in the shared dispatch table.
     monkeypatch.setattr(implementation, "_cutlass_dispatch_table", lambda: {"configs": {}})
@@ -95,7 +95,7 @@ def test_separate_cutlass_table_takes_precedence_without_changing_other_backends
     import grain_gemm.gemm as implementation
     from grain_gemm.kernels import cuda as cute
 
-    monkeypatch.setattr(cute, "is_available", lambda: True)
+    monkeypatch.setattr(cute, "is_available", lambda device=None: True)
     monkeypatch.setattr(implementation, "_cutlass_dispatch_table", lambda: {"configs": {}})
     tensors = empty_dispatch_inputs(*shape)
     previous = {backend: select_cutlass(tensors, backend=backend)
@@ -145,7 +145,7 @@ def test_separate_cutlass_table_preserves_backend_requirements(simulated_cutlass
     if variation == "layout":
         tensors[1] = tensors[1].contiguous()
     if variation == "not_built":
-        monkeypatch.setattr(simulated_cutlass, "is_available", lambda: False)
+        monkeypatch.setattr(simulated_cutlass, "is_available", lambda device=None: False)
     exception = RuntimeError if variation == "not_built" else ValueError
     with pytest.raises(exception):
         select_cutlass(tensors, group_size=group_size, output_dtype=output_dtype)
@@ -177,13 +177,13 @@ def test_cutlass_optimization_table_has_valid_exact_shapes(simulated_cutlass):
 
 
 def test_cutlass_missing_build_does_not_silently_fallback(simulated_cutlass, monkeypatch):
-    monkeypatch.setattr(simulated_cutlass, "is_available", lambda: False)
+    monkeypatch.setattr(simulated_cutlass, "is_available", lambda device=None: False)
     tensors = inputs(128, 128, 512, 256, layout="column_major_b")
     with pytest.raises(RuntimeError, match="(?i)(not built|unavailable)"):
         select_cutlass(tensors)
 
 
-@pytest.mark.parametrize("capability", [(8, 0), (9, 0), (11, 0), (12, 0)])
+@pytest.mark.parametrize("capability", [(8, 0), (9, 0), (11, 0), (12, 2)])
 def test_cutlass_rejects_other_architectures(simulated_cutlass, monkeypatch, capability):
     monkeypatch.setattr(torch.cuda, "get_device_capability", lambda device=None: capability)
     tensors = inputs(128, 128, 512, 256, layout="column_major_b")
@@ -251,7 +251,7 @@ def test_cutlass_availability_does_not_change_auto_dispatch(simulated_cutlass,
                                                            expected_id, cute_available):
     from grain_gemm.kernels import cuda as cute
 
-    monkeypatch.setattr(cute, "is_available", lambda: cute_available)
+    monkeypatch.setattr(cute, "is_available", lambda device=None: cute_available)
     tensors = inputs(*shape, 256, layout="column_major_b")
     config = select_cutlass(tensors, backend="auto")
     if cute_available and expected_id is not None:

@@ -9,13 +9,19 @@ experiment, not GrainGEMM's future multi-architecture support.
 The optional CUTLASS backend provides the same prequantized INT8 G256 operation
 as the direct CuTe backend: each complete K256 group accumulates in INT32,
 then contributes to an FP32 running sum through row/column scaling and FMA.
-The output is converted to BF16 once. It requires GB10 / SM121 and the
+The output is converted to BF16 once. The validated target is GB10 / SM121;
+an experimental SM120 build is also available through explicit backend
+selection. Both require the
 [native input layout](../docs/kernel_design.md#dispatch-and-limits).
 
 It composes a custom SM80-style collective with CUTLASS's `GemmUniversal`,
 `GemmUniversalAdapter`, and selectable output epilogues. A local kernel
 specialization supplies FP32 accumulator fragments and scale parameters.
 This backend does not call the existing direct CuTe kernel.
+Its installed source lives under
+[`csrc/sm12x/cutlass/`](../src/grain_gemm/kernels/csrc/sm12x/cutlass);
+the architecture directory is shared by SM121 and experimental SM120 builds,
+while measured launch tables remain specific to GB10.
 
 Published data are indexed in [CUTLASS experiment results](results/cutlass/README.md).
 The isolated K-lower-bound, output-addressing and synchronization variants live
@@ -35,8 +41,26 @@ python tools/build_cutlass.py --cutlass-dir /path/to/cutlass --arch sm_121
 This writes `libgrain_cutlass.so` and `cutlass_build.json` beside the existing
 CuTe library. It does not replace `libgrain_cuda.so`. The build requires CUDA
 13.0 or newer and a C++17 host compiler. No PyTorch C++ extension is involved.
-Both native build entry points accept only `--arch sm_121` and reject other
-targets. They can cross-compile without a GPU; execution still requires GB10.
+Both installed-backend build entry points default to `--arch sm_121` and also
+accept the experimental `--arch sm_120` target:
+
+```bash
+python tools/build_cuda.py --cutlass-dir /path/to/cutlass --arch sm_120
+python tools/build_cutlass.py --cutlass-dir /path/to/cutlass --arch sm_120
+```
+
+RTX 50-series runtime correctness and performance have not been validated.
+SM120 requires explicit `backend="cuda"` or `backend="cutlass"` selection and
+uses fixed compatible defaults rather than GB10 tuning tables; `auto` stays on
+Triton for SM120. Other build targets are rejected before invoking the compiler.
+Each backend installs a single target, so rebuilding replaces that backend's
+previous library. Runtime checks that its GPU target matches the device.
+
+Builds can run without a GPU, but the resulting library must match the execution
+machine's CPU architecture and host ABI as well as the GPU target. For example,
+a library built with a GB10 ARM64 host compiler cannot be loaded in an x86-64
+desktop process. The isolated experiment builders under `experiments/cutlass/`
+still accept only SM121, and their GPU entry points still require GB10.
 
 ```python
 c = int8_gemm(a, b, scale_a, scale_b,
@@ -46,12 +70,12 @@ c = int8_gemm(a, b, scale_a, scale_b,
 `backend="cuda"` selects direct CuTe; `backend="cutlass"` selects the new
 collective. The existing `auto` policy is retained. Explicit CUTLASS selection
 reports an error if its native library or input constraints are unavailable.
-The dispatch table stores separate measured CUTLASS configurations for the
+On GB10, the dispatch table stores separate measured CUTLASS configurations for the
 three M256 shapes and all sixteen square sizes below. These entries are used
 only by `backend="cutlass"`; each has a `cutlass_measurement_sha256` identifying
 its comparison record. Unmeasured shapes use a fixed compatible configuration.
 
-`sm121_g256_cutlass.json` additionally stores the independently tuned choices
+`gb10_sm121_g256_cutlass.json` additionally stores the independently tuned choices
 for 18 model projection shapes at M=1024 and M=2048. This separate table takes
 precedence for explicit CUTLASS calls and does not alter `auto`, `cuda`, or
 `triton` selection. Inspect a choice with

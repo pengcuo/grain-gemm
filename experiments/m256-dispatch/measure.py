@@ -142,7 +142,7 @@ def main():
                   torch_version=torch.__version__, triton_version=triton.__version__,
                   environment_before=environment_before, environment_after=snapshot(),
                   native_sha256=hashlib.sha256(cuda._LIBRARY.read_bytes()).hexdigest(),
-                  source_sha256=hashlib.sha256((PROJECT / 'src/grain_gemm/kernels/csrc/grain_cute.cu').read_bytes()).hexdigest(),
+                  source_sha256=hashlib.sha256((PROJECT / 'src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu').read_bytes()).hexdigest(),
                   script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                   device_check_sha256=hashlib.sha256(Path(require_gb10.__code__.co_filename).read_bytes()).hexdigest(),
                   protocol=dict(graph_nodes=nodes, rounds=rounds, graph_replays_per_round=replays,

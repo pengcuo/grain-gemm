@@ -29,9 +29,9 @@ Down `(256,1536,1024)` 的 CuTe cfg5 为 7.809 μs，Triton 64×128/W4 为 7.843
 ## 根因的代码位置
 
 - [gemm.py:113](https://github.com/pengcuo/grain-gemm/blob/63a72f1d6487c5305d179d2d77ad43e1f4602c91/src/grain_gemm/gemm.py#L113)：矩形 native fallback 只判断 M/N 对 128 的整除性，选 cfg7 或 cfg0。
-- [grain_cute.cu:413](../../../src/grain_gemm/kernels/csrc/grain_cute.cu#L413)：二维网格为 `(M/BM, N/BN)`。
-- [grain_cute.cu:426](../../../src/grain_gemm/kernels/csrc/grain_cute.cu#L426)：所有本次 K1024/K1536 实验均走同一 2D 遍历分支。
-- [grain_cute.cu:437](../../../src/grain_gemm/kernels/csrc/grain_cute.cu#L437)：cfg3=128×64/W4/P3，cfg5=64×128/W4/P3，cfg7=128×128/W8/P3。三者相同的 scale 预取与 128-bit 写回策略。
+- [int8_g256_cute.cu:413](../../../src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu#L413)：二维网格为 `(M/BM, N/BN)`。
+- [int8_g256_cute.cu:426](../../../src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu#L426)：所有本次 K1024/K1536 实验均走同一 2D 遍历分支。
+- [int8_g256_cute.cu:437](../../../src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu#L437)：cfg3=128×64/W4/P3，cfg5=64×128/W4/P3，cfg7=128×128/W8/P3。三者相同的 scale 预取与 128-bit 写回策略。
 
 ## 资源与 CTA 规模
 

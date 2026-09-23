@@ -8,7 +8,7 @@ include docs/assets/*.svg
 include tests/*.py
 include tools/build_cuda.py
 include tools/build_cutlass.py
-recursive-include src/grain_gemm/kernels/csrc *.cu *.hpp
+recursive-include src/grain_gemm/kernels/csrc *.cu *.hpp *.md
 recursive-include src/grain_gemm/kernels/configs *.json
 prune src/grain_gemm/kernels/_native
 include docs/*.md

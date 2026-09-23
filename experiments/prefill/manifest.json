@@ -17,7 +17,7 @@
     },
     {
       "path": "benchmark.py",
-      "sha256": "8281af2eb54abe48f4c618b71e9efc06d2ac573bc671a5fefcbd9985c93cb020",
+      "sha256": "8269e22d9ad3d7a02a5c4c411de3fd061c2392abfedb32bd0e2bfa36f7bd9255",
       "source_file": "grain-llm-prefill-g256/benchmark.py",
       "source_sha256": "66f962418b7a2c6875cee86b0415ab1a25cd942c9811fd405143d9b107d488ef",
       "byte_preserved": false

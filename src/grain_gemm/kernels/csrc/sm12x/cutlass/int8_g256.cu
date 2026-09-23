@@ -37,8 +37,8 @@
 #include "cutlass/epilogue/collective/sm70_epilogue_vectorized.hpp"
 #include "cutlass/epilogue/thread/linear_combination.h"
 #include "cutlass/gemm/device/gemm_universal_adapter.h"
-#include "grain_cutlass_kernel.hpp"
-#include "grain_cutlass_epilogue.hpp"
+#include "kernel.hpp"
+#include "epilogue.hpp"
 
 namespace grain_cutlass {
 using namespace cute;

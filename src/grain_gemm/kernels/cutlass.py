@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 
+from ._native import SUPPORTED_ARCHITECTURES, architecture_for_device
 
 _ROOT = Path(__file__).parent
 _LIBRARY = _ROOT / "_native" / "libgrain_cutlass.so"
@@ -35,25 +36,31 @@ CONFIGS = tuple(
 def _source_hashes():
     return {
         path.name: hashlib.sha256(path.read_bytes()).hexdigest()
-        for path in sorted((_ROOT / "csrc").glob("grain_cutlass*"))
+        for path in sorted((_ROOT / "csrc" / "sm12x" / "cutlass").iterdir())
         if path.suffix in (".cu", ".hpp")
     }
 
 
-@lru_cache(maxsize=1)
-def _load_library():
+@lru_cache(maxsize=2)
+def _load_library(architecture):
+    if architecture not in SUPPORTED_ARCHITECTURES:
+        raise RuntimeError(f"Unsupported native target: {architecture}")
     if not _LIBRARY.is_file():
         raise RuntimeError(
             "The optional CUTLASS library has not been built; run "
-            "python tools/build_cutlass.py --cutlass-dir /path/to/cutlass"
+            f"python tools/build_cutlass.py --cutlass-dir /path/to/cutlass --arch {architecture}"
         )
     try:
         metadata = json.loads(_LIBRARY.with_name("cutlass_build.json").read_text())
     except (OSError, ValueError) as exc:
         raise RuntimeError("CUTLASS build metadata is missing or invalid; rebuild") from exc
-    if (metadata.get("architecture") != "sm_121"
-            or metadata.get("source_sha256") != _source_hashes()):
-        raise RuntimeError("CUTLASS library is stale or targets a different architecture; rebuild for sm_121")
+    if metadata.get("architecture") != architecture:
+        raise RuntimeError(
+            f"CUTLASS library targets {metadata.get('architecture')}, but the device requires "
+            f"{architecture}; rebuild with tools/build_cutlass.py --arch {architecture}"
+        )
+    if metadata.get("source_sha256") != _source_hashes():
+        raise RuntimeError("CUTLASS library is stale; rebuild with tools/build_cutlass.py")
     try:
         library = ctypes.CDLL(str(_LIBRARY))
     except OSError as exc:
@@ -65,11 +72,11 @@ def _load_library():
     return library
 
 
-def is_available():
-    """Whether a native library matching the local source can be loaded."""
+def is_available(device=None):
+    """Whether a native build matches the source and the requested CUDA device."""
     try:
-        _load_library()
-    except (RuntimeError, AttributeError):
+        _load_library(architecture_for_device(device))
+    except (RuntimeError, AttributeError, AssertionError):
         return False
     return True
 
@@ -80,7 +87,7 @@ def launch(a, b, scale_a, scale_b, out, config_id=0):
 
     if isinstance(config_id, bool) or not isinstance(config_id, int) or not 0 <= config_id < len(CONFIGS):
         raise ValueError(f"config_id must be an integer in [0, {len(CONFIGS) - 1}]")
-    library = _load_library()
+    library = _load_library(architecture_for_device(a.device))
     m, k = a.shape
     n = b.shape[1]
     with torch.cuda.device(a.device):

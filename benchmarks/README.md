@@ -41,8 +41,17 @@ The CuTe/CUTLASS GPU experiment entry points verify both a device name containin
 rendering and source/data audits do not require a GPU. Historical raw reports
 remain unchanged; their results do not become measurements for another GPU by
 rebuilding the source for that GPU.
-The native and experimental build entry points accept only `--arch sm_121`;
-other targets are rejected. Cross-compilation itself does not require a GPU.
+The isolated experimental build entry points accept only `--arch sm_121`.
+The production builders under `tools/` additionally accept experimental
+`--arch sm_120` builds for explicit native calls; see
+[build and dispatch requirements](../docs/kernel_design.md). This does not
+extend the scope of these GB10 measurements. Cross-compilation itself does not
+require a GPU.
+
+Current native sources live under `kernels/csrc/sm12x/`; measured dispatch
+tables are named `gb10_sm121_g256*.json` to keep their GPU scope explicit.
+Historical source snapshots and raw records preserve their original filenames
+and hashes. See [source organization](../docs/kernel_design.md#source-organization).
 
 Run all commands below from the **repository root**, using a CUDA-enabled PyTorch build and a compatible Triton version. Install the test and plotting dependencies with:
 
@@ -136,7 +145,7 @@ python benchmarks/plot_backends.py --input benchmarks/results/gb10_cute_g256_squ
 Regenerate the per-size dispatch table on this GB10:
 
 ```bash
-python benchmarks/tune_grain.py --output benchmarks/results/gb10_cute_g256_tuning.json --dispatch-output src/grain_gemm/kernels/configs/sm121_g256.json
+python benchmarks/tune_grain.py --output benchmarks/results/gb10_cute_g256_tuning.json --dispatch-output src/grain_gemm/kernels/configs/gb10_sm121_g256.json
 ```
 
 Then rerun the separate comparison. Both measurement scripts accept

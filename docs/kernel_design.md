@@ -8,6 +8,39 @@ uses Triton for these output types. Inputs are already quantized; there is no
 hidden quantizer or weight packing. All timings and validation results are in
 [Tests and benchmarks](../benchmarks/README.md).
 
+## Source organization
+
+Native source directories identify the GPU architecture family, while tuning
+tables identify the measured GPU model and quantization format:
+
+```text
+src/grain_gemm/kernels/
+├── triton.py
+├── cuda.py
+├── cutlass.py
+├── csrc/
+│   └── sm12x/
+│       ├── int8_g256_cute.cu
+│       └── cutlass/
+│           ├── int8_g256.cu
+│           ├── collective.hpp
+│           ├── epilogue.hpp
+│           └── kernel.hpp
+└── configs/
+    ├── gb10_sm121_g256.json
+    └── gb10_sm121_g256_cutlass.json
+```
+
+`sm12x` contains the current implementation shared by SM121 and experimental
+SM120 builds. This source grouping does not imply equal validation or optimal
+launch configurations across GPU models. The `gb10_` tables contain GB10
+measurements only; RTX GPUs need their own validation and tuning data.
+
+Future native H100 and Thor/T5000 implementations can be added under `sm90/`
+and `sm110/`, respectively. Those implementations and directories are not yet
+present. Triton remains the general implementation. Frozen experiment source
+snapshots and historical measurements retain their original paths and hashes.
+
 ## Implementations
 
 The custom [Triton kernel](../src/grain_gemm/kernels/triton.py) makes group size,
@@ -16,7 +49,7 @@ uses Tensor Core INT8 dot products, and applies the two scales once per complete
 or masked K-group. A grouped tile traversal improves L2 reuse. It accepts
 positive-stride views and partial M/N/K tiles without copying the inputs.
 
-The optional [CUDA/CuTe kernel](../src/grain_gemm/kernels/csrc/grain_cute.cu) adapts
+The optional [CUDA/CuTe kernel](../src/grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu) adapts
 the CUTLASS SM80 CuTe tutorial and specializes its pipeline for GB10. Each G256
 consists of two K128 tiles accumulated into the **same INT32 fragment** using
 `mma.sync.aligned.m16n8k32`. The complete group sum is converted to FP32 and
@@ -63,16 +96,17 @@ Implementations and toolchains can differ slightly in floating-point rounding.
 The complete INT32 group reduction and FP32 cross-group accumulation remain
 the common numerical contract.
 
-## Build the optional GB10 CUDA backend
+## Build the optional native backends
 
 The alternative `backend="cutlass"` uses CUTLASS 3.x composition:
 `GemmUniversalAdapter` launches a `GemmUniversal` specialization with a custom
 G256 collective and a selectable epilogue. The collective adapts
 the official SM80 multistage mainloop; a small device composition bridge adds
 scale parameters and FP32 output fragments while retaining the standard
-argument lowering and launch machinery. It is compiled for SM121 and uses
+argument lowering and launch machinery. It supports SM121 builds and experimental
+SM120 builds, and uses
 the same INT8 `mma.sync` and `cp.async` instruction families as the direct CuTe
-backend. It does not invoke `grain_cute.cu`.
+backend. It does not invoke `sm12x/int8_g256_cute.cu`.
 
 Its 32 configurations repeat eight tile/warp/stage choices in four families.
 IDs 0–7 retain the standard FP32 shared exchange before 128-bit BF16 stores;
@@ -81,14 +115,15 @@ asynchronous scale staging with direct BF16 pair stores; IDs 24–31 retain
 register scale prefetch with the same direct stores. The last family permits
 the scale-loading change to be measured separately. All families retain
 `GemmUniversalAdapter` and the G256/BF16/native-layout constraints below.
-An independent `sm121_g256_cutlass.json` table selects configurations for
+An independent `gb10_sm121_g256_cutlass.json` table selects configurations for
 explicit CUTLASS calls on the measured M1024/M2048 model projection shapes;
 it does not change the automatic backend policy.
 This is a custom CUTLASS implementation, not an unchanged stock INT8 GEMM.
 See [CUTLASS build and comparison](../benchmarks/cutlass.md).
 
 Use a source checkout (or unpacked source distribution), CUDA 13.0 or newer with
-`sm_121` support, a compatible host C++ compiler, and the pinned CUTLASS headers:
+support for the selected target, a compatible host C++ compiler, and the pinned
+CUTLASS headers:
 
 ```bash
 python -m pip install -e ".[runtime]"
@@ -97,11 +132,35 @@ git -C /path/to/cutlass checkout 098de2a652cf8f00fd70b2df54051c7eccbb855a
 python tools/build_cuda.py --cutlass-dir /path/to/cutlass --arch sm_121
 ```
 
+For an experimental SM120 build (including RTX 5090/5080/5070/5060), select the
+target explicitly for either or both backends:
+
+```bash
+python tools/build_cuda.py --cutlass-dir /path/to/cutlass --arch sm_120
+python tools/build_cutlass.py --cutlass-dir /path/to/cutlass --arch sm_120
+```
+
+Select `backend="cuda"` or `backend="cutlass"` explicitly to use these SM120
+builds. The public API starts with config 0 (64×64, two stages, four warps),
+without reusing the GB10 tuning table. `auto` remains on portable Triton for
+SM120. These native paths have not been validated or timed on an SM120 GPU;
+successful compilation alone does not establish correctness or performance.
+The dedicated GB10 experiment scripts still reject other devices and targets.
+
+Both production build scripts accept only `sm_120` and `sm_121`, defaulting to
+`sm_121`. Building does not require a GPU. Each backend has one installed target;
+building it again replaces that backend's local library. Build for the target
+machine's CPU and system ABI as well: a shared library built on GB10's ARM host
+cannot be copied directly to an x86 host. Restart Python after rebuilding a
+loaded library.
+
 Building is explicit: importing or calling GrainGEMM does not download headers
 or invoke a compiler for the native backend. The build writes a local shared
 library and metadata to `src/grain_gemm/kernels/_native/`; these are excluded from
 Git and distributions. Rebuild after changing the CUDA source. The loader checks
-the source hash and target architecture before using the library.
+the source hash and requires the target architecture to match the input tensor's
+GPU before loading or launching the library. Availability is checked per device,
+so a cached SM121 library cannot be used to launch on an SM120 GPU, or vice versa.
 
 The launcher obtains the current PyTorch CUDA stream on every call, including
 CUDA Graph capture. Warm up the desired shape before capture. No PyTorch C++ ABI
@@ -111,7 +170,7 @@ CUTLASS attribution and licensing.
 ## Dispatch and limits
 
 `backend="auto"` consults the checked-in
-[SM121 G256 table](../src/grain_gemm/kernels/configs/sm121_g256.json) for measured
+[GB10 SM121 G256 table](../src/grain_gemm/kernels/configs/gb10_sm121_g256.json) for measured
 BF16-output square shapes and exact rectangular `(M,N,K)` shapes. Each entry
 stores the selected backend, the best measured CUDA configuration, and the best
 measured Triton configuration.
@@ -146,13 +205,17 @@ must be measured on their actual target devices before making speed claims;
 H100 and Thor do not inherit the GB10 tuning table. Future specialized kernels
 can be added to the same dispatch layer.
 
-The native path requires SM121, G256, BF16 output, positive M/N multiples of 64,
+The native path requires SM120 or SM121, G256, BF16 output, positive M/N multiples of 64,
 and K a positive multiple of 256. A must be contiguous [M,K], and logical B[K,N]
 must have contiguous [N,K] backing storage; both pointers must be 16-byte aligned.
 FP32 scales must be contiguous with shapes [M,K/256] and [K/256,N]. Individual
 configurations can require larger M/N multiples to match their tiles. Explicit
 CUDA selection reports an error when these constraints or the native build are
 unavailable; unmeasured compatible shapes use a fixed CUDA configuration.
+On SM120, both explicit native backends always start with config 0; further
+configuration choices and automatic native selection require measurements on
+the target GPU. Matching SM120 instructions does not make GB10's optimal
+configuration portable across RTX models.
 
 Use `get_kernel_config(a, b, group_size=256, output_dtype=torch.bfloat16,
 scale_a=scale_a, scale_b=scale_b, backend="auto")` to inspect the exact selection.

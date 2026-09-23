@@ -55,7 +55,11 @@ def main():
     package = Path(cuda.__file__).resolve().parent
     report["kernel_source_sha256"] = {
         str(path.relative_to(package)): hashlib.sha256(path.read_bytes()).hexdigest()
-        for path in (package / "triton.py", package / "cuda.py", package / "csrc" / "grain_cute.cu")
+        for path in (
+            package / "triton.py",
+            package / "cuda.py",
+            package / "csrc" / "sm12x" / "int8_g256_cute.cu",
+        )
     }
     report["tuning_script_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     report["device_check_sha256"] = hashlib.sha256(Path(require_gb10.__code__.co_filename).read_bytes()).hexdigest()

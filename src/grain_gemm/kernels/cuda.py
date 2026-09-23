@@ -6,6 +6,7 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
+from ._native import SUPPORTED_ARCHITECTURES, architecture_for_device
 
 _LIBRARY = Path(__file__).parent / "_native" / "libgrain_cuda.so"
 _TILES = (
@@ -31,23 +32,29 @@ CONFIGS = tuple(
 )
 
 
-@lru_cache(maxsize=1)
-def _load_library():
+@lru_cache(maxsize=2)
+def _load_library(architecture):
+    if architecture not in SUPPORTED_ARCHITECTURES:
+        raise RuntimeError(f"Unsupported native target: {architecture}")
     if not _LIBRARY.is_file():
         raise RuntimeError(
             "The optional GrainGEMM CUDA library has not been built. From the "
             "repository root, run: python tools/build_cuda.py "
-            "--cutlass-dir /path/to/cutlass --arch sm_121"
+            f"--cutlass-dir /path/to/cutlass --arch {architecture}"
         )
     manifest = _LIBRARY.with_name("build.json")
-    source = Path(__file__).parent / "csrc" / "grain_cute.cu"
+    source = Path(__file__).parent / "csrc" / "sm12x" / "int8_g256_cute.cu"
     try:
         info = json.loads(manifest.read_text())
     except (OSError, ValueError) as exc:
         raise RuntimeError("Native build metadata is missing or invalid; rebuild with tools/build_cuda.py") from exc
-    if (info.get("architecture") != "sm_121"
-            or info.get("source_sha256") != hashlib.sha256(source.read_bytes()).hexdigest()):
-        raise RuntimeError("Native library is stale or targets a different architecture; rebuild for sm_121")
+    if info.get("architecture") != architecture:
+        raise RuntimeError(
+            f"Native library targets {info.get('architecture')}, but the device requires "
+            f"{architecture}; rebuild with tools/build_cuda.py --arch {architecture}"
+        )
+    if info.get("source_sha256") != hashlib.sha256(source.read_bytes()).hexdigest():
+        raise RuntimeError("Native library is stale; rebuild with tools/build_cuda.py")
     try:
         library = ctypes.CDLL(str(_LIBRARY))
     except OSError as exc:
@@ -59,11 +66,11 @@ def _load_library():
     return library
 
 
-def is_available():
-    """Whether the optional native library exists and can be loaded locally."""
+def is_available(device=None):
+    """Whether a native build matches the source and the requested CUDA device."""
     try:
-        _load_library()
-    except (RuntimeError, AttributeError):
+        _load_library(architecture_for_device(device))
+    except (RuntimeError, AttributeError, AssertionError):
         return False
     return True
 
@@ -78,7 +85,7 @@ def launch(a, b, scale_a, scale_b, out, config_id=0):
 
     if isinstance(config_id, bool) or not isinstance(config_id, int) or not 0 <= config_id < len(CONFIGS):
         raise ValueError(f"config_id must be an integer in [0, {len(CONFIGS) - 1}]")
-    library = _load_library()
+    library = _load_library(architecture_for_device(a.device))
     m, k = a.shape
     n = b.shape[1]
     with torch.cuda.device(a.device):

@@ -63,7 +63,13 @@ For a fixed K, this conversion-and-scaling work occurs `ceil(K / G)` times. **G2
 
 ## Development status
 
-GrainGEMM includes a custom Triton kernel and an optional native CUDA/CuTe kernel, with a measured G256 dispatch table for **GB10 (SM121)**. The public API selects a backend and launch configuration by architecture, shape, dtype, and layout. A100, H100, and Thor use the portable Triton path pending validation and dedicated tuning on those GPUs.
+GrainGEMM includes a custom Triton kernel and optional native CUDA/CuTe and CUTLASS kernels, with measured G256 dispatch tables for **GB10 (SM121)**. The public API selects a backend and launch configuration by architecture, shape, dtype, and layout. A100, H100, and Thor use the portable Triton path pending validation and dedicated tuning on those GPUs. **SM120 native builds are experimental and require explicit backend selection**; RTX 50-series correctness and performance have not yet been validated, and `auto` continues to use Triton on SM120.
+
+Native sources are organized by architecture under
+[`kernels/csrc/sm12x`](src/grain_gemm/kernels/csrc/sm12x), while measured tuning
+tables use GPU-specific names such as `gb10_sm121_g256.json`. Future H100 and
+Thor specializations will live in separate architecture directories; they are
+not implemented yet. See [source organization](docs/kernel_design.md#source-organization).
 
 ## GrainGEMM API
 
@@ -148,6 +154,33 @@ contiguous scales, M/N multiples of 64, and K a multiple of 256.
 See [Kernel design and native build](docs/kernel_design.md) for the implementation,
 CUTLASS build instructions, and dispatch behavior. Inputs must already be
 quantized; the API does not perform quantization or provide autograd.
+
+### Experimental SM120 native build
+
+To try the existing native kernels on an SM120 device, build the desired backend
+with the explicit target:
+
+```bash
+python tools/build_cuda.py --cutlass-dir /path/to/cutlass --arch sm_120
+python tools/build_cutlass.py --cutlass-dir /path/to/cutlass --arch sm_120
+```
+
+Then pass `backend="cuda"` for CuTe or `backend="cutlass"` to `int8_gemm`.
+The native G256, BF16 and layout constraints above still apply. These builds
+use fixed compatible defaults instead of the GB10 tuning tables;
+`backend="auto"` stays on Triton for SM120 until measurements justify native
+dispatch. The default build target remains `sm_121`.
+
+Each backend installs one target at a time; rebuilding it replaces its previous
+library. Runtime requires the build's GPU target to match the device. Builds
+can run without a GPU, but the shared library must also match the execution
+machine's CPU architecture and host ABI; a GB10 ARM64 host build is not an
+x86-64 desktop library. See [native build requirements](docs/kernel_design.md)
+and [CUTLASS build details](benchmarks/cutlass.md#build-and-use).
+
+RTX 50-series runtime correctness and performance remain unvalidated. Published
+GB10 benchmark results and experimental measurement scripts retain their
+GB10-only scope.
 
 See [Tests and benchmarks](benchmarks/README.md) for validation, performance results, plots, and reproduction instructions.
 

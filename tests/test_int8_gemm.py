@@ -78,8 +78,8 @@ def assert_matches_reference(actual, tensors, group_size):
 
 def require_native_cuda():
     """Keep the optional native tests usable without building the CUDA library."""
-    if not torch.cuda.is_available() or torch.cuda.get_device_capability() != (12, 1):
-        pytest.skip("The optional native CUDA kernels require SM121")
+    if not torch.cuda.is_available() or torch.cuda.get_device_capability() not in ((12, 0), (12, 1)):
+        pytest.skip("The optional native CUDA kernels require SM120 or SM121")
     from grain_gemm.kernels import cuda as native_cuda
 
     if not native_cuda.is_available():
@@ -357,6 +357,8 @@ def test_native_cuda_configurations(native_case, config_id):
 @cuda
 def test_forced_native_uses_its_measured_configuration(monkeypatch):
     require_native_cuda()
+    if torch.cuda.get_device_capability() != (12, 1):
+        pytest.skip("The measured native dispatch table is specific to SM121")
     import grain_gemm.gemm as implementation
 
     tensors = inputs(1024, 1024, 1024, 256, device="cuda", layout="column_major_b")
@@ -389,7 +391,7 @@ def simulated_sm121(monkeypatch):
     from grain_gemm.kernels import cuda as native_cuda
 
     monkeypatch.setattr(torch.cuda, "get_device_capability", lambda device=None: (12, 1))
-    monkeypatch.setattr(native_cuda, "is_available", lambda: True)
+    monkeypatch.setattr(native_cuda, "is_available", lambda device=None: True)
 
 
 def measured_config(tensors, *, backend="auto", group_size=256,
@@ -437,8 +439,13 @@ def test_m256_measurements_are_specific_to_sm121(simulated_sm121, monkeypatch,
     config = measured_config(tensors)
     assert config["backend"] == "triton"
     assert config["policy"] == "portable"
-    with pytest.raises(ValueError, match="SM121"):
-        measured_config(tensors, backend="cuda")
+    if capability == (12, 0):
+        explicit = measured_config(tensors, backend="cuda")
+        assert explicit["config_id"] == 0
+        assert explicit["policy"] == "sm120_g256_explicit"
+    else:
+        with pytest.raises(ValueError, match="SM121"):
+            measured_config(tensors, backend="cuda")
 
 
 @pytest.mark.parametrize("group_size", [32, 64, 128])
@@ -511,6 +518,8 @@ def assert_sampled_reference(actual, tensors):
 @pytest.mark.parametrize("backend", ["auto", "cuda"])
 def test_m256_public_api_launches_measured_native(monkeypatch, n, k, config_id,
                                                  triton_tile, backend):
+    if torch.cuda.get_device_capability() != (12, 1):
+        pytest.skip("The measured native dispatch table is specific to SM121")
     native_cuda = require_native_cuda()
     tensors = inputs(256, n, k, 256, device="cuda", layout="column_major_b")
     original_launch = native_cuda.launch
@@ -539,7 +548,7 @@ def test_m256_public_api_triton_fallback(monkeypatch, n, k, config_id,
 
     # Auto must use Triton without a native build. Explicit Triton must retain
     # that choice even when the native library is reported as available.
-    monkeypatch.setattr(native_cuda, "is_available", lambda: backend == "triton")
+    monkeypatch.setattr(native_cuda, "is_available", lambda device=None: backend == "triton")
     original_launch = implementation.launch
     calls = []
 

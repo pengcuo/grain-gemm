@@ -36,7 +36,7 @@
 // Argument lowering, workspace, launch grid and adapter remain upstream code.
 #include "cutlass/gemm/kernel/gemm_universal.hpp"
 #include "cutlass/gemm/kernel/sm70_gemm.hpp"
-#include "grain_cutlass_collective.hpp"
+#include "collective.hpp"
 
 namespace grain_cutlass {
 template<class Mainloop>
