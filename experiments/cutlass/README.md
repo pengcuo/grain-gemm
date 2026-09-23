@@ -1,5 +1,11 @@
 # CUTLASS experiments
 
+**GB10-only: SM121 / compute capability 12.1.** All performance results,
+configuration choices and CuTe/CUTLASS rankings from these experiments apply
+only to NVIDIA GB10. Thor / Jetson T5000 uses SM110 / compute capability 11.0
+and requires independent implementation, tuning and validation. This boundary
+does not restrict GrainGEMM's future multi-architecture support.
+
 This directory preserves the independent CUTLASS G256 experiments used to investigate the performance difference from direct CuTe C++. The experiment libraries are loaded explicitly through `ctypes`; they do not participate in `backend="auto"` or replace the production libraries. The existing explicit production CUTLASS backend remains separate.
 
 The [measured results and analysis](../../benchmarks/results/cutlass/residual-gap/) include the three original paired runs and the M=4096 extension, with raw rounds, TOPS tables, static instruction analysis, and validation records. These are fixed-configuration comparisons on NVIDIA GB10, not autotuning results for every shape or claims about other GPUs.
@@ -24,7 +30,13 @@ The variants are independent changes, not successive optimizations. In particula
 
 `archive/` retains the exact original measurement, reference, correctness, and M=4096 driver scripts. Absolute paths inside those archived scripts and the historical manifests are provenance from the original machine; they are not required by the portable entry points in this directory. `source_manifest.json` records all frozen source hashes.
 
-The portable `paired_benchmark.py` changes path/CLI plumbing, adds input checks and refuses to overwrite case files. Its timing loop and statistical calculation retain the original method. `reference.py` and `correctness_fixture.py` contain the unchanged numerical helper functions from the archived scripts. New measurements record the new script hashes; historical result JSON remains unchanged and refers to the archived scripts.
+The portable `paired_benchmark.py` changes path/CLI plumbing, adds input and device checks and refuses to overwrite case files. Its timing loop and statistical calculation retain the original method. `reference.py` and `correctness_fixture.py` contain the unchanged numerical helper functions from the archived scripts. New measurements record the new script hashes; historical result JSON remains unchanged and refers to the archived scripts.
+
+GPU measurement and validation entry points require both a device name
+containing `GB10` and compute capability `(12, 1)`, and reject all other GPUs.
+CPU-only rendering, source/data audits and command previews do not require a
+GPU. The build entry point only accepts `sm_121`; changing the target requires
+a separate architecture implementation and validation effort.
 
 ## Build
 
@@ -43,7 +55,10 @@ python experiments/cutlass/build.py --cutlass-dir /path/to/cutlass \
   --target cute_control cutlass_control baseline minimum_k_guard no_direct_tail_barrier
 ```
 
-`--arch`, `--nvcc`, and `--build-dir` are explicit overrides. `--dry-run` prints the build commands without compiling.
+`--arch` accepts only `sm_121`; other targets are rejected during argument
+parsing. `--nvcc` and `--build-dir` remain configurable. `--dry-run` prints the
+build commands without compiling. Cross-compilation itself does not require a
+GPU; measurement and validation still require GB10.
 
 ## Correctness and sanitizer
 

@@ -2,6 +2,10 @@
 
 [Historical results and root-cause report](../../benchmarks/results/m256-dispatch/README.md)
 
+The GPU entry point checks for an NVIDIA GB10 device and compute capability
+12.1 (SM121) before native loading or measurement. These tile/resource choices
+are not configurations for Thor or other GPU architectures.
+
 The portable `measure.py` keeps the historical fixed CuTe configuration IDs and Triton tiles. It records the **current** API selections separately under `defaults`; those selections now include three measured M256 entries and are not the defaults in the archived JSON.
 
 Requirements are GB10/SM121, the built CuTe backend, runtime dependencies and an occupancy record for the **same native binary SHA256**. The default occupancy input is the archived record. The script refuses to assign those resources to a different rebuild; a different binary requires a fresh matching occupancy record passed through `--occupancy`. The archive does not bundle the historical binary or a complete cubin extraction toolchain.

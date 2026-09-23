@@ -1,5 +1,13 @@
 # Tests and benchmarks
 
+**Hardware scope: this published batch is GB10-only (SM121, compute capability
+12.1).** All measured performance, tuned configurations and backend rankings,
+especially the CuTe/CUTLASS comparisons, apply only to NVIDIA GB10. Thor / Jetson
+T5000 uses SM110 (compute capability 11.0) and requires an independent
+implementation, tuning and validation. See [NVIDIA's compute capability
+table](https://developer.nvidia.com/cuda/gpus). This experiment boundary does not
+limit GrainGEMM's goal of supporting multiple GPU architectures.
+
 Validation, measurements, and reproduction instructions for GrainGEMM and the standalone SGLang Triton baseline. See the [project README](../README.md) for the operation, API, and research basis.
 
 For the separate CUTLASS collective backend, see
@@ -27,6 +35,14 @@ combine latencies from separate runs into a speedup. Historical forced-backend
 defaults may differ from current dispatch; the three measured M=256 choices
 are now integrated into `auto`. K-lower-bound and tail-synchronization
 ablations remain [isolated experiments](../experiments/cutlass/README.md).
+
+The CuTe/CUTLASS GPU experiment entry points verify both a device name containing
+`GB10` and compute capability `(12, 1)`, and reject other devices. CPU-only report
+rendering and source/data audits do not require a GPU. Historical raw reports
+remain unchanged; their results do not become measurements for another GPU by
+rebuilding the source for that GPU.
+The native and experimental build entry points accept only `--arch sm_121`;
+other targets are rejected. Cross-compilation itself does not require a GPU.
 
 Run all commands below from the **repository root**, using a CUDA-enabled PyTorch build and a compatible Triton version. Install the test and plotting dependencies with:
 

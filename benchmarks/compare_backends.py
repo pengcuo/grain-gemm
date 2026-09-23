@@ -17,6 +17,7 @@ import platform
 import statistics
 import subprocess
 
+from _device import require_gb10
 
 IMPLEMENTATIONS = ("cute_int8_gemm", "triton_int8_gemm", "torch_mm_bf16")
 INT8_BACKENDS = {"cute_int8_gemm": "cuda", "triton_int8_gemm": "triton"}
@@ -128,6 +129,7 @@ def source_metadata(grain_gemm):
         "git_commit": git("rev-parse", "HEAD"),
         "git_status_porcelain": git("status", "--porcelain"),
         "comparison_script_sha256": hashlib.sha256(script.read_bytes()).hexdigest(),
+        "device_check_sha256": hashlib.sha256(Path(require_gb10.__code__.co_filename).read_bytes()).hexdigest(),
         "check_sample_script_sha256": hashlib.sha256(
             script.with_name("bench_sglang.py").read_bytes()
         ).hexdigest(),
@@ -305,11 +307,10 @@ def main():
         parser.error("output must have a .json suffix; a matching .csv is also written")
 
     import torch
+    require_gb10(torch)
     import triton
     import grain_gemm
 
-    if not torch.cuda.is_available():
-        parser.error("a CUDA GPU is required")
     if not callable(getattr(grain_gemm, "int8_gemm", None)):
         parser.error("this GrainGEMM installation does not export int8_gemm")
     device = torch.cuda.current_device()

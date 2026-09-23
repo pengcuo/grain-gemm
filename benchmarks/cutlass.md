@@ -1,5 +1,11 @@
 # CUTLASS collective comparison
 
+**GB10-only experiment: SM121 / compute capability 12.1.** The performance
+results, tuned configurations and CuTe/CUTLASS rankings on this page apply only
+to NVIDIA GB10. Thor / Jetson T5000 is SM110 / compute capability 11.0 and needs
+its own implementation, tuning and validation. This scope applies to this
+experiment, not GrainGEMM's future multi-architecture support.
+
 The optional CUTLASS backend provides the same prequantized INT8 G256 operation
 as the direct CuTe backend: each complete K256 group accumulates in INT32,
 then contributes to an FP32 running sum through row/column scaling and FMA.
@@ -29,6 +35,8 @@ python tools/build_cutlass.py --cutlass-dir /path/to/cutlass --arch sm_121
 This writes `libgrain_cutlass.so` and `cutlass_build.json` beside the existing
 CuTe library. It does not replace `libgrain_cuda.so`. The build requires CUDA
 13.0 or newer and a C++17 host compiler. No PyTorch C++ extension is involved.
+Both native build entry points accept only `--arch sm_121` and reject other
+targets. They can cross-compile without a GPU; execution still requires GB10.
 
 ```python
 c = int8_gemm(a, b, scale_a, scale_b,
@@ -57,6 +65,10 @@ Build both native backends first, then run:
 ```bash
 python benchmarks/compare_cutlass.py --output-dir benchmarks/results/cutlass_g256
 ```
+
+GPU measurement and validation entry points check both that the device name
+contains `GB10` and that compute capability is `(12, 1)`, rejecting other GPUs.
+CPU-only rendering and source/data audits have no GPU requirement.
 
 The default sweep contains the three M256 shapes `(256,1024,1536)`,
 `(256,1536,1024)`, `(256,2048,1536)`, plus M=N=K from 1024 to 16384 in steps

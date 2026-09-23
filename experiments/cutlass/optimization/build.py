@@ -3,7 +3,6 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-import re
 import shutil
 import subprocess
 import tempfile
@@ -15,11 +14,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--cutlass-dir', required=True, type=Path)
     parser.add_argument('--nvcc', default=shutil.which('nvcc') or '/usr/local/cuda/bin/nvcc')
-    parser.add_argument('--arch', default='sm_121')
+    parser.add_argument('--arch', default='sm_121', help='Only sm_121 is supported (GB10-only native implementation)')
     parser.add_argument('--dry-run', action='store_true')
     args = parser.parse_args()
-    if not re.fullmatch(r'sm_[0-9]+[af]?', args.arch):
-        parser.error('invalid CUDA architecture')
+    if args.arch != 'sm_121':
+        parser.error('This is a GB10-only native implementation; --arch must be sm_121. '
+                     'Other architectures require a separate implementation.')
     include = args.cutlass_dir.expanduser().resolve() / 'include'
     if not (include / 'cute/tensor.hpp').is_file():
         parser.error('CUTLASS headers not found')

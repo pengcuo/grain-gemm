@@ -16,6 +16,9 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+sys.path.append(str(ROOT.parents[1] / "benchmarks"))
+from _device import require_gb10
+
 DEFAULT_BUILD = ROOT / "build"
 SHAPES = [(1024, 1024, 1536, 3, 11), (1024, 1536, 1024, 7, 15),
           (1024, 2048, 1536, 7, 15), (2048, 1536, 1024, 7, 15),
@@ -59,6 +62,7 @@ def run(shape, libraries, output, rounds):
     if path.exists():
         raise FileExistsError(f'Refusing to overwrite measurement: {path}')
     import torch
+    require_gb10(torch)
     from reference import check, reference
 
     m, n, k, cute_id, cutlass_id = shape
@@ -142,7 +146,9 @@ def run(shape, libraries, output, rounds):
                   fixed_configs=dict(cute=cute_id, cutlass=cutlass_id),
                   library_hashes={name: sha(lib.path) for name, lib in libraries.items()},
                   script_sha256=sha(Path(__file__)), reference_script_sha256=sha(ROOT / 'reference.py'),
-                  device=torch.cuda.get_device_name(), torch=torch.__version__, cuda=torch.version.cuda,
+                  device_check_sha256=sha(Path(require_gb10.__code__.co_filename)),
+                  device=torch.cuda.get_device_name(), compute_capability=list(torch.cuda.get_device_capability()),
+                  experiment_target='GB10/SM121', torch=torch.__version__, cuda=torch.version.cuda,
                   nodes=nodes, rounds=rounds, warmup_seconds=2, orders=orders, sensors=sensors,
                   results=results, contrasts=contrasts,
                   note='Bootstrap intervals resample paired round ratios; adjacent rounds may be correlated. '
@@ -176,6 +182,8 @@ def main():
         if not sep or not name or not path or name in ('cute', 'cutlass_production') or name in variants:
             parser.error('--variant requires a unique NAME=LIBRARY; cute/cutlass_production are reserved')
         variants[name] = Path(path).expanduser().resolve()
+    import torch
+    require_gb10(torch)
     if args.case:
         m, n, k, cute_id, cutlass_id = args.case
         if min(m, n, k) <= 0 or m % 128 or n % 128 or k % 256:

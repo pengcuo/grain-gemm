@@ -9,7 +9,7 @@ import shlex
 import subprocess
 import sys
 
-from paired_benchmark import SHAPES
+from paired_benchmark import SHAPES, require_gb10
 
 ROOT = Path(__file__).resolve().parent
 M4096 = [(4096, 1024, 1536, 3, 11), (4096, 1536, 1024, 7, 15),
@@ -60,6 +60,8 @@ def main():
         for command in commands:
             print(shlex.join(command))
         return
+    import torch
+    require_gb10(torch)
     output.mkdir(parents=True, exist_ok=True)
     (output / "commands.json").write_text(json.dumps(commands, indent=2) + "\n")
     env = dict(os.environ)

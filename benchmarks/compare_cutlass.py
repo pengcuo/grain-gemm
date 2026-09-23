@@ -17,6 +17,7 @@ import statistics
 import subprocess
 import sys
 
+from _device import require_gb10
 
 BACKENDS = ("cutlass", "cuda", "triton")
 SHAPES = [(256, 1024, 1536), (256, 1536, 1024), (256, 2048, 1536)] + [
@@ -49,6 +50,7 @@ def provenance():
     root = Path(grain_gemm.__file__).parent
     return dict(
         script_sha256=digest(Path(__file__)),
+        device_check_sha256=digest(Path(require_gb10.__code__.co_filename)),
         candidate_script_sha256=digest(Path(__file__).with_name('tune_grain.py')),
         sources={str(p.relative_to(root)): digest(p) for p in root.rglob('*')
                  if p.is_file() and p.suffix in ('.py', '.cu', '.hpp', '.json')},
@@ -138,14 +140,15 @@ def summarize(rounds, operations):
 
 def run_case(shape, output_dir):
     import torch
+    require_gb10(torch)
     import triton
     from triton.runtime.errors import OutOfResources
     from grain_gemm.kernels import cuda, cutlass
     from grain_gemm.kernels.triton import launch
     from tune_grain import TRITON_CANDIDATES
 
-    assert torch.cuda.get_device_capability() == (12, 1)
-    assert cuda.is_available() and cutlass.is_available()
+    if not cuda.is_available() or not cutlass.is_available():
+        raise RuntimeError('Build the GB10 CuTe and CUTLASS libraries before this comparison')
     path = output_dir / ('case_'+'_'.join(map(str, shape))+'.json')
     source = provenance()
     runtime = environment(torch, triton)

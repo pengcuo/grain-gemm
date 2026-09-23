@@ -5,7 +5,6 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-import re
 import shlex
 import shutil
 import subprocess
@@ -29,14 +28,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--cutlass-dir", type=Path, required=True,
                         help=f"CUTLASS checkout; measured revision: {CUTLASS_COMMIT}")
-    parser.add_argument("--arch", default="sm_121")
+    parser.add_argument("--arch", default="sm_121", help="Only sm_121 is supported (GB10-only native implementation)")
     parser.add_argument("--nvcc")
     parser.add_argument("--build-dir", type=Path, default=ROOT / "build")
     parser.add_argument("--target", nargs="+", choices=TARGETS, default=TARGETS)
     parser.add_argument("--dry-run", action="store_true", help="Print commands without compiling or writing")
     args = parser.parse_args()
-    if not re.fullmatch(r"sm_[0-9]+[af]?", args.arch):
-        parser.error("--arch must name a CUDA architecture, e.g. sm_121")
+    if args.arch != "sm_121":
+        parser.error("This is a GB10-only native implementation; --arch must be sm_121. "
+                     "Other architectures require a separate implementation.")
     cutlass = args.cutlass_dir.expanduser().resolve()
     if not (cutlass / "include/cutlass/gemm/device/gemm_universal_adapter.h").is_file():
         parser.error(f"CUTLASS headers were not found under {cutlass / 'include'}")

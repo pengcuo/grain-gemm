@@ -13,9 +13,12 @@ from pathlib import Path
 import platform
 import statistics
 import subprocess
+import sys
 
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.append(str(ROOT / "benchmarks"))
+from _device import require_gb10
 METHODS = ('triton_default', 'cute_default', 'triton_tuned', 'cute_tuned')
 TOKENS = [512, 1024, 2048, 4096]
 
@@ -284,14 +287,15 @@ def main():
     if args.max_new_cases is not None and args.max_new_cases <= 0:
         parser.error('max-new-cases must be positive')
     import torch
+    require_gb10(torch)
     import triton
     import grain_gemm as grain
     from grain_gemm.kernels import cuda
     from grain_gemm.kernels.triton import launch
     from triton.testing import do_bench_cudagraph
 
-    assert torch.cuda.get_device_capability() == (12, 1), 'This benchmark targets the current GB10 native build'
-    assert cuda.is_available(), 'Build the native library first'
+    if not cuda.is_available():
+        raise RuntimeError('Build the GB10 native CuTe library first')
     specs = workloads(args.tokens)
     if args.limit:
         specs = specs[:args.limit]
@@ -320,6 +324,7 @@ def main():
         source=dict(git_commit=subprocess.check_output(['git','-C',str(ROOT),'rev-parse','HEAD'], text=True).strip(),
                     git_status=subprocess.check_output(['git','-C',str(ROOT),'status','--porcelain'], text=True).strip(),
                     script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                    device_check_sha256=hashlib.sha256(Path(require_gb10.__code__.co_filename).read_bytes()).hexdigest(),
                     kernel_hashes={str(path.relative_to(package)): hashlib.sha256(path.read_bytes()).hexdigest()
                                    for path in (package/'gemm.py', package/'kernels/triton.py', package/'kernels/cuda.py', package/'kernels/csrc/grain_cute.cu', package/'kernels/configs/sm121_g256.json')},
                     native_build=json.loads((package/'kernels/_native/build.json').read_text()),

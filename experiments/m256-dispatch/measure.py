@@ -11,6 +11,8 @@ import sys
 
 ROOT = Path(__file__).resolve().parent
 PROJECT = Path(__file__).resolve().parents[2]
+sys.path.append(str(PROJECT / "benchmarks"))
+from _device import require_gb10
 sys.path.insert(0, str(ROOT.parent / 'prefill'))
 from benchmark import reference, validate
 import torch
@@ -36,8 +38,7 @@ def main():
         parser.error('Write new measurements outside the archived benchmarks/results directory')
     if not (0 < args.m <= 1024 and args.m % 128 == 0 and 0 < args.n <= 4096 and args.n % 128 == 0 and args.k > 0 and args.k % 256 == 0):
         parser.error('This fixed-prefix diagnostic requires M<=1024 and N<=4096, M/N multiples of 128, positive K multiple of 256')
-    if torch.cuda.get_device_capability() != (12, 1):
-        parser.error('This experiment requires GB10 / SM121')
+    require_gb10(torch)
     if not cuda.is_available():
         parser.error('Build the native CuTe library first')
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -143,6 +144,7 @@ def main():
                   native_sha256=hashlib.sha256(cuda._LIBRARY.read_bytes()).hexdigest(),
                   source_sha256=hashlib.sha256((PROJECT / 'src/grain_gemm/kernels/csrc/grain_cute.cu').read_bytes()).hexdigest(),
                   script_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                  device_check_sha256=hashlib.sha256(Path(require_gb10.__code__.co_filename).read_bytes()).hexdigest(),
                   protocol=dict(graph_nodes=nodes, rounds=rounds, graph_replays_per_round=replays,
                                 reduction='median of round medians', variant_order='rotate each round',
                                 warm_cache=True, preallocated_output=True, pure_gemm=True),

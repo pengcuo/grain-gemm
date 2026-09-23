@@ -5,7 +5,7 @@ import argparse
 from pathlib import Path
 
 from build import VARIANTS
-from paired_benchmark import Native
+from paired_benchmark import Native, require_gb10
 
 ROOT = Path(__file__).resolve().parent
 
@@ -19,6 +19,7 @@ def main():
     if unknown:
         parser.error(f"Unknown variants: {', '.join(sorted(unknown))}")
     import torch
+    require_gb10(torch)
     from correctness_fixture import case
 
     libraries = {name: Native(args.build_dir.expanduser().resolve() / name / "libgrain_cutlass.so",

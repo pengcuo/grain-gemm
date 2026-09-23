@@ -10,10 +10,17 @@
     },
     {
       "path": "measure.py",
-      "sha256": "e33b3dd1972a1384e1f0a2f455b5334abdae08771e1a588912c101a73739cdf4",
+      "sha256": "09ac1f2a75087912952f9f9eb5fbc7d01f78c76ec3ee0213d6be41cf4daa1af3",
       "source_file": "grain-m256-root-cause/measure.py",
       "source_sha256": "2d563a142bb7ffd4b8d05326c23539991716144c42a4d93e3b350af7cd6d974e",
       "byte_preserved": false
     }
-  ]
+  ],
+  "runtime_device_requirement": {
+    "name_token": "GB10",
+    "compute_capability": [
+      12,
+      1
+    ]
+  }
 }

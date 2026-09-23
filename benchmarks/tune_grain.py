@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 import statistics
 
+from _device import require_gb10
 TRITON_CANDIDATES = [
     dict(backend="triton", block_m=64, block_n=64, num_warps=4, num_stages=2, swizzle=8),
     dict(backend="triton", block_m=64, block_n=128, num_warps=8, num_stages=3, swizzle=8),
@@ -31,14 +32,13 @@ def main():
             or any(n % 256 for n in args.sizes) or len(set(args.sizes)) != len(args.sizes)):
         parser.error("sizes must be distinct positive multiples of 256; timing parameters must be positive")
     import torch
+    require_gb10(torch)
     import triton
     from triton.testing import do_bench_cudagraph
     from grain_gemm.kernels.triton import launch
     from grain_gemm.kernels import cuda
     from bench_sglang import check_sample
 
-    if torch.cuda.get_device_capability() != (12, 1):
-        parser.error("this candidate set and dispatch format target GB10 / SM121")
     candidates = list(TRITON_CANDIDATES)
     if cuda.is_available():
         candidates += [dict(backend="cuda", config_id=i) for i in range(len(cuda.CONFIGS))]
@@ -58,6 +58,7 @@ def main():
         for path in (package / "triton.py", package / "cuda.py", package / "csrc" / "grain_cute.cu")
     }
     report["tuning_script_sha256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    report["device_check_sha256"] = hashlib.sha256(Path(require_gb10.__code__.co_filename).read_bytes()).hexdigest()
     if cuda.is_available():
         report["native_build"] = json.loads((package / "_native" / "build.json").read_text())
     dispatch = dict(gpu="NVIDIA GB10", compute_capability=[12, 1], group_size=256,
