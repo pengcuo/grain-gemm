@@ -1,0 +1,6 @@
+{
+  "grain_cutlass.cu": "6f938f78cb2b3c150dc767764bec4045316e21e315bc274277c4d2488d65a812",
+  "grain_cutlass_collective.hpp": "482a26e13af8acd2e097deabcc4b29cefe5c3664f5223ec952638937a26ff80c",
+  "grain_cutlass_epilogue.hpp": "a4a7d9c0b20322880eee6afe5a4f690096a0dac7a0012ee16a5e243dfd11bfcd",
+  "grain_cutlass_kernel.hpp": "d3158b84df2caf6b9444570e460497afb51b2678dea934601c417dd22f21e6c2"
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "shape": [
+      1024,
+      1024,
+      1536
+    ],
+    "selected": {
+      "policy": "sm121_g256_measured",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "backend": "cutlass",
+      "config_id": 11
+    },
+    "correctness": {
+      "checked_rows": 32,
+      "checked_columns": 32,
+      "max_abs_error": 0.0
+    }
+  },
+  {
+    "shape": [
+      2048,
+      151936,
+      1536
+    ],
+    "selected": {
+      "policy": "sm121_g256_measured",
+      "compute_capability": [
+        12,
+        1
+      ],
+      "backend": "cutlass",
+      "config_id": 23
+    },
+    "correctness": {
+      "checked_rows": 32,
+      "checked_columns": 32,
+      "max_abs_error": 0.0
+    }
+  }
+]

@@ -1,0 +1,6 @@
+# Preserve measured CSV bytes (including CRLF) so archived hashes stay valid.
+*.csv -text whitespace=cr-at-eol
+
+# Original compiler dumps retain their whitespace for provenance checks.
+benchmarks/results/cutlass/optimized/resource-usage.txt -text -whitespace
+benchmarks/results/cutlass/residual-gap/*-resource.txt -text -whitespace

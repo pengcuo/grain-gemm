@@ -1,0 +1,39 @@
+{
+  "variant": "minimum_k_guard",
+  "configs": [
+    11,
+    15,
+    23
+  ],
+  "source_sha256": {
+    "grain_cutlass.cu": "b321e25c4b6e965b2ff99c2351b9f094d0922f45895b91c9355d644e38b437e8",
+    "grain_cutlass_collective.hpp": "482a26e13af8acd2e097deabcc4b29cefe5c3664f5223ec952638937a26ff80c",
+    "grain_cutlass_epilogue.hpp": "a4a7d9c0b20322880eee6afe5a4f690096a0dac7a0012ee16a5e243dfd11bfcd",
+    "grain_cutlass_kernel.hpp": "2adaed4c141a595fa91b72620329c8341dcb31ebcd8008a131fa8a65f455b21f"
+  },
+  "original_source_sha256": {
+    "grain_cutlass.cu": "6f938f78cb2b3c150dc767764bec4045316e21e315bc274277c4d2488d65a812",
+    "grain_cutlass_collective.hpp": "482a26e13af8acd2e097deabcc4b29cefe5c3664f5223ec952638937a26ff80c",
+    "grain_cutlass_epilogue.hpp": "a4a7d9c0b20322880eee6afe5a4f690096a0dac7a0012ee16a5e243dfd11bfcd",
+    "grain_cutlass_kernel.hpp": "d3158b84df2caf6b9444570e460497afb51b2678dea934601c417dd22f21e6c2"
+  },
+  "command": [
+    "/usr/local/cuda/bin/nvcc",
+    "-std=c++17",
+    "-O3",
+    "-arch=sm_121",
+    "-shared",
+    "-Xcompiler",
+    "-fPIC",
+    "--expt-relaxed-constexpr",
+    "-Xptxas=-v",
+    "-I",
+    "/home/pengcuo/spark/experiments/grain-cutlass-comparison/cutlass/include",
+    "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/minimum_k_guard/grain_cutlass.cu",
+    "-o",
+    "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/minimum_k_guard/libgrain_cutlass.so"
+  ],
+  "cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+  "nvcc_version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Aug_20_01:57:39_PM_PDT_2025\nCuda compilation tools, release 13.0, V13.0.88\nBuild cuda_13.0.r13.0/compiler.36424714_0",
+  "library_sha256": "411ca1be0d55df19e6ac4db7ba29052742245545290dc4950c8200e72aa7a7b7"
+}

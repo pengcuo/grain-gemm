@@ -56,6 +56,13 @@ def _dispatch_table():
     return json.loads(path.read_text()) if path.exists() else {"square_configs": {}}
 
 
+@lru_cache(maxsize=1)
+def _cutlass_dispatch_table():
+    """Measurements for explicit CUTLASS selection, independent of auto policy."""
+    path = Path(__file__).with_name("kernels") / "configs" / "sm121_g256_cutlass.json"
+    return json.loads(path.read_text()) if path.exists() else {"configs": {}}
+
+
 def _native_compatible(a, b, scale_a, scale_b, group_size, output_dtype):
     m, k = a.shape
     n = b.shape[1]
@@ -68,26 +75,30 @@ def _native_compatible(a, b, scale_a, scale_b, group_size, output_dtype):
             and scale_a.is_contiguous() and scale_b.is_contiguous())
 
 
-def get_kernel_config(a, b, *, group_size=256, output_dtype=torch.float32,
+def get_kernel_config(a, b, *, group_size=256, output_dtype=torch.bfloat16,
                       scale_a=None, scale_b=None, backend="auto"):
     """Describe the selected kernel without compiling or benchmarking it.
 
-    Pass the same dtype and scale tensors as int8_gemm for an exact dispatch
-    description. Omitted scales disable selection of the native fast path.
+    Output defaults to BF16, matching int8_gemm. Pass the same dtype and scale
+    tensors for an exact dispatch description. Omitted scales disable selection
+    of the native fast path.
     The measured table is specific to SM121/G256/BF16 and the documented layout;
     other architectures and shapes retain a portable Triton implementation.
     """
-    if backend not in ("auto", "triton", "cuda"):
-        raise ValueError("backend must be 'auto', 'triton', or 'cuda'")
+    if backend not in ("auto", "triton", "cuda", "cutlass"):
+        raise ValueError("backend must be 'auto', 'triton', 'cuda', or 'cutlass'")
     capability = torch.cuda.get_device_capability(a.device)
     m, k = a.shape
     n = b.shape[1]
     aligned = (a.stride() == (k, 1) and b.stride() == (1, k)
                and k % 256 == 0 and min(m, n) >= 64)
     table = _dispatch_table()
-    entry = (table["square_configs"].get(str(m))
-             if capability == (12, 1) and m == n == k and group_size == 256
-             and aligned and output_dtype == torch.bfloat16 else None)
+    entry = None
+    if (capability == (12, 1) and group_size == 256
+            and aligned and output_dtype == torch.bfloat16):
+        # Rectangular measurements apply only to the exact M/N/K tuple.
+        entry = (table["square_configs"].get(str(m)) if m == n == k else
+                 table.get("rectangular_configs", {}).get(f"{m}x{n}x{k}"))
     if capability == (12, 1) and group_size == 256 and aligned:
         config = dict(backend="triton", block_m=64, block_n=128,
                       num_warps=8, num_stages=3, swizzle=8)
@@ -99,6 +110,22 @@ def get_kernel_config(a, b, *, group_size=256, output_dtype=torch.float32,
     if entry:
         config = dict(entry["triton"])
         policy = "sm121_g256_measured"
+    if backend == "cutlass":
+        from .kernels import cutlass
+        if capability != (12, 1) or not _native_compatible(
+                a, b, scale_a, scale_b, group_size, output_dtype):
+            raise ValueError("cutlass requires SM121, G256, BF16 output, M/N multiples of 64, "
+                             "K a positive multiple of 256, aligned contiguous A and B.T, "
+                             "and contiguous FP32 scales")
+        if not cutlass.is_available():
+            raise RuntimeError("CUTLASS kernel is not built; run tools/build_cutlass.py --cutlass-dir PATH")
+        cutlass_entry = _cutlass_dispatch_table().get("configs", {}).get(f"{m}x{n}x{k}")
+        measured = (cutlass_entry["config"] if cutlass_entry else
+                    entry.get("cutlass") if entry else None)
+        config = dict(measured or dict(backend="cutlass", config_id=(
+            7 if m % 128 == n % 128 == 0 else 0)))
+        policy = "sm121_g256_measured" if measured else "sm121_g256_cutlass_explicit"
+        return dict(policy=policy, compute_capability=list(capability), **config)
     wants_native = backend == "cuda" or (backend == "auto" and entry
                                         and entry["selected"]["backend"] == "cuda")
     if wants_native:
@@ -120,24 +147,26 @@ def get_kernel_config(a, b, *, group_size=256, output_dtype=torch.float32,
 
 
 def int8_gemm(a, b, scale_a, scale_b, *, group_size=256,
-              output_dtype=torch.float32, backend="auto"):
+              output_dtype=torch.bfloat16, backend="auto"):
     """Compute INT8 A[M,K] @ B[K,N] with independent row/column K-group scales.
 
     FP32 scale shapes are [M, ceil(K/G)] and [ceil(K/G), N]. Each G-element dot
     product accumulates in INT32, then contributes to an FP32 scaled sum. The
-    result is cast once to FP32 (default), FP16 or BF16. G can be 32/64/128/256.
+    result is cast once to BF16 (default), FP16 or FP32. G can be 32/64/128/256.
     All inputs must share an SM80+ CUDA device; positive-stride views and tails
     are supported without packing. Quantization and autograd are not included.
 
     backend='auto' selects settings by architecture, shape and layout;
     backend='triton' explicitly selects Triton; backend='cuda' requires the optional
-    native CuTe build and its supported layout. Auto falls back to Triton when
+    native CuTe build and its supported layout. backend='cutlass' explicitly
+    selects the optional CUTLASS collective backend with the same native layout.
+    Auto falls back to Triton when
     the native build or layout is unavailable. Warm up the
     function before capturing it in a CUDA graph. No tuning runs occur inside
     this call.
     """
-    if backend not in ("auto", "triton", "cuda"):
-        raise ValueError("backend must be 'auto', 'triton', or 'cuda'")
+    if backend not in ("auto", "triton", "cuda", "cutlass"):
+        raise ValueError("backend must be 'auto', 'triton', 'cuda', or 'cutlass'")
     m, n, k = _validate(a, b, scale_a, scale_b, group_size, output_dtype)
     with torch.cuda.device(a.device):
         if m == 0 or n == 0 or k == 0:
@@ -147,7 +176,10 @@ def int8_gemm(a, b, scale_a, scale_b, *, group_size=256,
             a, b, group_size=group_size, output_dtype=output_dtype,
             scale_a=scale_a, scale_b=scale_b, backend=backend,
         )
-        if config["backend"] == "cuda":
+        if config["backend"] == "cutlass":
+            from .kernels import cutlass
+            cutlass.launch(a, b, scale_a, scale_b, result, config["config_id"])
+        elif config["backend"] == "cuda":
             from .kernels import cuda
             cuda.launch(a, b, scale_a, scale_b, result, config["config_id"])
         else:

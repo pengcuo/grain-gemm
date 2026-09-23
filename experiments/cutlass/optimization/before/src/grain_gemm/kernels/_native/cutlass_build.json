@@ -1,0 +1,11 @@
+{
+  "architecture": "sm_121",
+  "cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+  "tested_cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+  "nvcc_version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Aug_20_01:57:39_PM_PDT_2025\nCuda compilation tools, release 13.0, V13.0.88\nBuild cuda_13.0.r13.0/compiler.36424714_0",
+  "source_sha256": {
+    "grain_cutlass.cu": "b49d5ed9a8407938c62a6e3fec791e70f79a39331f227e21fe08199750482459",
+    "grain_cutlass_collective.hpp": "2de942696e43fe36f3ff703f6da32b8f2645b598dd94e7633b86668700b7795e",
+    "grain_cutlass_kernel.hpp": "d3158b84df2caf6b9444570e460497afb51b2678dea934601c417dd22f21e6c2"
+  }
+}

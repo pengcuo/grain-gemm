@@ -1,0 +1,5 @@
+========= COMPUTE-SANITIZER
+/home/pengcuo/spark/venv/lib/python3.12/site-packages/torch/_subclasses/functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+36 isolated variant launches passed full-output reference checks
+========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)

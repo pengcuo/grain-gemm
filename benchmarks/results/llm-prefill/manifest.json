@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "archive": "historical measured results; no new GPU run",
+  "files": [
+    {
+      "path": "results.json",
+      "source_file": "grain-llm-prefill-g256/results.json",
+      "sha256": "6d5da3fabffcbd06e2b78d0ccce118e156f6e587573bd715a71ccaebcb7bef85",
+      "bytes": 992501,
+      "byte_preserved": true
+    },
+    {
+      "path": "results.csv",
+      "source_file": "grain-llm-prefill-g256/results.csv",
+      "sha256": "068a102e79cbd284bd5990f6fedd63351d99345c2d02881a933fdc91aba5b641",
+      "bytes": 11662,
+      "byte_preserved": true
+    },
+    {
+      "path": "report.md",
+      "source_file": "grain-llm-prefill-g256/report.md",
+      "source_sha256": "01b021ccc89a7a134ce463f36ed778ea09a5d9275661ee8d37f478a8a423e3b0",
+      "sha256": "277b960c538de6d635ee59046e87162b246611efa5017f3d1c6af7837d3f9f0e",
+      "bytes": 19632,
+      "byte_preserved": false,
+      "changes": "Relative publication links and explicit historical dispatch/API state; measured table values unchanged."
+    }
+  ]
+}

@@ -32,7 +32,7 @@ where = ["src"]
 testpaths = ["tests"]
 
 [tool.setuptools.package-data]
-grain_gemm = ["kernels/configs/*.json", "kernels/csrc/*.cu"]
+grain_gemm = ["kernels/configs/*.json", "kernels/csrc/*.cu", "kernels/csrc/*.hpp"]
 
 [tool.setuptools.exclude-package-data]
 grain_gemm = ["kernels/_native/*"]

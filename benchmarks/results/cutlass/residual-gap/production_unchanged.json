@@ -1,0 +1,7 @@
+{
+  "grain_cutlass_kernel.hpp": true,
+  "grain_cutlass_collective.hpp": true,
+  "grain_cutlass_epilogue.hpp": true,
+  "production_cutlass_sha256": "e44f2c0d8679a8374d42bb0e26929c8e8ace158fe908f14cfc0bdefcf177ce2b",
+  "production_cute_sha256": "4c1940d5105732617cebb3b799a753a66565061d5e3440b2af8bd133e573c0ce"
+}

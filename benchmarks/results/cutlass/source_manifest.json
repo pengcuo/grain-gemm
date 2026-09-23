@@ -1,0 +1,621 @@
+{
+  "schema": 1,
+  "note": "Raw JSON/CSV and logs are copied byte-for-byte; absolute source paths and original hashes are preserved as historical provenance, not portable file locations. Summary JSON files are explicitly derived. Dynamic libraries, full SASS dumps and third-party checkout are excluded.",
+  "credential_scan": {
+    "method": "High-confidence private-key/token/access-key/credential-URL patterns over source text before copy",
+    "findings": 0
+  },
+  "files": [
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_1024_1024_1536.json",
+      "path": "optimized/results/case_1024_1024_1536.json",
+      "bytes": 73705,
+      "sha256": "b441e506a184d8ef96692a0d4f5c458c770723f33a7d8afe39a5f1ca5b81c4fd",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_1024_151936_1536.json",
+      "path": "optimized/results/case_1024_151936_1536.json",
+      "bytes": 73286,
+      "sha256": "ce74c719ed8db35654cc03d1d5f6f50bbdd0acf0bfb8e20ae6d4c5220a26e926",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_1024_1536_1024.json",
+      "path": "optimized/results/case_1024_1536_1024.json",
+      "bytes": 73690,
+      "sha256": "75ed91cdf8e4968d29aae2fd5422cad9418ea989d07a66a0125139cb9d271073",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_1024_1536_3072.json",
+      "path": "optimized/results/case_1024_1536_3072.json",
+      "bytes": 73144,
+      "sha256": "697544a390465f176d839860ca39f0850a0c0874d1df6fd4e8002b4b6392ba17",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_1024_2048_1536.json",
+      "path": "optimized/results/case_1024_2048_1536.json",
+      "bytes": 73365,
+      "sha256": "45d4148bc3da4ec01b2e9edbd970e481f6e835f29a2eb76cf29a923e5a21cddd",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_1024_262144_1536.json",
+      "path": "optimized/results/case_1024_262144_1536.json",
+      "bytes": 73165,
+      "sha256": "d11c6873857d7c7e6e3dbd2c76be186b63c721b0bd0255d0626ecf5f60e3b7fd",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_1024_3072_1536.json",
+      "path": "optimized/results/case_1024_3072_1536.json",
+      "bytes": 73122,
+      "sha256": "9a801cdfa9f34a312dd5dea726060f47fd8384f35c757dd824359fde9942b193",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_1024_4096_1536.json",
+      "path": "optimized/results/case_1024_4096_1536.json",
+      "bytes": 73935,
+      "sha256": "44872298c510c84bc87cc9d0a856555c278e22ee4de0a594a852f893047fca08",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_1024_512_1536.json",
+      "path": "optimized/results/case_1024_512_1536.json",
+      "bytes": 73990,
+      "sha256": "ea743b60fa186a82f7ca6606b628dc0ec9e28d2bb1d664fa1be716b25ec9dac7",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_2048_1024_1536.json",
+      "path": "optimized/results/case_2048_1024_1536.json",
+      "bytes": 73310,
+      "sha256": "6d1cee8233f1803576e6cf39e0a6c663de3ee33601e76e0679f0f62c485eb175",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_2048_151936_1536.json",
+      "path": "optimized/results/case_2048_151936_1536.json",
+      "bytes": 73179,
+      "sha256": "d0464d5d5611b2a74b950b63f357fe3b55053c11b23b4a5e5cad772e59676b6b",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_2048_1536_1024.json",
+      "path": "optimized/results/case_2048_1536_1024.json",
+      "bytes": 73274,
+      "sha256": "f22630098b9aa29f313dd235f1671419df07497e1dca0f56652147d79f855137",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_2048_1536_3072.json",
+      "path": "optimized/results/case_2048_1536_3072.json",
+      "bytes": 74114,
+      "sha256": "e79d9a9643c88bcd10ab8f53a6255b92f75e931018145e051a8867f1463e95de",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_2048_2048_1536.json",
+      "path": "optimized/results/case_2048_2048_1536.json",
+      "bytes": 74097,
+      "sha256": "4362aa10c2e0957445b46c5fe12a0c9b61fc67c1982b264fe4ef51d4a34ad6ce",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_2048_262144_1536.json",
+      "path": "optimized/results/case_2048_262144_1536.json",
+      "bytes": 74004,
+      "sha256": "42bf86ac477c8f47379d640d143763a106b17cb6f4ae64961762684c65b33a14",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_2048_3072_1536.json",
+      "path": "optimized/results/case_2048_3072_1536.json",
+      "bytes": 74032,
+      "sha256": "7cd846e3c5be0ae55e775e37021612f78e62c27f1cc580a6533d5a0ac4a324d4",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_2048_4096_1536.json",
+      "path": "optimized/results/case_2048_4096_1536.json",
+      "bytes": 73947,
+      "sha256": "351fb76016d71a8ceca28be4020e45e3a735fddc17393fab0b72c6b202a67eeb",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/case_2048_512_1536.json",
+      "path": "optimized/results/case_2048_512_1536.json",
+      "bytes": 73749,
+      "sha256": "cae0823528dfdb706f440007b5a88354c21146279f38a76b89555b5414e49ed0",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/results.csv",
+      "path": "optimized/results/results.csv",
+      "bytes": 20107,
+      "sha256": "50825b131d0ac77a97a39c895fe893c248159d6378d1285cdb8f3996987c46c2",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/audit_before_integration.json",
+      "path": "optimized/audit_before_integration.json",
+      "bytes": 976,
+      "sha256": "72bf005b45d8b66f0401022034abfb86d1ad1a747789a22a4a696bb67716b4cf",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/audit_snapshot.json",
+      "path": "optimized/audit_snapshot.json",
+      "bytes": 976,
+      "sha256": "72bf005b45d8b66f0401022034abfb86d1ad1a747789a22a4a696bb67716b4cf",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/binary-audit.json",
+      "path": "optimized/binary-audit.json",
+      "bytes": 12043,
+      "sha256": "dbeb5128ba830e6045de5e1b48387d4e7b0dfa72c6f81d8d9ac96a60b3631666",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/public_api_checks.json",
+      "path": "optimized/public_api_checks.json",
+      "bytes": 705,
+      "sha256": "be42373a3f6593f0286c9ade10dff27bc8c2c24f5f4e392afdf894470d0bc6d4",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before_hashes.json",
+      "path": "optimized/before_hashes.json",
+      "bytes": 2110,
+      "sha256": "da994e777dd3bc01d2e5ffd24bd1bb36a8a153a269dfeedcfd88cc4c13ea51ef",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/scope.json",
+      "path": "optimized/scope.json",
+      "bytes": 1228,
+      "sha256": "bb1f715b337fb738be7ced8eae60e68e15cda1adad7e90921f2a4346a20ded37",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/memcheck.log",
+      "path": "optimized/memcheck.log",
+      "bytes": 140,
+      "sha256": "67fadbb9a6db3dd742c0e5923c4e4eee664d92285c71d75e6324cafebd2d7d99",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/racecheck.log",
+      "path": "optimized/racecheck.log",
+      "bytes": 178,
+      "sha256": "13ea6cc53170c2a05840c0aee41b20cf17093a4da33744c2c2672ac160423f51",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/pytest_integrated.log",
+      "path": "optimized/pytest_integrated.log",
+      "bytes": 820,
+      "sha256": "da77db4e965ce2f11dbfb88923d648b3d13f5d2d4d07bde11ea3b4470aafd46f",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/cutlass_build.json",
+      "path": "optimized/cutlass_build.json",
+      "bytes": 825,
+      "sha256": "f553553ba0f8257df3aee3b1edb06dd5829bfe1723836ba800ec1dcea0d084ae",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/build-command.json",
+      "path": "optimized/build-command.json",
+      "bytes": 428,
+      "sha256": "3de64a6484e0c3c43b87ff09d967a971daea0ce70840cdc7fbe31b381edfc70b",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/resource-usage.txt",
+      "path": "optimized/resource-usage.txt",
+      "bytes": 30193,
+      "sha256": "f17d67687511b5fbf2382f9ae385ebd9271c9f5f96daf1bd0e67aae77adcadd9",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/report.md",
+      "path": "optimized/report.original.txt",
+      "bytes": 5894,
+      "sha256": "0e28eb0226819a5cc03c27a12b79f6139827f05e3d97418aa20df039aed415a5",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/results/report.md",
+      "path": "optimized/results/report.original.txt",
+      "bytes": 6833,
+      "sha256": "dcc15e17ebf28d9cd2c939f7a0149b2933ea3e53a0804680ef91b47f61dc0020",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_1024_1024_1536.json",
+      "path": "residual-gap/paired_run1/case_1024_1024_1536.json",
+      "bytes": 64752,
+      "sha256": "4d33ac1b3a3c0e17cc8d3ec31319150ca3e9fda9247590f57abb73cd8347be41",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_1024_1536_1024.json",
+      "path": "residual-gap/paired_run1/case_1024_1536_1024.json",
+      "bytes": 64710,
+      "sha256": "b8c8b311b4d74a2df9af878cc880898ca210604eef558db8f9580b55f5211d0c",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_1024_2048_1536.json",
+      "path": "residual-gap/paired_run1/case_1024_2048_1536.json",
+      "bytes": 64111,
+      "sha256": "e9a85999924c38406537e4e913cefef8a8b63e5c95134b0e5079771cdfce0f79",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_2048_151936_1536.json",
+      "path": "residual-gap/paired_run1/case_2048_151936_1536.json",
+      "bytes": 63803,
+      "sha256": "4150072668e0a9af3e7639c2e4b6e3cc1dc5e9a246c7d887e4c0099402fb3911",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_2048_1536_1024.json",
+      "path": "residual-gap/paired_run1/case_2048_1536_1024.json",
+      "bytes": 64136,
+      "sha256": "48a77241ca38359d67741294f678dccb025e51a8763f6e96a29e0bcab71300d4",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_1024_1024_1536.json",
+      "path": "residual-gap/paired_run2/case_1024_1024_1536.json",
+      "bytes": 75329,
+      "sha256": "4075860b11caed1cf7b9157af09e960d648259d3a7d58a44708407e133354604",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_1024_1536_1024.json",
+      "path": "residual-gap/paired_run2/case_1024_1536_1024.json",
+      "bytes": 75328,
+      "sha256": "daa9f35bb3b8b6b7cd6ec9b93bf0e6a50ea10692d3fba33da019f528a979c94f",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_1024_2048_1536.json",
+      "path": "residual-gap/paired_run2/case_1024_2048_1536.json",
+      "bytes": 74639,
+      "sha256": "d40251cff58de76d14e4e14d0defec1c5e23cf5033dccdca34dd3d443e7c69b7",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_2048_151936_1536.json",
+      "path": "residual-gap/paired_run2/case_2048_151936_1536.json",
+      "bytes": 74224,
+      "sha256": "a1398af54530f2cbbe15afb52e8b44d1b2e34ae74df3772c68758698fbfe7a49",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_2048_1536_1024.json",
+      "path": "residual-gap/paired_run2/case_2048_1536_1024.json",
+      "bytes": 74637,
+      "sha256": "3f58d61a73a067cb43dc75604291b2894c035225494759dd99f7b1a3f4a1a7ef",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run3/case_1024_1024_1536.json",
+      "path": "residual-gap/paired_run3/case_1024_1024_1536.json",
+      "bytes": 64643,
+      "sha256": "9fc717a2c596c6abce9991c79a64dc024d37d261c4289860aeb3542cf8e5c942",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run3/case_1024_1536_1024.json",
+      "path": "residual-gap/paired_run3/case_1024_1536_1024.json",
+      "bytes": 64680,
+      "sha256": "dd5b185c55208e836c72bc29359af625d3a0bc81d89dee4dbfa4d2adfddb74c1",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run3/case_1024_2048_1536.json",
+      "path": "residual-gap/paired_run3/case_1024_2048_1536.json",
+      "bytes": 64141,
+      "sha256": "0125a0c05729d8ce81f22fff6fcbe7e546e8bdda4ba798654c43cf57094c9c7b",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run3/case_2048_151936_1536.json",
+      "path": "residual-gap/paired_run3/case_2048_151936_1536.json",
+      "bytes": 63764,
+      "sha256": "928eed51d0b264be1200abc53bc9ed22cab2a97244545b6ddef4de313f71b62c",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run3/case_2048_1536_1024.json",
+      "path": "residual-gap/paired_run3/case_2048_1536_1024.json",
+      "bytes": 64045,
+      "sha256": "2bdd19865e7c5346a08c9e8876dd928481f919bacefe05d87c7e0c9036f18484",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_m4096/case_4096_1024_1536.json",
+      "path": "residual-gap/paired_m4096/case_4096_1024_1536.json",
+      "bytes": 54332,
+      "sha256": "e27bcc406c81742120681e9f5c2cecbb8df910ec19acf3b9b1004ec81609ef6d",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_m4096/case_4096_151936_1536.json",
+      "path": "residual-gap/paired_m4096/case_4096_151936_1536.json",
+      "bytes": 54287,
+      "sha256": "9074bd06226557cd2766f9048efdd154b47000a968842a3dfd790008ab6f1e6b",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_m4096/case_4096_1536_1024.json",
+      "path": "residual-gap/paired_m4096/case_4096_1536_1024.json",
+      "bytes": 53994,
+      "sha256": "c767238e0a31dae04999ca4ed4dc667c0a8c7224e89a1220fd0900e9fa237658",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_m4096/case_4096_2048_1536.json",
+      "path": "residual-gap/paired_m4096/case_4096_2048_1536.json",
+      "bytes": 54163,
+      "sha256": "f145ef10464bfd14c2ae3dfb15739fb91f12f88e6c9a2791691661457a8614a0",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_m4096/commands.json",
+      "path": "residual-gap/paired_m4096/commands.json",
+      "bytes": 2942,
+      "sha256": "c973b15ba70b40753d83d09883be44efa5743eed9bcf458c4de8da9f416bf17f",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_m4096/results.csv",
+      "path": "residual-gap/paired_m4096/results.csv",
+      "bytes": 5182,
+      "sha256": "d62e1e0340caa3a890dbc6673db46714f8ba892e9321ff24d959f7e5ccad08b6",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired-audit.json",
+      "path": "residual-gap/paired-audit.json",
+      "bytes": 133581,
+      "sha256": "c008f616f86808b491254fec87c4f0cb16199289a9afaface8ea3f7f9996165e",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired-m4096-audit.json",
+      "path": "residual-gap/paired-m4096-audit.json",
+      "bytes": 26429,
+      "sha256": "17b0d92662476efaadcc4ad616e6b71db13560d9a3c17ea5375dac4bc86dd1c6",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired-m4096-display-audit.json",
+      "path": "residual-gap/paired-m4096-display-audit.json",
+      "bytes": 252,
+      "sha256": "35455929633fecc336e011502d26db7fb2a164ec2e0b967678c5f908ee315563",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired-run1-cpu-audit.json",
+      "path": "residual-gap/paired-run1-cpu-audit.json",
+      "bytes": 47852,
+      "sha256": "4513dd17bf1a3e079d0a73d946761c8e704b0ff05e9e941912e92ea68d16cbdc",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired-run2-cpu-audit.json",
+      "path": "residual-gap/paired-run2-cpu-audit.json",
+      "bytes": 30043,
+      "sha256": "7be1eb271a9dcddb7468dc620f48754fad4c9bf7d8bbad8a5fa85ae4927793d8",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/positive-k-clear-evidence.json",
+      "path": "residual-gap/positive-k-clear-evidence.json",
+      "bytes": 22253,
+      "sha256": "e8da64ed76190902b2dd12d8fd9397b34fa81dc0487cd141d02cbca00bb0a6f8",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/ef-audit-summary.json",
+      "path": "residual-gap/ef-audit-summary.json",
+      "bytes": 5139,
+      "sha256": "eed8fc299fee32c11c51747ceaa1be84998b0f983157d8cdeaf65a95a2a97fcb",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/original-source-hashes.json",
+      "path": "residual-gap/original-source-hashes.json",
+      "bytes": 393,
+      "sha256": "e5da119ce690b9b493af1576ab15f7707fa7e70a37e3a9604b9d1491eb187bb9",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/production_unchanged.json",
+      "path": "residual-gap/production_unchanged.json",
+      "bytes": 312,
+      "sha256": "3b929c1f880e8ab2b28bf37608c4dda62c0a5b9e4e1fde75743ba5d3094cbc72",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/results_run3.csv",
+      "path": "residual-gap/results_run3.csv",
+      "bytes": 1390,
+      "sha256": "48dbf2e7972cd1cb31ee187e2dc9e21b2b44d0bf7dc82434c301ea87f5fac620",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/cl11-cu3-opcodes.csv",
+      "path": "residual-gap/cl11-cu3-opcodes.csv",
+      "bytes": 1138,
+      "sha256": "9ab71013e28fc683b2f1fd62c97d4e81a19c88c07abea4f867dd7db65fa397d6",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/cl15-cu7-opcodes.csv",
+      "path": "residual-gap/cl15-cu7-opcodes.csv",
+      "bytes": 1130,
+      "sha256": "fdfa099159948c9a61e4792ec7a26a291b5433889409cba97fe53129cef50c93",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/cl23-cu15-opcodes.csv",
+      "path": "residual-gap/cl23-cu15-opcodes.csv",
+      "bytes": 1157,
+      "sha256": "807da399a86302c483a083ca87c56df9caf855c9710420d72ae35369172ae439",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/cutlass-resource.txt",
+      "path": "residual-gap/cutlass-resource.txt",
+      "bytes": 30193,
+      "sha256": "f17d67687511b5fbf2382f9ae385ebd9271c9f5f96daf1bd0e67aae77adcadd9",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/cute-resource.txt",
+      "path": "residual-gap/cute-resource.txt",
+      "bytes": 32197,
+      "sha256": "ffb26fab2f0b5e6154c750f899760a1e8980d0f610a87828681ffea96347d73d",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/memcheck.log",
+      "path": "residual-gap/memcheck.log",
+      "bytes": 439,
+      "sha256": "6a9a79aea6adf679e97de112f825bfebb885ebb71361d0f11f158177ff9ee9a8",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/racecheck.log",
+      "path": "residual-gap/racecheck.log",
+      "bytes": 477,
+      "sha256": "772535c32e2916d238da23a13f593bf3e22b1eb4ce9d67d57ced1b0e6adf601f",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/memcheck_fixed_loop.log",
+      "path": "residual-gap/memcheck_fixed_loop.log",
+      "bytes": 439,
+      "sha256": "a48b044baae651f1725bd3c2d60ab19e4e6d7c7161705e57b45a3d751e91ae79",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/racecheck_fixed_loop.log",
+      "path": "residual-gap/racecheck_fixed_loop.log",
+      "bytes": 477,
+      "sha256": "e511c0e9ecf553525ec2b72f17c4ee0e986c441d1140a7c348d3e74049f77a22",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/memcheck_guard_ungrouped.log",
+      "path": "residual-gap/memcheck_guard_ungrouped.log",
+      "bytes": 455,
+      "sha256": "c91a42399c65d756f60f85efb657679524aa5b178abf4af80d59c6254d11c141",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/racecheck_guard_ungrouped.log",
+      "path": "residual-gap/racecheck_guard_ungrouped.log",
+      "bytes": 493,
+      "sha256": "fa4ba0e8a97daa6ec554a442551760326ba8c40b565538bf4b7f6c063d2fc8b8",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/ncu_probe.log",
+      "path": "residual-gap/ncu_probe.log",
+      "bytes": 347,
+      "sha256": "09da0df0ed1632b9889f9593c2676b8c6c8f400fc7dfef921e2257a50147b2ad",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1.log",
+      "path": "residual-gap/paired_run1.log",
+      "bytes": 2973,
+      "sha256": "616f460260721433cf0c95e6091894c7596e122b36e41730b062e7c226f9e6c8",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2.log",
+      "path": "residual-gap/paired_run2.log",
+      "bytes": 3204,
+      "sha256": "b71ab9b9347e6458da244e8823dd539495369ebf6e85cb2d6e7a3f100339edc0",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run3.log",
+      "path": "residual-gap/paired_run3.log",
+      "bytes": 2975,
+      "sha256": "dadf2b99879a0c4b28212af28bb9c888bad54f7c601aebfa25ff54c8db8c0cb0",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_m4096.log",
+      "path": "residual-gap/paired_m4096.log",
+      "bytes": 2217,
+      "sha256": "b590d7d3350411e99023c58177cd4cd4d13d9fffb654ac1ba078f032cdc03771",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/report.md",
+      "path": "residual-gap/report.original.txt",
+      "bytes": 7682,
+      "sha256": "d971218f42c81daa18dcaea11b1b091943ab430a22d980109b342b7c9bbd0d49",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/static-report.md",
+      "path": "residual-gap/static-report.original.txt",
+      "bytes": 8359,
+      "sha256": "721cee274bc61ebe96ca03da2374b209be7329d5a12d20861f6c7b7a361ba5b3",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired-run1-audit.md",
+      "path": "residual-gap/paired-run1-audit.original.txt",
+      "bytes": 9309,
+      "sha256": "70ab8c72127e35045f20fd4a54410e9803e964ff558dd4ceb11a820367bc344b",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired-run2-audit.md",
+      "path": "residual-gap/paired-run2-audit.original.txt",
+      "bytes": 5200,
+      "sha256": "91f3a33035490644656a96cd96402ea8663b968fecfebae5ee59e258bb64232d",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_m4096/report.md",
+      "path": "residual-gap/paired_m4096/report.original.txt",
+      "bytes": 5007,
+      "sha256": "d583d68618e7d899ebba21229c8a1ead4221b3917441bc83c7c2072d48e62b64",
+      "mode": "verbatim"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/static-comparison.json",
+      "source_sha256": "9a8df66dd46efa26a2586c9c25a78d36babffbfc816403022ca77415f5f2d84b",
+      "path": "residual-gap/static-comparison.summary.json",
+      "bytes": 517697,
+      "sha256": "af7024ec3f356d0033477729db0c5aba358584f6d61da54c21423e73cf638bfb",
+      "mode": "derived_without_instruction_arrays"
+    },
+    {
+      "source_path": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/binary-audit.json",
+      "source_sha256": "c86fe38d64a3b44e26a8fff0091c0aea6c023e3931990cd1626f178c592caa28",
+      "path": "residual-gap/binary-audit.summary.json",
+      "bytes": 55064,
+      "sha256": "77daf647ee8c9525dc92ee4ef8592900738d5796e9069bf1011f1c435c53169f",
+      "mode": "derived_without_instruction_arrays"
+    }
+  ]
+}

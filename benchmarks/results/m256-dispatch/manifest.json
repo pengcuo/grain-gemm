@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "archive": "historical measured results; no new GPU run",
+  "files": [
+    {
+      "path": "main_256_1024_1536.json",
+      "source_file": "grain-m256-root-cause/main_256_1024_1536.json",
+      "sha256": "4a204d94f40bce006ce7ea41e23de9f0de62693f6bc996684220dc1479f21859",
+      "bytes": 29954,
+      "byte_preserved": true
+    },
+    {
+      "path": "main_256_1536_1024.json",
+      "source_file": "grain-m256-root-cause/main_256_1536_1024.json",
+      "sha256": "24b42d244f0564cb8c7e802ba07994cc257593025dbfe76f02f7fa185713231b",
+      "bytes": 29806,
+      "byte_preserved": true
+    },
+    {
+      "path": "main_256_2048_1536.json",
+      "source_file": "grain-m256-root-cause/main_256_2048_1536.json",
+      "sha256": "b116487b54a3c223889cc083ea9e752f2f5f5a00ea5529e99ad23970c1373fa2",
+      "bytes": 30117,
+      "byte_preserved": true
+    },
+    {
+      "path": "n_sweep_256_1408_1536.json",
+      "source_file": "grain-m256-root-cause/n_sweep_256_1408_1536.json",
+      "sha256": "3b6222b39fc840ab938b4b1f3a1d5b31e57128039407d8fa72b0193b42a89584",
+      "bytes": 8795,
+      "byte_preserved": true
+    },
+    {
+      "path": "n_sweep_256_1536_1536.json",
+      "source_file": "grain-m256-root-cause/n_sweep_256_1536_1536.json",
+      "sha256": "dcb57c70c565be35f9b24c2f901cd15d04d8dc29cfb03aeba0bedeb6dc020060",
+      "bytes": 8838,
+      "byte_preserved": true
+    },
+    {
+      "path": "n_sweep_256_1664_1536.json",
+      "source_file": "grain-m256-root-cause/n_sweep_256_1664_1536.json",
+      "sha256": "58f09e6fa0bbe35d6abffaa3164336c207663b7ae9394e6dca3e4c8ab2809bea",
+      "bytes": 8831,
+      "byte_preserved": true
+    },
+    {
+      "path": "n_sweep_256_2944_1536.json",
+      "source_file": "grain-m256-root-cause/n_sweep_256_2944_1536.json",
+      "sha256": "9adbf81ffeecc90964e8cd1ffd5a1f25f151d1fb109dc795eaed27894bd20dea",
+      "bytes": 8822,
+      "byte_preserved": true
+    },
+    {
+      "path": "n_sweep_256_3072_1536.json",
+      "source_file": "grain-m256-root-cause/n_sweep_256_3072_1536.json",
+      "sha256": "e4264be7fad6a018142c2c32d892b487c4ea792210e69c705b29d2d0e1e1bccc",
+      "bytes": 8810,
+      "byte_preserved": true
+    },
+    {
+      "path": "n_sweep_256_3200_1536.json",
+      "source_file": "grain-m256-root-cause/n_sweep_256_3200_1536.json",
+      "sha256": "2f26a0f8820540ed01bee360a979cecebfcdcb5c67e2e0770edbf57861799118",
+      "bytes": 8803,
+      "byte_preserved": true
+    },
+    {
+      "path": "m_sweep_128_1024_1536.json",
+      "source_file": "grain-m256-root-cause/m_sweep_128_1024_1536.json",
+      "sha256": "c59c6639e065bda6f30ffd59e5ea7a42f9034771cb4a4dfb39c5acae253bcd93",
+      "bytes": 8740,
+      "byte_preserved": true
+    },
+    {
+      "path": "m_sweep_384_1024_1536.json",
+      "source_file": "grain-m256-root-cause/m_sweep_384_1024_1536.json",
+      "sha256": "75cf69dc5dfda4916af9974bf301d7ec796af98b1e848b1b1275040494ebd025",
+      "bytes": 8841,
+      "byte_preserved": true
+    },
+    {
+      "path": "m_sweep_512_1024_1536.json",
+      "source_file": "grain-m256-root-cause/m_sweep_512_1024_1536.json",
+      "sha256": "28a270f4ab440ee231d7fe863eb6cb0f94f120a7f53bcf0f611e411ec329bbce",
+      "bytes": 8819,
+      "byte_preserved": true
+    },
+    {
+      "path": "m_sweep_768_1024_1536.json",
+      "source_file": "grain-m256-root-cause/m_sweep_768_1024_1536.json",
+      "sha256": "de1e69f9e153bf0a686c672b0aa181e17618a0fc8b21ae12c373f82e06100f3a",
+      "bytes": 8811,
+      "byte_preserved": true
+    },
+    {
+      "path": "m_sweep_896_1024_1536.json",
+      "source_file": "grain-m256-root-cause/m_sweep_896_1024_1536.json",
+      "sha256": "e8ac9627eedb14525acaaeeefa0b072959034ff803a2a7f9d20e5f03011af40e",
+      "bytes": 8810,
+      "byte_preserved": true
+    },
+    {
+      "path": "results.csv",
+      "source_file": "grain-m256-root-cause/results.csv",
+      "sha256": "d08c72cffe8caa03cf6ef9f52a70596c84446ffa99cc5e04e07705ec656345f0",
+      "bytes": 9701,
+      "byte_preserved": true
+    },
+    {
+      "path": "occupancy.json",
+      "source_file": "grain-m256-root-cause/occupancy.json",
+      "sha256": "8d2f76d422f10369a7494d08cd6e8aaf33f5acaf25ae3f63b8b85d5b766b26bc",
+      "bytes": 9384,
+      "byte_preserved": true
+    },
+    {
+      "path": "static-audit.json",
+      "source_file": "grain-m256-root-cause/static-audit.json",
+      "sha256": "c7504e5bce1d38a23d4d252a42aced5de5cb9eeee3bae3ad9ee8c82bced74133",
+      "bytes": 231709,
+      "byte_preserved": true
+    },
+    {
+      "path": "static-audit.csv",
+      "source_file": "grain-m256-root-cause/static-audit.csv",
+      "sha256": "57c823d89a32ac80dc61d08c738ea86755f9b5c1f6bb14dfe0c189dc246a76d8",
+      "bytes": 3003,
+      "byte_preserved": true
+    },
+    {
+      "path": "static-audit-summary.txt",
+      "source_file": "grain-m256-root-cause/static-audit-summary.txt",
+      "sha256": "14a63b711f4f1698b1bcfbb42d082405c87f9907d6f7b9a7eca32345440cba1e",
+      "bytes": 2185,
+      "byte_preserved": true
+    },
+    {
+      "path": "ncu_launch_stats.csv",
+      "source_file": "grain-m256-root-cause/ncu_launch_stats.csv",
+      "sha256": "c048bf5f097ecf36d882f55b2ff716c81a8f7e1546ce22dbf91d6ed437167de5",
+      "bytes": 347,
+      "byte_preserved": true
+    },
+    {
+      "path": "report.md",
+      "source_file": "grain-m256-root-cause/report.md",
+      "source_sha256": "df855c7c533c94c6a5a4b4a102e0dc96df8ce9820e82c475b7f54d5d6a8a3b29",
+      "sha256": "e9345e779a13354476b028687249b63d236238c572ec8ea497098172063bd2a5",
+      "bytes": 13370,
+      "byte_preserved": false,
+      "changes": "Relative publication links and explicit historical dispatch/API state; measured table values unchanged."
+    },
+    {
+      "path": "static-audit.md",
+      "source_file": "grain-m256-root-cause/static-audit.md",
+      "source_sha256": "8e96889fa7b2997ce2d7c63527cb4961151b510ff0d06b0e85265b15e3ee9bff",
+      "sha256": "81983866b6619a15be652ac87dea07d5c7fbed96a375b740e1fbbb321e989995",
+      "bytes": 4749,
+      "byte_preserved": false,
+      "changes": "Relative publication links and explicit historical dispatch/API state; measured table values unchanged."
+    }
+  ]
+}

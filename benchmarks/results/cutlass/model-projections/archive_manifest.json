@@ -1,0 +1,269 @@
+{
+  "format": 1,
+  "files": [
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_1024_1024_1536.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_1024_1024_1536.json",
+      "sha256": "5d93697d299658e6df05e4f93da7f9e0f8387a24c8b45c321a4b15d490858d09",
+      "bytes": 38010
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_1024_151936_1536.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_1024_151936_1536.json",
+      "sha256": "b41473319ceff1a3104d193efe2c40ec43674f99d860f43e1c558b425fc9bfe2",
+      "bytes": 37828
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_1024_1536_1024.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_1024_1536_1024.json",
+      "sha256": "4049365be198cac9291f52a9ff1a7ca3363fca9eebdc8aca0f9aa6a7ebfb7404",
+      "bytes": 38016
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_1024_1536_3072.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_1024_1536_3072.json",
+      "sha256": "3ec02fbacb3bee7601ec761e3fc85351e00a30bba9e7685a74f6bd292ca3d096",
+      "bytes": 37786
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_1024_2048_1536.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_1024_2048_1536.json",
+      "sha256": "29fbca7fc85227094ca3c62ccad6d6dd5babb7aad0483eca385e3d2ccab0ffda",
+      "bytes": 37807
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_1024_262144_1536.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_1024_262144_1536.json",
+      "sha256": "397f517604dbdb6cfe865b8f9df1d61da9ad1ed9b3091a72ee5554e7741717f1",
+      "bytes": 37797
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_1024_3072_1536.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_1024_3072_1536.json",
+      "sha256": "b2e4805f3f4b908a649bc56a888e39094672a489c599b1318e4d5570c17be1e5",
+      "bytes": 37791
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_1024_4096_1536.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_1024_4096_1536.json",
+      "sha256": "4dd95dfad8d3568d0b14788f0f48fa17c96fa9fe0554b4ddb14d1ec4f4034534",
+      "bytes": 38120
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_1024_512_1536.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_1024_512_1536.json",
+      "sha256": "b99159be268eb63daab39c68438904cd577f1a3962f829a5ccdf48d117aedd2c",
+      "bytes": 38089
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_2048_1024_1536.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_2048_1024_1536.json",
+      "sha256": "8c9e0d85ab8a8fe94466314a60e207faff8c1d221cdabe33cb25c72c895c30d0",
+      "bytes": 37842
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_2048_151936_1536.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_2048_151936_1536.json",
+      "sha256": "c1e887348fe1bc919dcfdcf21371ead7a2fe77fa89389e6747dded96cbe4160c",
+      "bytes": 37817
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_2048_1536_1024.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_2048_1536_1024.json",
+      "sha256": "b57e86e3c0ce4918c0e62104489118db70b668d10e773b7c3c382d50115131ae",
+      "bytes": 37809
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_2048_1536_3072.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_2048_1536_3072.json",
+      "sha256": "dabf890a4131191f5f1a9a082032f4ca90d108b74cd851e1515817bfce48df07",
+      "bytes": 38186
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_2048_2048_1536.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_2048_2048_1536.json",
+      "sha256": "4190f5d810c5cac4e30b3b2d306b541b75934ebbfd4d5715e1fbc70189a0f702",
+      "bytes": 38147
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_2048_262144_1536.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_2048_262144_1536.json",
+      "sha256": "97bd727a3ba84b946db40d9789a245fa9bdfa9f75234e7e89f84aaa3bc4aef49",
+      "bytes": 38158
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_2048_3072_1536.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_2048_3072_1536.json",
+      "sha256": "038b218fe4a13689f37a8dfe3faf05f919621f853af979cf5a1ad5a72249bfe7",
+      "bytes": 38158
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_2048_4096_1536.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_2048_4096_1536.json",
+      "sha256": "c1c30e6272f2b7817953fd92a2774a86c8f712a7856d37515c3a247ee06015e3",
+      "bytes": 38135
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/case_2048_512_1536.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/case_2048_512_1536.json",
+      "sha256": "863763a3644f2e7f2970380f9ecaef39922c14027b020985631489926d99257f",
+      "bytes": 38006
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/report.md",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/report.md",
+      "sha256": "afd68a0ac0557f6a7ff8d73abfdc44f3a449c15762dc6cf545e184c6753af98b",
+      "bytes": 4580
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/results.csv",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/results/results.csv",
+      "sha256": "28221d9231eea8504da5c0bf081c19c68bb8d548452a616ac80941d930718188",
+      "bytes": 6169
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/overview.original.md",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/report.md",
+      "sha256": "419b5d320427bf778dc0d87b346d9e8125759266965dda07f78c7746e4b0d616",
+      "bytes": 4363
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/validation/scope.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/scope.json",
+      "sha256": "67f330df3660eb491062f7bfbfb8d74bde6867c94361335d8be7ceceaf954cd3",
+      "bytes": 1179
+    },
+    {
+      "file": "benchmarks/results/cutlass/model-projections/validation/audit.log",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/audit.log",
+      "sha256": "61d63195421568b5596f416152147680e21a9dd13d4ebf401b9156b36ef517be",
+      "bytes": 764
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/compare_cutlass.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/compare_cutlass.py",
+      "sha256": "2d792440374ab991119c8c7ba339d8ad26e7f753985655811616c21fa492e41c",
+      "bytes": 15503
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/tune_grain.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/tune_grain.py",
+      "sha256": "cca4a8f3a2d3c7d877e1497d59f03cf62a466e314aa23188cbfbe42db1c7a439",
+      "bytes": 997
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/__init__.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/__init__.py",
+      "sha256": "22c5685605c9d04d8168009cbead08dcb1d9000aaf606c4df633bb1f40c03d42",
+      "bytes": 531
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/gemm.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/gemm.py",
+      "sha256": "43bb659bfcd3ba587431ef59e8001d0d0debd9bddfe0724a4ae0624b72305aae",
+      "bytes": 9213
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/baselines/__init__.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/baselines/__init__.py",
+      "sha256": "b045e960f98bbc0d0ffc1d9ad4ad3e9ecff31d859fd5761dd0f20423dd14c211",
+      "bytes": 150
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/baselines/sglang.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/baselines/sglang.py",
+      "sha256": "cde6cf5e9cef6bb66a8da2af5cdb7a74bd744eee4ca50686bc39dae661953b81",
+      "bytes": 9139
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/kernels/__init__.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/kernels/__init__.py",
+      "sha256": "df3df411d10614aabefa0a3893e37899c67b80d984a70f2d82b6f334658f69ab",
+      "bytes": 71
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/kernels/triton.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/kernels/triton.py",
+      "sha256": "0e4834f409c64c3cffb4481a985948239c8d737bb53b805270eabe15f029da21",
+      "bytes": 2555
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/kernels/cutlass.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/kernels/cutlass.py",
+      "sha256": "c1150d1f5de5d9c55493aa94b349aff77a7de0130a6e02dbca8e22737da266f2",
+      "bytes": 3145
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/kernels/cuda.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/kernels/cuda.py",
+      "sha256": "5b9e259e223cd666b0ed09470a4ccceb2cd616db957a204445f4f7a5154932fe",
+      "bytes": 3698
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/kernels/_native/cutlass_build.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/kernels/_native/cutlass_build.json",
+      "sha256": "318f006109d04708b83053d381cc7f3fec156e5b5d6d44edaf27a2bcb47ae15e",
+      "bytes": 723
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/kernels/_native/build.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/kernels/_native/build.json",
+      "sha256": "6195046f5bbef742b799267da1d41f3cfc40d640c9b7a6c5ff9a109add04c116",
+      "bytes": 489
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/kernels/configs/sm121_g256.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/kernels/configs/sm121_g256.json",
+      "sha256": "a88ae37bff252d6da04eb80ac7d1bb77e05e31f31bfa36a99a60f09674b3c529",
+      "bytes": 10728
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/kernels/csrc/grain_cutlass.cu",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/kernels/csrc/grain_cutlass.cu",
+      "sha256": "b49d5ed9a8407938c62a6e3fec791e70f79a39331f227e21fe08199750482459",
+      "bytes": 6644
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/kernels/csrc/grain_cutlass_kernel.hpp",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/kernels/csrc/grain_cutlass_kernel.hpp",
+      "sha256": "d3158b84df2caf6b9444570e460497afb51b2678dea934601c417dd22f21e6c2",
+      "bytes": 5379
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/kernels/csrc/grain_cutlass_collective.hpp",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/kernels/csrc/grain_cutlass_collective.hpp",
+      "sha256": "2de942696e43fe36f3ff703f6da32b8f2645b598dd94e7633b86668700b7795e",
+      "bytes": 15617
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/measurement_sources/grain_gemm/kernels/csrc/grain_cute.cu",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/measurement_sources/grain_gemm/kernels/csrc/grain_cute.cu",
+      "sha256": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148",
+      "bytes": 20769
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/archive/compare_cutlass.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/compare_cutlass.py",
+      "sha256": "2d792440374ab991119c8c7ba339d8ad26e7f753985655811616c21fa492e41c",
+      "bytes": 15503
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/archive/tune_grain.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/tune_grain.py",
+      "sha256": "cca4a8f3a2d3c7d877e1497d59f03cf62a466e314aa23188cbfbe42db1c7a439",
+      "bytes": 997
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/archive/audit_results.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/audit_results.py",
+      "sha256": "16de572f7cd620b484ec9658f6a2510411a40a8c22fd5b46cfaa15b2dd82d5ee",
+      "bytes": 15917
+    },
+    {
+      "file": "experiments/cutlass/history/model-projections/archive/scope.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-m1024-m2048/scope.json",
+      "sha256": "67f330df3660eb491062f7bfbfb8d74bde6867c94361335d8be7ceceaf954cd3",
+      "bytes": 1179
+    }
+  ]
+}

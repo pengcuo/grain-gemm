@@ -1,0 +1,257 @@
+{
+  "format": 1,
+  "files": [
+    {
+      "file": "experiments/cutlass/optimization/before/tools/build_cutlass.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/tools/build_cutlass.py",
+      "sha256": "14afe6a01bdab6f81f6f3686c7f30862448b8a8fd8159964cc51160af21f7ae8",
+      "bytes": 2875
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/benchmarks/compare_cutlass.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/benchmarks/compare_cutlass.py",
+      "sha256": "e179a9de91fa6303cef4d63a24207445f9d95f12a678dfff81ab78d5ff080803",
+      "bytes": 15265
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/benchmarks/tune_grain.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/benchmarks/tune_grain.py",
+      "sha256": "5a848af3b4d0e07bf3831e09709e8235725186a932039693c4b8ad15bcc5a015",
+      "bytes": 7150
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/__init__.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/__init__.py",
+      "sha256": "22c5685605c9d04d8168009cbead08dcb1d9000aaf606c4df633bb1f40c03d42",
+      "bytes": 531
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/gemm.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/gemm.py",
+      "sha256": "43bb659bfcd3ba587431ef59e8001d0d0debd9bddfe0724a4ae0624b72305aae",
+      "bytes": 9213
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/baselines/__init__.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/baselines/__init__.py",
+      "sha256": "b045e960f98bbc0d0ffc1d9ad4ad3e9ecff31d859fd5761dd0f20423dd14c211",
+      "bytes": 150
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/baselines/sglang.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/baselines/sglang.py",
+      "sha256": "cde6cf5e9cef6bb66a8da2af5cdb7a74bd744eee4ca50686bc39dae661953b81",
+      "bytes": 9139
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/kernels/__init__.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/kernels/__init__.py",
+      "sha256": "df3df411d10614aabefa0a3893e37899c67b80d984a70f2d82b6f334658f69ab",
+      "bytes": 71
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/kernels/triton.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/kernels/triton.py",
+      "sha256": "0e4834f409c64c3cffb4481a985948239c8d737bb53b805270eabe15f029da21",
+      "bytes": 2555
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/kernels/cutlass.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/kernels/cutlass.py",
+      "sha256": "c1150d1f5de5d9c55493aa94b349aff77a7de0130a6e02dbca8e22737da266f2",
+      "bytes": 3145
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/kernels/cuda.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/kernels/cuda.py",
+      "sha256": "5b9e259e223cd666b0ed09470a4ccceb2cd616db957a204445f4f7a5154932fe",
+      "bytes": 3698
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/kernels/_native/cutlass_build.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/kernels/_native/cutlass_build.json",
+      "sha256": "318f006109d04708b83053d381cc7f3fec156e5b5d6d44edaf27a2bcb47ae15e",
+      "bytes": 723
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/kernels/_native/build.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/kernels/_native/build.json",
+      "sha256": "6195046f5bbef742b799267da1d41f3cfc40d640c9b7a6c5ff9a109add04c116",
+      "bytes": 489
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/kernels/configs/sm121_g256.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/kernels/configs/sm121_g256.json",
+      "sha256": "a88ae37bff252d6da04eb80ac7d1bb77e05e31f31bfa36a99a60f09674b3c529",
+      "bytes": 10728
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/kernels/csrc/grain_cutlass.cu",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/kernels/csrc/grain_cutlass.cu",
+      "sha256": "b49d5ed9a8407938c62a6e3fec791e70f79a39331f227e21fe08199750482459",
+      "bytes": 6644
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/kernels/csrc/grain_cutlass_kernel.hpp",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/kernels/csrc/grain_cutlass_kernel.hpp",
+      "sha256": "d3158b84df2caf6b9444570e460497afb51b2678dea934601c417dd22f21e6c2",
+      "bytes": 5379
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/kernels/csrc/grain_cutlass_collective.hpp",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/kernels/csrc/grain_cutlass_collective.hpp",
+      "sha256": "2de942696e43fe36f3ff703f6da32b8f2645b598dd94e7633b86668700b7795e",
+      "bytes": 15617
+    },
+    {
+      "file": "experiments/cutlass/optimization/before/src/grain_gemm/kernels/csrc/grain_cute.cu",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before/src/grain_gemm/kernels/csrc/grain_cute.cu",
+      "sha256": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148",
+      "bytes": 20769
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/tune_grain.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/tune_grain.py",
+      "sha256": "cca4a8f3a2d3c7d877e1497d59f03cf62a466e314aa23188cbfbe42db1c7a439",
+      "bytes": 997
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/compare_optimized.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/compare_optimized.py",
+      "sha256": "22b08483080df195a7afa704b51c8a956623980d8bc53253d74ad0b2b856646d",
+      "bytes": 16979
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/__init__.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/__init__.py",
+      "sha256": "22c5685605c9d04d8168009cbead08dcb1d9000aaf606c4df633bb1f40c03d42",
+      "bytes": 531
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/gemm.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/gemm.py",
+      "sha256": "43bb659bfcd3ba587431ef59e8001d0d0debd9bddfe0724a4ae0624b72305aae",
+      "bytes": 9213
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/baselines/__init__.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/baselines/__init__.py",
+      "sha256": "b045e960f98bbc0d0ffc1d9ad4ad3e9ecff31d859fd5761dd0f20423dd14c211",
+      "bytes": 150
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/baselines/sglang.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/baselines/sglang.py",
+      "sha256": "cde6cf5e9cef6bb66a8da2af5cdb7a74bd744eee4ca50686bc39dae661953b81",
+      "bytes": 9139
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/kernels/__init__.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/kernels/__init__.py",
+      "sha256": "df3df411d10614aabefa0a3893e37899c67b80d984a70f2d82b6f334658f69ab",
+      "bytes": 71
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/kernels/triton.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/kernels/triton.py",
+      "sha256": "0e4834f409c64c3cffb4481a985948239c8d737bb53b805270eabe15f029da21",
+      "bytes": 2555
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/kernels/cutlass.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/kernels/cutlass.py",
+      "sha256": "a8dbb32dcbcabf32b575e114b658f2965e5ad17a157ecc55018e62bfdfc5b60b",
+      "bytes": 3644
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/kernels/cuda.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/kernels/cuda.py",
+      "sha256": "5b9e259e223cd666b0ed09470a4ccceb2cd616db957a204445f4f7a5154932fe",
+      "bytes": 3698
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/kernels/_native/cutlass_build.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/kernels/_native/cutlass_build.json",
+      "sha256": "f553553ba0f8257df3aee3b1edb06dd5829bfe1723836ba800ec1dcea0d084ae",
+      "bytes": 825
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/kernels/_native/build.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/kernels/_native/build.json",
+      "sha256": "6195046f5bbef742b799267da1d41f3cfc40d640c9b7a6c5ff9a109add04c116",
+      "bytes": 489
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/kernels/configs/sm121_g256.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/kernels/configs/sm121_g256.json",
+      "sha256": "a88ae37bff252d6da04eb80ac7d1bb77e05e31f31bfa36a99a60f09674b3c529",
+      "bytes": 10728
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/kernels/csrc/grain_cutlass.cu",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/kernels/csrc/grain_cutlass.cu",
+      "sha256": "6f938f78cb2b3c150dc767764bec4045316e21e315bc274277c4d2488d65a812",
+      "bytes": 8831
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/kernels/csrc/grain_cutlass_kernel.hpp",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/kernels/csrc/grain_cutlass_kernel.hpp",
+      "sha256": "d3158b84df2caf6b9444570e460497afb51b2678dea934601c417dd22f21e6c2",
+      "bytes": 5379
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/kernels/csrc/grain_cutlass_epilogue.hpp",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/kernels/csrc/grain_cutlass_epilogue.hpp",
+      "sha256": "a4a7d9c0b20322880eee6afe5a4f690096a0dac7a0012ee16a5e243dfd11bfcd",
+      "bytes": 5548
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/kernels/csrc/grain_cutlass_collective.hpp",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/kernels/csrc/grain_cutlass_collective.hpp",
+      "sha256": "482a26e13af8acd2e097deabcc4b29cefe5c3664f5223ec952638937a26ff80c",
+      "bytes": 18182
+    },
+    {
+      "file": "experiments/cutlass/optimization/measurement_sources/grain_gemm/kernels/csrc/grain_cute.cu",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/measurement_sources/grain_gemm/kernels/csrc/grain_cute.cu",
+      "sha256": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148",
+      "bytes": 20769
+    },
+    {
+      "file": "experiments/cutlass/optimization/before_hashes.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/before_hashes.json",
+      "sha256": "da994e777dd3bc01d2e5ffd24bd1bb36a8a153a269dfeedcfd88cc4c13ea51ef",
+      "bytes": 2110
+    },
+    {
+      "file": "experiments/cutlass/optimization/tune_grain.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/tune_grain.py",
+      "sha256": "cca4a8f3a2d3c7d877e1497d59f03cf62a466e314aa23188cbfbe42db1c7a439",
+      "bytes": 997
+    },
+    {
+      "file": "experiments/cutlass/optimization/scope.json",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/scope.json",
+      "sha256": "bb1f715b337fb738be7ced8eae60e68e15cda1adad7e90921f2a4346a20ded37",
+      "bytes": 1228
+    },
+    {
+      "file": "experiments/cutlass/optimization/archive/compare_optimized.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/compare_optimized.py",
+      "sha256": "22b08483080df195a7afa704b51c8a956623980d8bc53253d74ad0b2b856646d",
+      "bytes": 16979
+    },
+    {
+      "file": "experiments/cutlass/optimization/archive/audit_results.py",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/audit_results.py",
+      "sha256": "28d00d90703fe52262b7a280d7e2e11736d46f0f6b9b0020c1fe077973a65f00",
+      "bytes": 18013
+    },
+    {
+      "file": "experiments/cutlass/optimization/archive/reproduce.sh",
+      "original": "/home/pengcuo/spark/experiments/grain-cutlass-optimized/reproduce.sh",
+      "sha256": "bd65ef1764e93927cb09a9b75b03fc1f3ef7e297c0936beeb17938e01b921ae0",
+      "bytes": 811
+    }
+  ]
+}

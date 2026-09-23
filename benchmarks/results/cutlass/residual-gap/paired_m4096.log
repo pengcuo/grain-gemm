@@ -1,0 +1,32 @@
+/home/pengcuo/spark/venv/lib/python3.12/site-packages/torch/_subclasses/functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+(4096, 1024, 1536) nodes 82
+cute 106.1637 us 0.0 % vs CuTe
+cutlass_production 107.6542 us 1.411 % vs CuTe
+cutlass_matched 107.6312 us 1.409 % vs CuTe
+cutlass_minimum_k 107.2948 us 1.075 % vs CuTe
+cutlass_no_tail 107.6634 us 1.393 % vs CuTe
+/home/pengcuo/spark/venv/lib/python3.12/site-packages/torch/_subclasses/functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+(4096, 1536, 1024) nodes 55
+cute 100.6301 us 0.0 % vs CuTe
+cutlass_production 101.7673 us 1.136 % vs CuTe
+cutlass_matched 101.7396 us 1.067 % vs CuTe
+cutlass_minimum_k 99.1412 us -1.551 % vs CuTe
+cutlass_no_tail 101.7617 us 1.17 % vs CuTe
+/home/pengcuo/spark/venv/lib/python3.12/site-packages/torch/_subclasses/functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+(4096, 2048, 1536) nodes 52
+cute 188.1166 us 0.0 % vs CuTe
+cutlass_production 190.9431 us 1.537 % vs CuTe
+cutlass_matched 190.9985 us 1.562 % vs CuTe
+cutlass_minimum_k 186.076 us -1.129 % vs CuTe
+cutlass_no_tail 191.1212 us 1.559 % vs CuTe
+/home/pengcuo/spark/venv/lib/python3.12/site-packages/torch/_subclasses/functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+(4096, 151936, 1536) nodes 1
+cute 13515.408 us 0.0 % vs CuTe
+cutlass_production 13967.5202 us 3.411 % vs CuTe
+cutlass_matched 13985.0082 us 3.423 % vs CuTe
+cutlass_minimum_k 13931.1037 us 3.025 % vs CuTe
+cutlass_no_tail 13865.7122 us 2.547 % vs CuTe

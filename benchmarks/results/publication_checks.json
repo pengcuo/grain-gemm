@@ -1,0 +1,40 @@
+{
+  "checked_at_utc": "2026-09-23T06:52:14.347088+00:00",
+  "pytest": {
+    "command": "python -m pytest -q",
+    "passed": 667,
+    "skipped": 0
+  },
+  "packaging": {
+    "sdist_built": true,
+    "wheel_built": true,
+    "checked_members": [
+      "tools/build_cutlass.py",
+      "benchmarks/cutlass.md",
+      "grain_cutlass_epilogue.hpp",
+      "sm121_g256_cutlass.json"
+    ],
+    "compiled_libraries_bundled": false
+  },
+  "portable_experiment": {
+    "rebuilt_target": "minimum_k_guard",
+    "architecture": "sm_121",
+    "full_output_correctness_launches": 12,
+    "paired_smoke_shape": [
+      1024,
+      1536,
+      1024
+    ],
+    "paired_smoke_rounds": 2,
+    "all_sample_max_abs_error": 0.0,
+    "note": "Smoke checks validate reproduction plumbing, not a new performance claim."
+  },
+  "source_sha256": {
+    "src/grain_gemm/gemm.py": "6d5520dd95347a6eef0265296db76c2d7402734459f459e06032a029cf68263c",
+    "tests/test_int8_gemm.py": "54b765c0046fabc6ae7a3913a93c0f2be9341e3b63e48a5a1bea62314f6f837a",
+    "tests/test_cutlass_gemm.py": "1e5477700b4348846ddc3599ac5a98ab90409a6b339e1be9f2019a4865941f2c",
+    "experiments/cutlass/build.py": "dd777ba1472522e1370cf16bf476b7a335680e86da1f62b6f0689775acc53836",
+    "experiments/cutlass/paired_benchmark.py": "58af080bec3b7e2605fdedc8b38a67e90c8feadd1fa1641ff2e87a6f42f116c1",
+    "experiments/cutlass/validate_variants.py": "9928896470ee7cfb1c0f1759b6f398e0cbc522f7ed30613a215c047e519e2f66"
+  }
+}

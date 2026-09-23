@@ -1,0 +1,867 @@
+{
+  "status": "PASS",
+  "method": "CPU-only audit; no CUDA work or torch import.",
+  "source_hashes": {
+    "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_benchmark.py": "8af07682367be4de73deeea104f4c8df6202dce53207123752d6bb9eb8a7b764",
+    "/home/pengcuo/spark/experiments/grain-cutlass-optimized/compare_optimized.py": "22b08483080df195a7afa704b51c8a956623980d8bc53253d74ad0b2b856646d"
+  },
+  "library_hashes": {
+    "cute": "4c1940d5105732617cebb3b799a753a66565061d5e3440b2af8bd133e573c0ce",
+    "cutlass_production": "e44f2c0d8679a8374d42bb0e26929c8e8ace158fe908f14cfc0bdefcf177ce2b",
+    "cutlass_matched": "2ce2b1d949ecac17e627db419a05eb295f61901c65d8f11095c45480c57b8637",
+    "cutlass_minimum_k": "411ca1be0d55df19e6ac4db7ba29052742245545290dc4950c8200e72aa7a7b7",
+    "cutlass_no_tail": "f87fa2dc578b92b6bbe5eeee9196e6e3361c6b66b773a846ff2cf4860a2afc25"
+  },
+  "cases": [
+    {
+      "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_m4096/case_4096_1024_1536.json",
+      "sha256": "e27bcc406c81742120681e9f5c2cecbb8df910ec19acf3b9b1004ec81609ef6d",
+      "shape": [
+        4096,
+        1024,
+        1536
+      ],
+      "nodes": 82,
+      "results": {
+        "cute": {
+          "config_id": 3,
+          "median_us": 106.16370526755728,
+          "tops": 121.36823837795643,
+          "paired_latency_change_vs_cute_pct": 0.0,
+          "paired_latency_change_vs_matched_pct": -1.3893303311259375,
+          "bootstrap_latency_change_vs_cute_pct": [
+            0.0,
+            0.0
+          ],
+          "positions": {
+            "0": 12,
+            "4": 12,
+            "3": 12,
+            "2": 12,
+            "1": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            -1.5431295356891361,
+            -1.4992718797057436,
+            -1.3712792501539561,
+            -1.3154245132950715,
+            -1.295812638127225,
+            -1.3540399757781207
+          ]
+        },
+        "cutlass_production": {
+          "config_id": 11,
+          "median_us": 107.6542400732273,
+          "tops": 119.68782538649275,
+          "paired_latency_change_vs_cute_pct": 1.411488496963642,
+          "paired_latency_change_vs_matched_pct": 0.018342674331894848,
+          "bootstrap_latency_change_vs_cute_pct": [
+            1.35256853802721,
+            1.499740284895723
+          ],
+          "positions": {
+            "1": 12,
+            "0": 12,
+            "4": 12,
+            "3": 12,
+            "2": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            1.5424504854915977,
+            1.525466791660346,
+            1.38618253611682,
+            1.3114525065271776,
+            1.3204004335191089,
+            1.3021517040198827
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            -0.02978926637200452,
+            0.028415482491039867,
+            8.117021410569691e-06,
+            0.08312025320660332,
+            0.034762997926041095,
+            0.06808668269782103
+          ]
+        },
+        "cutlass_matched": {
+          "config_id": 11,
+          "median_us": 107.63122395771305,
+          "tops": 119.71341971417435,
+          "paired_latency_change_vs_cute_pct": 1.4089048121721959,
+          "paired_latency_change_vs_matched_pct": 0.0,
+          "bootstrap_latency_change_vs_cute_pct": [
+            1.3574004336050827,
+            1.486051329940996
+          ],
+          "positions": {
+            "2": 12,
+            "1": 12,
+            "0": 12,
+            "4": 12,
+            "3": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            1.5673153166450682,
+            1.522092263958097,
+            1.3903448698848297,
+            1.3329619864873798,
+            1.312846742242435,
+            1.3726267458745056
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "cutlass_minimum_k": {
+          "config_id": 11,
+          "median_us": 107.29483278786265,
+          "tops": 120.08874568522148,
+          "paired_latency_change_vs_cute_pct": 1.0752179768420689,
+          "paired_latency_change_vs_matched_pct": -0.28313974699860633,
+          "bootstrap_latency_change_vs_cute_pct": [
+            1.031847379554951,
+            1.178094873373059
+          ],
+          "positions": {
+            "3": 12,
+            "2": 12,
+            "1": 12,
+            "0": 12,
+            "4": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            1.251160001571483,
+            1.1833446529441183,
+            1.0610828066445865,
+            1.016054498781882,
+            0.947914993441934,
+            0.9590486106875407
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            -0.2569022086790662,
+            -0.30376579834430206,
+            -0.2738571815651736,
+            -0.24350067400302766,
+            -0.37173908565238944,
+            -0.26470978948818225
+          ]
+        },
+        "cutlass_no_tail": {
+          "config_id": 11,
+          "median_us": 107.66341628097906,
+          "tops": 119.67762433223457,
+          "paired_latency_change_vs_cute_pct": 1.3930283682767053,
+          "paired_latency_change_vs_matched_pct": 0.013063266770529935,
+          "bootstrap_latency_change_vs_cute_pct": [
+            1.3148589896565754,
+            1.4652528699899303
+          ],
+          "positions": {
+            "4": 12,
+            "3": 12,
+            "2": 12,
+            "1": 12,
+            "0": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            1.5710252315736417,
+            1.451765192681398,
+            1.3122930303657743,
+            1.3656501749589545,
+            1.379839966272245,
+            1.2485471299123585
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            0.03414345895449422,
+            -0.07185609491784373,
+            -0.0563165918747055,
+            0.06302052145437109,
+            0.08986901131358138,
+            -0.015574661606976292
+          ]
+        }
+      },
+      "sensors": [
+        {
+          "round": 0,
+          "temperature_clock_power_util": "62, 2346, 99.86, 96"
+        },
+        {
+          "round": 10,
+          "temperature_clock_power_util": "64, 2327, 99.62, 96"
+        },
+        {
+          "round": 20,
+          "temperature_clock_power_util": "65, 2307, 100.53, 96"
+        },
+        {
+          "round": 30,
+          "temperature_clock_power_util": "67, 2314, 100.10, 96"
+        },
+        {
+          "round": 40,
+          "temperature_clock_power_util": "68, 2314, 100.37, 96"
+        },
+        {
+          "round": 50,
+          "temperature_clock_power_util": "68, 2307, 99.08, 96"
+        }
+      ]
+    },
+    {
+      "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_m4096/case_4096_151936_1536.json",
+      "sha256": "9074bd06226557cd2766f9048efdd154b47000a968842a3dfd790008ab6f1e6b",
+      "shape": [
+        4096,
+        151936,
+        1536
+      ],
+      "nodes": 1,
+      "results": {
+        "cute": {
+          "config_id": 15,
+          "median_us": 13515.408039093018,
+          "tops": 141.45317049268277,
+          "paired_latency_change_vs_cute_pct": 0.0,
+          "paired_latency_change_vs_matched_pct": -3.309399387990153,
+          "bootstrap_latency_change_vs_cute_pct": [
+            0.0,
+            0.0
+          ],
+          "positions": {
+            "0": 12,
+            "4": 12,
+            "3": 12,
+            "2": 12,
+            "1": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            -3.2572009460929863,
+            -3.3057356182301767,
+            -3.3055380172887006,
+            -3.3533709005352685,
+            -3.3036226450376738,
+            -3.3677120212433187
+          ]
+        },
+        "cutlass_production": {
+          "config_id": 23,
+          "median_us": 13967.520236968994,
+          "tops": 136.87449777748577,
+          "paired_latency_change_vs_cute_pct": 3.4114114670138918,
+          "paired_latency_change_vs_matched_pct": -0.020572699108911685,
+          "bootstrap_latency_change_vs_cute_pct": [
+            3.339444155133009,
+            3.458322899659949
+          ],
+          "positions": {
+            "1": 12,
+            "0": 12,
+            "4": 12,
+            "3": 12,
+            "2": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            3.3122408620763544,
+            3.2749720004134897,
+            3.4454790383228406,
+            3.446715901199493,
+            3.531988469663938,
+            3.388082447147589
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            -0.007120053523723691,
+            -0.05704857778869865,
+            0.010769929358689367,
+            0.019319781409010695,
+            0.010420490310281139,
+            -0.11470288111670168
+          ]
+        },
+        "cutlass_matched": {
+          "config_id": 23,
+          "median_us": 13985.008239746094,
+          "tops": 136.70333866508398,
+          "paired_latency_change_vs_cute_pct": 3.4226695757186842,
+          "paired_latency_change_vs_matched_pct": 0.0,
+          "bootstrap_latency_change_vs_cute_pct": [
+            3.3866322445509356,
+            3.483600433350298
+          ],
+          "positions": {
+            "2": 12,
+            "1": 12,
+            "0": 12,
+            "4": 12,
+            "3": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            3.3668685766207407,
+            3.4187566144257886,
+            3.418546040008863,
+            3.4697256302517854,
+            3.4164992279098083,
+            3.4851074660086745
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "cutlass_minimum_k": {
+          "config_id": 23,
+          "median_us": 13931.103706359863,
+          "tops": 137.23229386048007,
+          "paired_latency_change_vs_cute_pct": 3.025382138425714,
+          "paired_latency_change_vs_matched_pct": -0.3837965773866747,
+          "bootstrap_latency_change_vs_cute_pct": [
+            2.9912491146329767,
+            3.09497575434452
+          ],
+          "positions": {
+            "3": 12,
+            "2": 12,
+            "1": 12,
+            "0": 12,
+            "4": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            2.9502399455718864,
+            2.973450254440002,
+            3.0035740635379726,
+            3.243332663041265,
+            3.0847423976268162,
+            3.092795886308064
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            -0.39253632485602985,
+            -0.5120003726147182,
+            -0.3917103104823516,
+            -0.23486311030440632,
+            -0.3407481473227225,
+            -0.46521095787521727
+          ]
+        },
+        "cutlass_no_tail": {
+          "config_id": 23,
+          "median_us": 13865.71216583252,
+          "tops": 137.87948969134055,
+          "paired_latency_change_vs_cute_pct": 2.5469132929844207,
+          "paired_latency_change_vs_matched_pct": -0.8743943082393346,
+          "bootstrap_latency_change_vs_cute_pct": [
+            2.5073058479342603,
+            2.616885485188547
+          ],
+          "positions": {
+            "4": 12,
+            "3": 12,
+            "2": 12,
+            "1": 12,
+            "0": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            2.5199258892145693,
+            2.504851222819826,
+            2.5797739909448225,
+            2.6270921072981235,
+            2.5569529623170606,
+            2.597018768870729
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            -0.7941199128498777,
+            -0.9055895960063731,
+            -0.8466813175542653,
+            -0.7992628210581332,
+            -0.858984958719522,
+            -0.9559225376471803
+          ]
+        }
+      },
+      "sensors": [
+        {
+          "round": 0,
+          "temperature_clock_power_util": "75, 2164, 95.47, 96"
+        },
+        {
+          "round": 10,
+          "temperature_clock_power_util": "76, 2171, 94.18, 96"
+        },
+        {
+          "round": 20,
+          "temperature_clock_power_util": "77, 2145, 94.31, 96"
+        },
+        {
+          "round": 30,
+          "temperature_clock_power_util": "77, 2158, 93.69, 96"
+        },
+        {
+          "round": 40,
+          "temperature_clock_power_util": "77, 2151, 94.29, 96"
+        },
+        {
+          "round": 50,
+          "temperature_clock_power_util": "78, 2145, 93.51, 96"
+        }
+      ]
+    },
+    {
+      "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_m4096/case_4096_1536_1024.json",
+      "sha256": "c767238e0a31dae04999ca4ed4dc667c0a8c7224e89a1220fd0900e9fa237658",
+      "shape": [
+        4096,
+        1536,
+        1024
+      ],
+      "nodes": 55,
+      "results": {
+        "cute": {
+          "config_id": 7,
+          "median_us": 100.63010996038264,
+          "tops": 128.04221214776268,
+          "paired_latency_change_vs_cute_pct": 0.0,
+          "paired_latency_change_vs_matched_pct": -1.0559668972144776,
+          "bootstrap_latency_change_vs_cute_pct": [
+            0.0,
+            0.0
+          ],
+          "positions": {
+            "0": 12,
+            "4": 12,
+            "3": 12,
+            "2": 12,
+            "1": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            -1.053184563168541,
+            -1.0361330538669944,
+            -1.1183277387117663,
+            -1.0263231624754954,
+            -1.0961920905489753,
+            -1.1367453032510744
+          ]
+        },
+        "cutlass_production": {
+          "config_id": 15,
+          "median_us": 101.7672755501487,
+          "tops": 126.61144575547374,
+          "paired_latency_change_vs_cute_pct": 1.1360030412719713,
+          "paired_latency_change_vs_matched_pct": 0.05459439605117744,
+          "bootstrap_latency_change_vs_cute_pct": [
+            1.0338839683536438,
+            1.2046103213968706
+          ],
+          "positions": {
+            "1": 12,
+            "0": 12,
+            "4": 12,
+            "3": 12,
+            "2": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            1.1229298181529845,
+            0.8803972052513043,
+            1.1649536399750193,
+            1.132160503984836,
+            1.1924560858516564,
+            1.1332561281060194
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            0.06488698412812077,
+            -0.0014309065215600825,
+            0.0631409394846294,
+            0.19324543428571594,
+            0.02743258956514616,
+            0.032465087653310576
+          ]
+        },
+        "cutlass_matched": {
+          "config_id": 15,
+          "median_us": 101.73963633450595,
+          "tops": 126.64584179990788,
+          "paired_latency_change_vs_cute_pct": 1.0672377373259767,
+          "paired_latency_change_vs_matched_pct": 0.0,
+          "bootstrap_latency_change_vs_cute_pct": [
+            1.00201342875752,
+            1.1714594763085895
+          ],
+          "positions": {
+            "2": 12,
+            "1": 12,
+            "0": 12,
+            "4": 12,
+            "3": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            1.064403099784661,
+            1.0470204260781824,
+            1.1310033907317996,
+            1.0369680287047878,
+            1.108380533781883,
+            1.149822128624356
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "cutlass_minimum_k": {
+          "config_id": 15,
+          "median_us": 99.1412336176092,
+          "tops": 129.96511560162207,
+          "paired_latency_change_vs_cute_pct": -1.5508326137742778,
+          "paired_latency_change_vs_matched_pct": -2.5660815639846457,
+          "bootstrap_latency_change_vs_cute_pct": [
+            -1.6130627305892986,
+            -1.424834913312889
+          ],
+          "positions": {
+            "3": 12,
+            "2": 12,
+            "1": 12,
+            "0": 12,
+            "4": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            -1.5811855884030557,
+            -1.791861775357284,
+            -1.5563541159818284,
+            -1.4684450405796357,
+            -1.4521897493849578,
+            -1.5898056764238166
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            -2.6430326653922753,
+            -2.690676584547236,
+            -2.6374328503138367,
+            -2.4798177903536778,
+            -2.539875967575722,
+            -2.605403265317119
+          ]
+        },
+        "cutlass_no_tail": {
+          "config_id": 15,
+          "median_us": 101.76174857399681,
+          "tops": 126.61832239086033,
+          "paired_latency_change_vs_cute_pct": 1.1699271832752434,
+          "paired_latency_change_vs_matched_pct": 0.025451155734090847,
+          "bootstrap_latency_change_vs_cute_pct": [
+            1.0525835518237603,
+            1.2416527524656162
+          ],
+          "positions": {
+            "4": 12,
+            "3": 12,
+            "2": 12,
+            "1": 12,
+            "0": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            1.099198521207434,
+            0.99518309390767,
+            1.1337862119402464,
+            1.1999757926133725,
+            1.2648701774619298,
+            1.2576231338557786
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            0.12144909146958316,
+            -0.11572963153761995,
+            -0.04575313125769753,
+            0.04145247530051854,
+            0.04400143266001244,
+            0.06975336420125267
+          ]
+        }
+      },
+      "sensors": [
+        {
+          "round": 0,
+          "temperature_clock_power_util": "69, 2294, 96.13, 96"
+        },
+        {
+          "round": 10,
+          "temperature_clock_power_util": "69, 2288, 96.10, 96"
+        },
+        {
+          "round": 20,
+          "temperature_clock_power_util": "70, 2288, 95.65, 96"
+        },
+        {
+          "round": 30,
+          "temperature_clock_power_util": "70, 2281, 96.19, 96"
+        },
+        {
+          "round": 40,
+          "temperature_clock_power_util": "71, 2281, 95.54, 96"
+        },
+        {
+          "round": 50,
+          "temperature_clock_power_util": "71, 2281, 95.62, 96"
+        }
+      ]
+    },
+    {
+      "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_m4096/case_4096_2048_1536.json",
+      "sha256": "f145ef10464bfd14c2ae3dfb15739fb91f12f88e6c9a2791691661457a8614a0",
+      "shape": [
+        4096,
+        2048,
+        1536
+      ],
+      "nodes": 52,
+      "results": {
+        "cute": {
+          "config_id": 7,
+          "median_us": 188.11662380511945,
+          "tops": 136.98844501215578,
+          "paired_latency_change_vs_cute_pct": 0.0,
+          "paired_latency_change_vs_matched_pct": -1.5383624075753666,
+          "bootstrap_latency_change_vs_cute_pct": [
+            0.0,
+            0.0
+          ],
+          "positions": {
+            "0": 12,
+            "4": 12,
+            "3": 12,
+            "2": 12,
+            "1": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            -1.5561226986659515,
+            -1.45889447247185,
+            -1.5446435875019038,
+            -1.4167911882206896,
+            -1.5212261046117503,
+            -1.5541396275181807
+          ]
+        },
+        "cutlass_production": {
+          "config_id": 15,
+          "median_us": 190.94307606036847,
+          "tops": 134.96066109175192,
+          "paired_latency_change_vs_cute_pct": 1.5372626777334197,
+          "paired_latency_change_vs_matched_pct": -0.0231458159034581,
+          "bootstrap_latency_change_vs_cute_pct": [
+            1.4841790558286938,
+            1.5703261204405239
+          ],
+          "positions": {
+            "1": 12,
+            "0": 12,
+            "4": 12,
+            "3": 12,
+            "2": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            1.5246733202404217,
+            1.5059145337080748,
+            1.5412760597178554,
+            1.492465632131168,
+            1.5463045712396095,
+            1.5758270730433344
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            -0.04136341685501144,
+            0.009828023877922476,
+            -0.05230544942617099,
+            0.0041719745877744074,
+            0.011868642932988394,
+            -0.004948478536737078
+          ]
+        },
+        "cutlass_matched": {
+          "config_id": 15,
+          "median_us": 190.99846253028284,
+          "tops": 134.9215246793633,
+          "paired_latency_change_vs_cute_pct": 1.562398092592221,
+          "paired_latency_change_vs_matched_pct": 0.0,
+          "bootstrap_latency_change_vs_cute_pct": [
+            1.4805097053770533,
+            1.5933955482555495
+          ],
+          "positions": {
+            "2": 12,
+            "1": 12,
+            "0": 12,
+            "4": 12,
+            "3": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            1.5807217674926655,
+            1.4805097053770533,
+            1.5688882676993199,
+            1.4371566788816903,
+            1.5447262218349467,
+            1.5786749363147168
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "cutlass_minimum_k": {
+          "config_id": 15,
+          "median_us": 186.07599918658917,
+          "tops": 138.4907451183918,
+          "paired_latency_change_vs_cute_pct": -1.129255496438919,
+          "paired_latency_change_vs_matched_pct": -2.59613893227687,
+          "bootstrap_latency_change_vs_cute_pct": [
+            -1.20570258226963,
+            -1.0698137629118754
+          ],
+          "positions": {
+            "3": 12,
+            "2": 12,
+            "1": 12,
+            "0": 12,
+            "4": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            -1.172860446897972,
+            -1.182674159039765,
+            -1.1283968278968937,
+            -1.1583392050314556,
+            -1.1912718802777666,
+            -1.022827368214485
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            -2.559039926196771,
+            -2.588526608586439,
+            -2.565232588079791,
+            -2.6586430572904662,
+            -2.662278249676331,
+            -2.5498098972152827
+          ]
+        },
+        "cutlass_no_tail": {
+          "config_id": 15,
+          "median_us": 191.12122975862943,
+          "tops": 134.8348574804859,
+          "paired_latency_change_vs_cute_pct": 1.5589378171695145,
+          "paired_latency_change_vs_matched_pct": 0.004674770789603322,
+          "bootstrap_latency_change_vs_cute_pct": [
+            1.5003458171250372,
+            1.6260764076145406
+          ],
+          "positions": {
+            "4": 12,
+            "3": 12,
+            "2": 12,
+            "1": 12,
+            "0": 12
+          },
+          "balanced_block_change_vs_cute_pct": [
+            1.49963994116189,
+            1.551951145818986,
+            1.5489998763943191,
+            1.5803748513560256,
+            1.62854939976258,
+            1.503877920706853
+          ],
+          "balanced_block_change_vs_matched_pct": [
+            -0.06798423477452076,
+            0.0016124474187417803,
+            -0.016924607264279246,
+            0.0943508954313943,
+            0.09642332712267443,
+            -0.08788143185436414
+          ]
+        }
+      },
+      "sensors": [
+        {
+          "round": 0,
+          "temperature_clock_power_util": "72, 2236, 96.67, 96"
+        },
+        {
+          "round": 10,
+          "temperature_clock_power_util": "73, 2236, 95.36, 96"
+        },
+        {
+          "round": 20,
+          "temperature_clock_power_util": "73, 2216, 96.35, 96"
+        },
+        {
+          "round": 30,
+          "temperature_clock_power_util": "74, 2210, 95.97, 96"
+        },
+        {
+          "round": 40,
+          "temperature_clock_power_util": "74, 2210, 96.01, 96"
+        },
+        {
+          "round": 50,
+          "temperature_clock_power_util": "75, 2203, 95.95, 96"
+        }
+      ]
+    }
+  ],
+  "tops_formula": "2 * M * N * K / (median_us * 1e6)",
+  "limitations": [
+    "TOPS counts two integer operations per INT8 multiply-add; scale and conversion operations are excluded from the numerator.",
+    "The timed GPU kernel includes scaling, accumulation, and BF16 output; input quantization and host dispatch are excluded.",
+    "Correctness checks sample 32x32 output entries and check full-output finiteness; source and recorded checks are audited, tensors are not retained.",
+    "Variants use a common graph node count and the same input/output tensors per shape, verified in measurement source.",
+    "The rotated/reversed sequence balances each of five positions across 60 rounds, but clocks are not locked and rounds may be correlated.",
+    "Bootstrap intervals describe paired ratios within this run; they are not independent-session confidence intervals.",
+    "Configurations are fixed to continue the earlier root-cause comparison; this is not an exhaustive M=4096 autotuning run."
+  ],
+  "missing_shapes": [],
+  "environment": [
+    "NVIDIA GB10",
+    "2.14.0+cu130",
+    "13.0"
+  ],
+  "variant_records": 20,
+  "raw_replay_samples": 3600
+}

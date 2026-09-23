@@ -1,0 +1,5 @@
+build/
+runs/
+*.so
+*.cubin
+*.ptx

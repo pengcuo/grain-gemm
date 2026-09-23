@@ -1,0 +1,16 @@
+[
+  "/usr/local/cuda/bin/nvcc",
+  "-std=c++17",
+  "-O3",
+  "-arch=sm_121",
+  "-shared",
+  "-Xcompiler",
+  "-fPIC",
+  "--expt-relaxed-constexpr",
+  "-Xptxas=-v",
+  "-I",
+  "/home/pengcuo/spark/experiments/grain-cutlass-comparison/cutlass/include",
+  "/home/pengcuo/spark/grain-gemm/src/grain_gemm/kernels/csrc/grain_cutlass.cu",
+  "-o",
+  "/home/pengcuo/spark/experiments/grain-cutlass-optimized/libgrain_cutlass_candidate.so"
+]

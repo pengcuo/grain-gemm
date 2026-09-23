@@ -16,3 +16,9 @@ htmlcov/
 
 # Locally compiled CUDA library and build metadata
 src/grain_gemm/kernels/_native/
+
+# Rebuilt experiment artifacts and fresh measurements
+experiments/**/*.so
+experiments/**/*.cubin
+experiments/**/*.ptx
+experiments/**/rebuild_manifest.json

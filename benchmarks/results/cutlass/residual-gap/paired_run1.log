@@ -1,0 +1,45 @@
+/home/pengcuo/spark/venv/lib/python3.12/site-packages/torch/_subclasses/functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+(1024, 1024, 1536) nodes 249
+cute 28.0715 us 0.0 % vs CuTe
+cutlass_production 28.2582 us 0.663 % vs CuTe
+cutlass_matched 28.2547 us 0.642 % vs CuTe
+cutlass_no_tail 28.2641 us 0.656 % vs CuTe
+cutlass_address32 28.2652 us 0.668 % vs CuTe
+cutlass_fixed_loop 28.209 us 0.462 % vs CuTe
+/home/pengcuo/spark/venv/lib/python3.12/site-packages/torch/_subclasses/functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+(1024, 1536, 1024) nodes 272
+cute 24.2666 us 0.0 % vs CuTe
+cutlass_production 24.6358 us 1.552 % vs CuTe
+cutlass_matched 24.6402 us 1.584 % vs CuTe
+cutlass_no_tail 24.6245 us 1.559 % vs CuTe
+cutlass_address32 24.6174 us 1.517 % vs CuTe
+cutlass_fixed_loop 24.8111 us 2.316 % vs CuTe
+/home/pengcuo/spark/venv/lib/python3.12/site-packages/torch/_subclasses/functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+(1024, 2048, 1536) nodes 165
+cute 47.976 us 0.0 % vs CuTe
+cutlass_production 48.6458 us 1.408 % vs CuTe
+cutlass_matched 48.6467 us 1.422 % vs CuTe
+cutlass_no_tail 48.6514 us 1.402 % vs CuTe
+cutlass_address32 48.6433 us 1.412 % vs CuTe
+cutlass_fixed_loop 48.9064 us 1.998 % vs CuTe
+/home/pengcuo/spark/venv/lib/python3.12/site-packages/torch/_subclasses/functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+(2048, 1536, 1024) nodes 159
+cute 49.5151 us 0.0 % vs CuTe
+cutlass_production 50.2665 us 1.497 % vs CuTe
+cutlass_matched 50.266 us 1.438 % vs CuTe
+cutlass_no_tail 50.2659 us 1.475 % vs CuTe
+cutlass_address32 50.2564 us 1.463 % vs CuTe
+cutlass_fixed_loop 50.4193 us 1.82 % vs CuTe
+/home/pengcuo/spark/venv/lib/python3.12/site-packages/torch/_subclasses/functional_tensor.py:368: UserWarning: Failed to initialize NumPy: No module named 'numpy' (Triggered internally at /__w/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:84.)
+  cpu = _conversion_method_template(device=torch.device("cpu"))
+(2048, 151936, 1536) nodes 1
+cute 6798.48 us 0.0 % vs CuTe
+cutlass_production 7010.3841 us 3.118 % vs CuTe
+cutlass_matched 7011.744 us 3.14 % vs CuTe
+cutlass_no_tail 6966.2561 us 2.537 % vs CuTe
+cutlass_address32 7006.5761 us 2.92 % vs CuTe
+cutlass_fixed_loop 7008.7202 us 3.008 % vs CuTe

@@ -26,7 +26,7 @@ def main():
     a=torch.ones((19,269),device='cuda',dtype=torch.int8)
     b=torch.ones((269,37),device='cuda',dtype=torch.int8)
     sa=torch.ones((19,2),device='cuda');sb=torch.ones((2,37),device='cuda')
-    c=int8_gemm(a,b,sa,sb,group_size=256,backend='triton')
+    c=int8_gemm(a,b,sa,sb,group_size=256,output_dtype=torch.float32,backend='triton')
     torch.cuda.synchronize()
     torch.testing.assert_close(c,torch.full_like(c,269))
     print('Native pipeline boundaries and Triton tails passed')

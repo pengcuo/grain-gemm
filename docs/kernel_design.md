@@ -1,9 +1,12 @@
 # Kernel design and native build
 
 The public `grain_gemm.int8_gemm` operation keeps a separate INT32 partial sum for
-each K-group and an FP32 sum across groups. Inputs are already quantized; there
-is no hidden quantizer or weight packing. All timings and validation results are
-in [Tests and benchmarks](../benchmarks/README.md).
+each K-group and an FP32 sum across groups. Output defaults to BF16, with
+conversion after FP32 accumulation. Set `output_dtype=torch.float32` or
+`output_dtype=torch.float16` explicitly for FP32 or FP16 output; `backend="auto"`
+uses Triton for these output types. Inputs are already quantized; there is no
+hidden quantizer or weight packing. All timings and validation results are in
+[Tests and benchmarks](../benchmarks/README.md).
 
 ## Implementations
 
@@ -62,6 +65,28 @@ the common numerical contract.
 
 ## Build the optional GB10 CUDA backend
 
+The alternative `backend="cutlass"` uses CUTLASS 3.x composition:
+`GemmUniversalAdapter` launches a `GemmUniversal` specialization with a custom
+G256 collective and a selectable epilogue. The collective adapts
+the official SM80 multistage mainloop; a small device composition bridge adds
+scale parameters and FP32 output fragments while retaining the standard
+argument lowering and launch machinery. It is compiled for SM121 and uses
+the same INT8 `mma.sync` and `cp.async` instruction families as the direct CuTe
+backend. It does not invoke `grain_cute.cu`.
+
+Its 32 configurations repeat eight tile/warp/stage choices in four families.
+IDs 0–7 retain the standard FP32 shared exchange before 128-bit BF16 stores;
+IDs 8–15 convert to BF16 before the shared exchange; IDs 16–23 combine
+asynchronous scale staging with direct BF16 pair stores; IDs 24–31 retain
+register scale prefetch with the same direct stores. The last family permits
+the scale-loading change to be measured separately. All families retain
+`GemmUniversalAdapter` and the G256/BF16/native-layout constraints below.
+An independent `sm121_g256_cutlass.json` table selects configurations for
+explicit CUTLASS calls on the measured M1024/M2048 model projection shapes;
+it does not change the automatic backend policy.
+This is a custom CUTLASS implementation, not an unchanged stock INT8 GEMM.
+See [CUTLASS build and comparison](../benchmarks/cutlass.md).
+
 Use a source checkout (or unpacked source distribution), CUDA 13.0 or newer with
 `sm_121` support, a compatible host C++ compiler, and the pinned CUTLASS headers:
 
@@ -87,14 +112,33 @@ CUTLASS attribution and licensing.
 
 `backend="auto"` consults the checked-in
 [SM121 G256 table](../src/grain_gemm/kernels/configs/sm121_g256.json) for measured
-BF16-output square shapes. Each entry stores the selected backend, the best
-measured CUDA configuration, and the best measured Triton configuration.
+BF16-output square shapes and exact rectangular `(M,N,K)` shapes. Each entry
+stores the selected backend, the best measured CUDA configuration, and the best
+measured Triton configuration.
 `backend="cuda"` selects the stored CUDA candidate even when Triton wins that
 shape; `backend="triton"` selects the stored Triton candidate. Auto dispatch uses
 the overall winner. If native code is unavailable or its layout constraints are
 not met, auto dispatch uses Triton. No search occurs during inference.
 The table chooses the fastest candidate in the documented search, not a proven
 global optimum; different toolchains or operating conditions can change rankings.
+
+The measured rectangular entries currently select these CuTe configurations:
+
+| M | N | K | CuTe config | Output tile |
+|---:|---:|---:|---:|---|
+| 256 | 1024 | 1536 | 3 | 128 × 64 |
+| 256 | 1536 | 1024 | 5 | 64 × 128 |
+| 256 | 2048 | 1536 | 7 | 128 × 128 |
+
+The first two shapes benefit from smaller tiles that distribute work across
+more SMs. The third retains the larger tile because the smaller tiles exceed
+one batch of resident CTAs on GB10. These are exact shape matches, not a rule
+for every M=256 shape. Each entry also retains its measured Triton fallback.
+The top-level `tuning_report_sha256` identifies the square search; each
+rectangular entry has a separate `measurement_sha256` for its timing record.
+The optional `cutlass` field stores the independent collective backend's
+measured configuration, identified by `cutlass_measurement_sha256`; it is used
+by explicit `backend="cutlass"` selection. Auto continues to use `selected`.
 
 Other SM121 shapes use a fixed Triton heuristic. Other SM80+ architectures,
 group sizes and layouts use a conservative Triton configuration. Those paths

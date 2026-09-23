@@ -110,6 +110,12 @@ c = int8_gemm(
 print(c.shape, c.dtype)  # torch.Size([1024, 1024]) torch.bfloat16
 ```
 
+`int8_gemm` returns BF16 by default; `output_dtype=torch.bfloat16` above is
+optional. Each K-group accumulates in INT32, and the scaled group results
+accumulate in FP32 before conversion to the output dtype. Set
+`output_dtype=torch.float32` or `output_dtype=torch.float16` explicitly for
+FP32 or FP16 output; these output types use the Triton path with `backend="auto"`.
+
 For each group, the helper uses symmetric INT8 quantization with
 `scale = max(abs(values)) / 127`, a positive floor for zero groups, and
 `q = round(values / scale)` clipped to `[-127, 127]`. The FP32 scales restore
@@ -132,6 +138,8 @@ final groups with scale shapes `[M, ceil(K/G)]` and `[ceil(K/G), N]`.
 `backend="auto"` uses the measured GB10 configuration where applicable. The
 optional CuTe backend requires a local CUDA build; otherwise the API uses Triton.
 `backend="triton"` or `backend="cuda"` explicitly selects an implementation.
+`backend="cutlass"` selects the separately built CUTLASS collective implementation;
+see [build and comparison instructions](benchmarks/cutlass.md).
 Group sizes 32/64/128/256, positive-stride views, K tails, and FP32/FP16/BF16
 outputs are supported through the Triton path. The native fast path currently
 supports G256 and BF16 output with aligned row-major A, column-major B,

@@ -93,7 +93,7 @@ def require_native_cuda():
 def test_group_sizes_with_m_n_k_tails(group_size, backend):
     tensors = inputs(19, 37, 2 * group_size + 13, group_size, device="cuda")
     actual = int8_gemm(*tensors, group_size=group_size, backend=backend)
-    assert actual.dtype == torch.float32
+    assert actual.dtype == torch.bfloat16
     assert actual.shape == (19, 37)
     assert actual.device == tensors[0].device
     assert_matches_reference(actual, tensors, group_size)
@@ -140,7 +140,8 @@ def test_distinct_signed_and_zero_row_column_group_scales(backend):
     scale_b = torch.tensor(
         [[0.5, -2, 0, 1], [-4, 1, 0.25, 2], [2, 0.5, -1, 0]], device="cuda"
     )
-    actual = int8_gemm(a, b, scale_a, scale_b, group_size=group_size, backend=backend)
+    actual = int8_gemm(a, b, scale_a, scale_b, group_size=group_size,
+                       output_dtype=torch.float32, backend=backend)
     torch.testing.assert_close(
         actual.cpu(), reference(a, b, scale_a, scale_b, group_size), rtol=0, atol=0
     )
@@ -156,7 +157,8 @@ def test_int8_extrema_accumulate_without_overflow(group_size):
     b = b.expand(k, 2).contiguous()
     scale_a = torch.ones((2, 2), device="cuda")
     scale_b = torch.ones((2, 2), device="cuda")
-    actual = int8_gemm(a, b, scale_a, scale_b, group_size=group_size)
+    actual = int8_gemm(a, b, scale_a, scale_b, group_size=group_size,
+                       output_dtype=torch.float32)
     torch.testing.assert_close(
         actual.cpu(), reference(a, b, scale_a, scale_b, group_size), rtol=0, atol=0
     )
@@ -368,10 +370,195 @@ def test_forced_native_uses_its_measured_configuration(monkeypatch):
     })
     config = get_kernel_config(
         *tensors[:2], scale_a=tensors[2], scale_b=tensors[3],
-        group_size=256, output_dtype=torch.bfloat16, backend="cuda",
+        group_size=256, backend="cuda",
     )
     assert config["backend"] == "cuda"
     assert config["config_id"] == 2
+
+
+M256_MEASURED_CASES = [
+    pytest.param(1024, 1536, 3, (128, 64), id="expert_gate_up"),
+    pytest.param(1536, 1024, 5, (64, 128), id="expert_down"),
+    pytest.param(2048, 1536, 7, (128, 64), id="expert_fused_gate_up"),
+]
+
+
+@pytest.fixture
+def simulated_sm121(monkeypatch):
+    """Test dispatch policy with real CPU layouts, without launching kernels."""
+    from grain_gemm.kernels import cuda as native_cuda
+
+    monkeypatch.setattr(torch.cuda, "get_device_capability", lambda device=None: (12, 1))
+    monkeypatch.setattr(native_cuda, "is_available", lambda: True)
+
+
+def measured_config(tensors, *, backend="auto", group_size=256,
+                    output_dtype=torch.bfloat16):
+    return get_kernel_config(
+        *tensors[:2], scale_a=tensors[2], scale_b=tensors[3],
+        group_size=group_size, output_dtype=output_dtype, backend=backend,
+    )
+
+
+@pytest.mark.parametrize("n,k,config_id,triton_tile", M256_MEASURED_CASES)
+@pytest.mark.parametrize("backend", ["auto", "cuda", "triton"])
+def test_m256_exact_measured_dispatch(simulated_sm121, n, k, config_id,
+                                      triton_tile, backend):
+    tensors = inputs(256, n, k, 256, layout="column_major_b")
+    config = measured_config(tensors, backend=backend)
+    assert config["policy"] == "sm121_g256_measured"
+    if backend == "triton":
+        assert config["backend"] == "triton"
+        assert (config["block_m"], config["block_n"]) == triton_tile
+        assert (config["num_warps"], config["num_stages"], config["swizzle"]) == (4, 3, 8)
+    else:
+        assert config["backend"] == "cuda"
+        assert config["config_id"] == config_id
+
+
+@pytest.mark.parametrize("shape", [(128, 1024, 1536), (256, 1152, 1536),
+                                   (256, 1024, 1280), (256, 1536, 1536)])
+def test_m256_measurements_do_not_match_neighboring_shapes(simulated_sm121, shape):
+    tensors = inputs(*shape, 256, layout="column_major_b")
+    config = measured_config(tensors)
+    assert config["backend"] == "triton"
+    assert config["policy"] == "sm121_g256_heuristic"
+    # Explicit CUDA remains available for unmeasured native-compatible shapes.
+    config = measured_config(tensors, backend="cuda")
+    assert config["config_id"] == 7
+    assert config["policy"] == "sm121_g256_explicit"
+
+
+@pytest.mark.parametrize("capability", [(8, 0), (9, 0), (11, 0), (12, 0)])
+def test_m256_measurements_are_specific_to_sm121(simulated_sm121, monkeypatch,
+                                                capability):
+    monkeypatch.setattr(torch.cuda, "get_device_capability", lambda device=None: capability)
+    tensors = inputs(256, 1024, 1536, 256, layout="column_major_b")
+    config = measured_config(tensors)
+    assert config["backend"] == "triton"
+    assert config["policy"] == "portable"
+    with pytest.raises(ValueError, match="SM121"):
+        measured_config(tensors, backend="cuda")
+
+
+@pytest.mark.parametrize("group_size", [32, 64, 128])
+def test_m256_measurements_do_not_select_native_for_other_groups(simulated_sm121,
+                                                                group_size):
+    tensors = inputs(256, 1024, 1536, group_size, layout="column_major_b")
+    assert measured_config(tensors, group_size=group_size)["backend"] == "triton"
+    with pytest.raises(ValueError, match="G256"):
+        measured_config(tensors, group_size=group_size, backend="cuda")
+
+
+@pytest.mark.parametrize("output_dtype", [torch.float16, torch.float32])
+def test_m256_measurements_do_not_select_native_for_other_dtypes(simulated_sm121,
+                                                                output_dtype):
+    tensors = inputs(256, 1024, 1536, 256, layout="column_major_b")
+    assert measured_config(tensors, output_dtype=output_dtype)["backend"] == "triton"
+    with pytest.raises(ValueError, match="BF16"):
+        measured_config(tensors, output_dtype=output_dtype, backend="cuda")
+
+
+@pytest.mark.parametrize("variation", ["strided_a", "row_major_b", "strided_scale_a",
+                                       "strided_scale_b", "unaligned_a", "unaligned_b",
+                                       "missing_scales"])
+def test_m256_measurements_preserve_native_layout_guards(simulated_sm121, variation):
+    tensors = list(inputs(256, 1024, 1536, 256, layout="column_major_b"))
+    if variation.startswith("strided_"):
+        index = {"strided_a": 0, "strided_scale_a": 2, "strided_scale_b": 3}[variation]
+        source = tensors[index]
+        tensors[index] = torch.empty(
+            (source.shape[0], 2 * source.shape[1]), dtype=source.dtype
+        )[:, ::2]
+    elif variation == "row_major_b":
+        tensors[1] = tensors[1].contiguous()
+    elif variation.startswith("unaligned_"):
+        index = 0 if variation == "unaligned_a" else 1
+        source = tensors[index]
+        backing = torch.empty(source.numel() + 1, dtype=source.dtype)[1:]
+        tensors[index] = (backing.view(source.shape) if index == 0
+                          else backing.view(source.shape[1], source.shape[0]).t())
+        assert tensors[index].data_ptr() % 16 == 1
+    else:
+        tensors[2:] = [None, None]
+    assert measured_config(tensors)["backend"] == "triton"
+    with pytest.raises(ValueError, match="requires"):
+        measured_config(tensors, backend="cuda")
+
+
+def test_square_measured_dispatch_is_preserved(simulated_sm121):
+    tensors = inputs(1024, 1024, 1024, 256, layout="column_major_b")
+    for backend in ("auto", "cuda"):
+        config = measured_config(tensors, backend=backend)
+        assert config["backend"] == "cuda"
+        assert config["config_id"] == 2
+        assert config["policy"] == "sm121_g256_measured"
+    assert measured_config(tensors, backend="triton")["backend"] == "triton"
+
+
+def assert_sampled_reference(actual, tensors):
+    """Check multiple tile boundaries without performing a large CPU GEMM."""
+    a, b, scale_a, scale_b = tensors
+    rows = [0, 63, 128, 255]
+    cols = [0, 63, 127, 128, b.shape[1] - 1]
+    sample = (a[rows], b[:, cols], scale_a[rows], scale_b[:, cols])
+    expected = reference(*sample, 256).to(actual.dtype)
+    torch.testing.assert_close(actual[rows][:, cols].cpu(), expected)
+
+
+@cuda
+@pytest.mark.parametrize("n,k,config_id,triton_tile", M256_MEASURED_CASES)
+@pytest.mark.parametrize("backend", ["auto", "cuda"])
+def test_m256_public_api_launches_measured_native(monkeypatch, n, k, config_id,
+                                                 triton_tile, backend):
+    native_cuda = require_native_cuda()
+    tensors = inputs(256, n, k, 256, device="cuda", layout="column_major_b")
+    original_launch = native_cuda.launch
+    calls = []
+
+    def record_launch(a, b, scale_a, scale_b, output, selected_id):
+        calls.append(selected_id)
+        return original_launch(a, b, scale_a, scale_b, output, selected_id)
+
+    monkeypatch.setattr(native_cuda, "launch", record_launch)
+    actual = int8_gemm(*tensors, group_size=256, backend=backend)
+    assert actual.dtype == torch.bfloat16
+    assert calls == [config_id]
+    assert_sampled_reference(actual, tensors)
+
+
+@cuda
+@pytest.mark.parametrize("n,k,config_id,triton_tile", M256_MEASURED_CASES)
+@pytest.mark.parametrize("backend", ["auto", "triton"])
+def test_m256_public_api_triton_fallback(monkeypatch, n, k, config_id,
+                                        triton_tile, backend):
+    if torch.cuda.get_device_capability() != (12, 1):
+        pytest.skip("The measured rectangular dispatch table is specific to SM121")
+    import grain_gemm.gemm as implementation
+    from grain_gemm.kernels import cuda as native_cuda
+
+    # Auto must use Triton without a native build. Explicit Triton must retain
+    # that choice even when the native library is reported as available.
+    monkeypatch.setattr(native_cuda, "is_available", lambda: backend == "triton")
+    original_launch = implementation.launch
+    calls = []
+
+    def record_launch(a, b, scale_a, scale_b, output, group_size, config):
+        calls.append(config)
+        return original_launch(a, b, scale_a, scale_b, output, group_size, config)
+
+    monkeypatch.setattr(implementation, "launch", record_launch)
+    tensors = inputs(256, n, k, 256, device="cuda", layout="column_major_b")
+    actual = int8_gemm(*tensors, group_size=256, backend=backend)
+    assert actual.dtype == torch.bfloat16
+    assert len(calls) == 1
+    assert calls[0]["backend"] == "triton"
+    assert (calls[0]["block_m"], calls[0]["block_n"]) == triton_tile
+    assert_sampled_reference(actual, tensors)
+    if backend == "auto":
+        with pytest.raises(RuntimeError, match="not built"):
+            int8_gemm(*tensors, group_size=256,
+                      output_dtype=torch.bfloat16, backend="cuda")
 
 
 @cuda

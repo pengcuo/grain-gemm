@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "completed_case_records": 18,
+  "expected_cases": 18,
+  "missing_shapes": [],
+  "expected_candidate_attempts": 612,
+  "measured_candidates": 612,
+  "skipped_candidates": 0,
+  "final_backend_records": 54,
+  "raw_replay_samples_audited": 6858,
+  "max_recorded_abs_error": 0.0,
+  "fresh_input_protocol": "Hashed script and stored checks audited; inputs are not retained, so no independent GEMM recomputation.",
+  "notes": [
+    "No GPU calls or measurement-module imports.",
+    "Recorded timings were recomputed from saved per-replay microseconds; CUDA event timestamps are not retained.",
+    "Full-output finite and zero/restore assertions are verified in the script, not separate serialized flags."
+  ],
+  "warnings": [],
+  "errors": []
+}

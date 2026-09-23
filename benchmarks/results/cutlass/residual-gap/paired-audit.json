@@ -1,0 +1,4016 @@
+{
+  "status": "PASS",
+  "method": "CPU-only JSON arithmetic and file-hash audit; no GPU execution",
+  "runs": {
+    "paired_run1": {
+      "cases": [
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_1024_1024_1536.json",
+          "sha256": "4d33ac1b3a3c0e17cc8d3ec31319150ca3e9fda9247590f57abb73cd8347be41",
+          "shape": [
+            1024,
+            1024,
+            1536
+          ],
+          "nodes": 249,
+          "results": {
+            "cute": {
+              "median_us": 28.071518403938015,
+              "round_range_us": [
+                28.017735385511774,
+                28.527807519139056
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -0.6381912781562304,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.6077881011525066,
+                -0.6229972751746304,
+                -0.6470728679769722,
+                -0.6387706470182719,
+                -0.653134947291989
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10
+              }
+            },
+            "cutlass_production": {
+              "median_us": 28.25824898409556,
+              "round_range_us": [
+                28.182876157952123,
+                29.207647086147325
+              ],
+              "paired_change_vs_cute_pct": 0.6634424165757657,
+              "paired_change_vs_matched_pct": 0.03186908605830041,
+              "bootstrap_interval_vs_cute_pct": [
+                0.6385620769352229,
+                0.6899175793370294
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.6577886272856492,
+                0.6307779520493995,
+                0.703134156942764,
+                0.6858968765858009,
+                0.6397279005017742
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.01548838539711106,
+                0.050087215249994266,
+                0.06070312481814,
+                0.04047543448191249,
+                -0.00796065373247501
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 28.25471483559972,
+              "round_range_us": [
+                28.199454387986517,
+                29.326264638019854
+              ],
+              "paired_change_vs_cute_pct": 0.6422903190212104,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                0.6204373160663579,
+                0.6571999808230311
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.6115049644236814,
+                0.626902908070126,
+                0.6512879898584067,
+                0.6428771601165062,
+                0.6574288453515376
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 28.26409646306172,
+              "round_range_us": [
+                28.18236102062057,
+                28.714923016038764
+              ],
+              "paired_change_vs_cute_pct": 0.6561135629614245,
+              "paired_change_vs_matched_pct": 0.017973985173558304,
+              "bootstrap_interval_vs_cute_pct": [
+                0.6329587729435593,
+                0.6872072212733338
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.6240831284053616,
+                0.631834775056106,
+                0.6677966180743677,
+                0.6627934522110746,
+                0.6815097762900013
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.037111412435386626,
+                0.0045555920243689485,
+                0.009093012475425155,
+                0.017277947192928522,
+                0.024088038557423808
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10
+              }
+            },
+            "cutlass_address32": {
+              "median_us": 28.265188018002185,
+              "round_range_us": [
+                28.196754225765368,
+                28.68754988214577
+              ],
+              "paired_change_vs_cute_pct": 0.6680265716405787,
+              "paired_change_vs_matched_pct": 0.030695470697827965,
+              "bootstrap_interval_vs_cute_pct": [
+                0.6446847079682128,
+                0.7013506782042711
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.6756742178373853,
+                0.6633255403138971,
+                0.6773831675793263,
+                0.6338719393937042,
+                0.6856833468380286
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.04713187802505292,
+                0.06283001850064807,
+                0.02023095111229889,
+                -0.0034093075734098477,
+                0.03682801939066671
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10
+              }
+            },
+            "cutlass_fixed_loop": {
+              "median_us": 28.209028473819593,
+              "round_range_us": [
+                28.125814644687146,
+                28.321670241145245
+              ],
+              "paired_change_vs_cute_pct": 0.46150922868348765,
+              "paired_change_vs_matched_pct": -0.19096286158524212,
+              "bootstrap_interval_vs_cute_pct": [
+                0.43349394633049876,
+                0.4978736638503456
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.41538075737537206,
+                0.3824384660841673,
+                0.5125501794837062,
+                0.5052792624669511,
+                0.4972217261205891
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.2242404941471987,
+                -0.20027619056893764,
+                -0.19340614975974502,
+                -0.17619897205202184,
+                -0.1530136426612927
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "58, 2372, 96.19, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "60, 2372, 96.92, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "61, 2372, 97.03, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "63, 2366, 98.47, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "64, 2366, 100.14, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "65, 2366, 100.32, 96"
+            }
+          ]
+        },
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_1024_1536_1024.json",
+          "sha256": "b8c8b311b4d74a2df9af878cc880898ca210604eef558db8f9580b55f5211d0c",
+          "shape": [
+            1024,
+            1536,
+            1024
+          ],
+          "nodes": 272,
+          "results": {
+            "cute": {
+              "median_us": 24.26658833728117,
+              "round_range_us": [
+                24.048118030323703,
+                24.48588259079877
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -1.5597419928128131,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -1.6256412846614055,
+                -1.600482735939046,
+                -1.5527060952303717,
+                -1.5532442028833193,
+                -1.4826660582210271
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10
+              }
+            },
+            "cutlass_production": {
+              "median_us": 24.635764605858746,
+              "round_range_us": [
+                24.489646448808557,
+                24.97035264968872
+              ],
+              "paired_change_vs_cute_pct": 1.552062717306546,
+              "paired_change_vs_matched_pct": -0.014617673271899445,
+              "bootstrap_interval_vs_cute_pct": [
+                1.5324788923032129,
+                1.606758708394418
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.609086825317041,
+                1.546168163931938,
+                1.562065309738303,
+                1.4918128842861256,
+                1.574360915041484
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.02444696759510423,
+                -0.05785995091873719,
+                0.0009292496254031946,
+                -0.010504898206720181,
+                -0.04760506610705928
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 24.640235830755792,
+              "round_range_us": [
+                24.478588034124936,
+                24.877528933917773
+              ],
+              "paired_change_vs_cute_pct": 1.5844554104737396,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                1.5408986144008763,
+                1.6204526036690536
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.6525056772131785,
+                1.6265162674937717,
+                1.5771957712859663,
+                1.5777505354514831,
+                1.5049817951546363
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 24.624529130318585,
+              "round_range_us": [
+                24.46282435865963,
+                24.858353769077976
+              ],
+              "paired_change_vs_cute_pct": 1.5585436398886987,
+              "paired_change_vs_matched_pct": -0.040124594681878456,
+              "bootstrap_interval_vs_cute_pct": [
+                1.4953932779501633,
+                1.5973285211560384
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.6012816106602212,
+                1.5812689496188748,
+                1.5153169190618154,
+                1.4979691528639094,
+                1.5709685787000716
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.03325821120574446,
+                -0.06910262631873998,
+                -0.028655154203560684,
+                -0.012146909184618249,
+                -0.03024642781215281
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10
+              }
+            },
+            "cutlass_address32": {
+              "median_us": 24.617412511040182,
+              "round_range_us": [
+                24.470823652604047,
+                24.92329478263855
+              ],
+              "paired_change_vs_cute_pct": 1.5171362196068072,
+              "paired_change_vs_matched_pct": -0.056053101786912585,
+              "bootstrap_interval_vs_cute_pct": [
+                1.475353220026232,
+                1.5494432923472967
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.6009606293712064,
+                1.5200158985529733,
+                1.5225277409053772,
+                1.4733549466010132,
+                1.475353220026232
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.08612323865351268,
+                -0.03251475894763267,
+                -0.02675746800069323,
+                -0.12483555253706147,
+                -0.07623559266212165
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10
+              }
+            },
+            "cutlass_fixed_loop": {
+              "median_us": 24.811117964632373,
+              "round_range_us": [
+                24.72741112989538,
+                25.27823518304264
+              ],
+              "paired_change_vs_cute_pct": 2.315561039783187,
+              "paired_change_vs_matched_pct": 0.7424098662543788,
+              "bootstrap_interval_vs_cute_pct": [
+                2.281775775757211,
+                2.362596190066979
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                2.4823523211928933,
+                2.3637764885900303,
+                2.322368379971973,
+                2.2581902040020863,
+                2.2143908016898806
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.8374353697230941,
+                0.7672800289361126,
+                0.7560343524157354,
+                0.6641608183453718,
+                0.6681015140115321
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "66, 2340, 101.81, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "67, 2353, 102.00, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "68, 2346, 102.43, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "69, 2346, 102.38, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "69, 2346, 101.19, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "70, 2340, 101.43, 96"
+            }
+          ]
+        },
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_1024_2048_1536.json",
+          "sha256": "e9a85999924c38406537e4e913cefef8a8b63e5c95134b0e5079771cdfce0f79",
+          "shape": [
+            1024,
+            2048,
+            1536
+          ],
+          "nodes": 165,
+          "results": {
+            "cute": {
+              "median_us": 47.97604878743489,
+              "round_range_us": [
+                47.10419394753196,
+                48.3634428544478
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -1.4022485641671523,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -1.4896569819739192,
+                -1.3457153891036633,
+                -1.3496467462736361,
+                -1.3772553773975238,
+                -1.4917516775141193
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10
+              }
+            },
+            "cutlass_production": {
+              "median_us": 48.64581714976917,
+              "round_range_us": [
+                47.8803403449781,
+                48.99083917791193
+              ],
+              "paired_change_vs_cute_pct": 1.40827710752629,
+              "paired_change_vs_matched_pct": -0.012372643081093315,
+              "bootstrap_interval_vs_cute_pct": [
+                1.3687460903611282,
+                1.4626747053278821
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.607933132670336,
+                1.3965809999117784,
+                1.3473983506685272,
+                1.3826745396707585,
+                1.4626096221451501
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.02532869904205981,
+                0.05191664938126728,
+                -0.011760418746686874,
+                -0.04038208575123381,
+                -0.12127646983979279
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 48.64669279618697,
+              "round_range_us": [
+                47.96625484119762,
+                49.17158647017045
+              ],
+              "paired_change_vs_cute_pct": 1.4221912881150711,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                1.3855997211001503,
+                1.475417192098205
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.5121834087524544,
+                1.3640721138601375,
+                1.3681169893435374,
+                1.3964887446902718,
+                1.514343759239889
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 48.6514409383138,
+              "round_range_us": [
+                47.90768478855942,
+                48.83626880067767
+              ],
+              "paired_change_vs_cute_pct": 1.402116205573467,
+              "paired_change_vs_matched_pct": -0.0170436739301838,
+              "bootstrap_interval_vs_cute_pct": [
+                1.3653080498865933,
+                1.4500401816504471
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.7208309007426204,
+                1.3961272346608267,
+                1.3615866480903627,
+                1.3960775175598794,
+                1.436427993225431
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.01887915476281865,
+                -0.0005938494428425756,
+                0.007352951158923204,
+                -0.008261968255940388,
+                -0.06857608456964925
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10
+              }
+            },
+            "cutlass_address32": {
+              "median_us": 48.643297137636125,
+              "round_range_us": [
+                47.94879971128522,
+                48.88184287331321
+              ],
+              "paired_change_vs_cute_pct": 1.4119549784180618,
+              "paired_change_vs_matched_pct": -0.05197566201706749,
+              "bootstrap_interval_vs_cute_pct": [
+                1.359988864198991,
+                1.4484721615638296
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.6744633369286888,
+                1.375024435747152,
+                1.3303576018253604,
+                1.413001057496066,
+                1.4860950171114329
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.01815638706135214,
+                -0.023147696776781856,
+                -0.05140304157608133,
+                -0.05197566201706749,
+                -0.12895896111151384
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10
+              }
+            },
+            "cutlass_fixed_loop": {
+              "median_us": 48.90637542262222,
+              "round_range_us": [
+                48.29013419873787,
+                49.28368655118075
+              ],
+              "paired_change_vs_cute_pct": 1.997581952703431,
+              "paired_change_vs_matched_pct": 0.550201045427734,
+              "bootstrap_interval_vs_cute_pct": [
+                1.963475382885349,
+                2.039851887098054
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                2.335404817598974,
+                1.9885108890487668,
+                1.9073824971106879,
+                2.0014568961139734,
+                2.054545636619265
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.679204149730106,
+                0.5929415008314898,
+                0.517258582285951,
+                0.5515737030797663,
+                0.5383548524584558
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "71, 2340, 102.53, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "71, 2333, 102.50, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "72, 2307, 101.18, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "72, 2307, 101.97, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "73, 2307, 101.43, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "73, 2307, 102.14, 96"
+            }
+          ]
+        },
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_2048_151936_1536.json",
+          "sha256": "4150072668e0a9af3e7639c2e4b6e3cc1dc5e9a246c7d887e4c0099402fb3911",
+          "shape": [
+            2048,
+            151936,
+            1536
+          ],
+          "nodes": 1,
+          "results": {
+            "cute": {
+              "median_us": 6798.480033874512,
+              "round_range_us": [
+                6745.920181274414,
+                7350.783824920654
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -3.0446964728596093,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -3.1256353423528727,
+                -3.0227973625937654,
+                -3.015835928619448,
+                -2.7737963454842696,
+                -3.042246841394536
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10
+              }
+            },
+            "cutlass_production": {
+              "median_us": 7010.384082794189,
+              "round_range_us": [
+                6854.112148284912,
+                7303.264141082764
+              ],
+              "paired_change_vs_cute_pct": 3.1183500777093087,
+              "paired_change_vs_matched_pct": -0.03105287109232968,
+              "bootstrap_interval_vs_cute_pct": [
+                2.9653633531560697,
+                3.194165113424874
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                3.1068124268677444,
+                3.0723286871388478,
+                3.133980393710445,
+                2.9730724939160957,
+                3.1856470128536873
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0015519066872693443,
+                -0.10853169964091247,
+                -0.031488143559277315,
+                -0.044787141634272665,
+                0.07076514916031229
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 7011.744022369385,
+              "round_range_us": [
+                6914.815902709961,
+                7174.304008483887
+              ],
+              "paired_change_vs_cute_pct": 3.140310881904451,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                2.9879957779236133,
+                3.2375073472445504
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                3.226504095909233,
+                3.1170309476275193,
+                3.109620072359509,
+                2.852970508915975,
+                3.137712368415757
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 6966.256141662598,
+              "round_range_us": [
+                6866.78409576416,
+                7297.728061676025
+              ],
+              "paired_change_vs_cute_pct": 2.5370272230100355,
+              "paired_change_vs_matched_pct": -0.6021267238811356,
+              "bootstrap_interval_vs_cute_pct": [
+                2.3290611116505877,
+                2.6402541489632725
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                2.4586253979375527,
+                2.6046498174585375,
+                2.521647334678745,
+                2.5654892430917453,
+                2.5262954451049424
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.7450907611334934,
+                -0.6114422039961376,
+                -0.5692609945221472,
+                -0.4600841045095283,
+                -0.6429801675047697
+              ],
+              "rounds_faster_than_cute": 4,
+              "positions": {
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10
+              }
+            },
+            "cutlass_address32": {
+              "median_us": 7006.576061248779,
+              "round_range_us": [
+                6875.135898590088,
+                7042.912006378174
+              ],
+              "paired_change_vs_cute_pct": 2.920385103582346,
+              "paired_change_vs_matched_pct": -0.06732875563306706,
+              "bootstrap_interval_vs_cute_pct": [
+                2.7839905238791207,
+                3.190813881247445
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                2.810159042872673,
+                2.959390960002284,
+                2.9154281627595147,
+                2.7503160662159187,
+                3.0661216566614247
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.021664871517335094,
+                -0.14403577017393365,
+                -0.07307711845676579,
+                -0.0683989444393518,
+                -0.05636520858725014
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10
+              }
+            },
+            "cutlass_fixed_loop": {
+              "median_us": 7008.72015953064,
+              "round_range_us": [
+                6643.648147583008,
+                7190.624237060547
+              ],
+              "paired_change_vs_cute_pct": 3.0082437553917707,
+              "paired_change_vs_matched_pct": -0.06647583117609379,
+              "bootstrap_interval_vs_cute_pct": [
+                2.8722207691443735,
+                3.1456720055896614
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                2.8572903257994,
+                3.0427253084050365,
+                3.0658639862570114,
+                2.893978155196897,
+                3.2311588088680843
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.14681021699998187,
+                -0.029878738918265313,
+                -0.09264206527765939,
+                -0.054027589131699916,
+                -0.01939458841160313
+              ],
+              "rounds_faster_than_cute": 3,
+              "positions": {
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "74, 2164, 94.83, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "75, 2171, 94.79, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "76, 2164, 93.16, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "76, 2158, 93.43, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "76, 2151, 93.44, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "77, 2151, 94.80, 96"
+            }
+          ]
+        },
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_2048_1536_1024.json",
+          "sha256": "48a77241ca38359d67741294f678dccb025e51a8763f6e96a29e0bcab71300d4",
+          "shape": [
+            2048,
+            1536,
+            1024
+          ],
+          "nodes": 159,
+          "results": {
+            "cute": {
+              "median_us": 49.51507040539627,
+              "round_range_us": [
+                47.99456566384753,
+                50.18888029662318
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -1.417496352108838,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -1.2830584452336757,
+                -1.4543721211341287,
+                -1.4398743164806715,
+                -1.385659162507924,
+                -1.4559093047017857
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10
+              }
+            },
+            "cutlass_production": {
+              "median_us": 50.26646530103383,
+              "round_range_us": [
+                48.55728449311646,
+                50.80714315738318
+              ],
+              "paired_change_vs_cute_pct": 1.4972121133354221,
+              "paired_change_vs_matched_pct": 0.08572913864053344,
+              "bootstrap_interval_vs_cute_pct": [
+                1.4280458102417848,
+                1.5458713270434465
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.336709334107189,
+                1.449583739082616,
+                1.5401718226861538,
+                1.5034956077500494,
+                1.5470066315276032
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.04967177871844086,
+                0.051377448712486284,
+                0.0918523277839034,
+                0.12028770569960656,
+                0.10224565650298612
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 50.26596147309309,
+              "round_range_us": [
+                48.74002408681426,
+                50.646943866081955
+              ],
+              "paired_change_vs_cute_pct": 1.4378785440066988,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                1.3780969274075794,
+                1.4794144034590229
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.299784899127343,
+                1.4758365354046177,
+                1.4609109324491332,
+                1.4051366778908614,
+                1.4774218048830612
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 50.26586250689044,
+              "round_range_us": [
+                48.687898887778225,
+                50.808756606383895
+              ],
+              "paired_change_vs_cute_pct": 1.4749591329192624,
+              "paired_change_vs_matched_pct": 0.01520398773178222,
+              "bootstrap_interval_vs_cute_pct": [
+                1.3794370451829074,
+                1.5466516535534325
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.2676880268666313,
+                1.4605625795685917,
+                1.5136473841673714,
+                1.5278779308600443,
+                1.4954389661620215
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.03786017635241112,
+                -0.0007871099061640408,
+                0.039252442187120984,
+                0.061916602813649746,
+                0.1434016594396681
+              ],
+              "rounds_faster_than_cute": 3,
+              "positions": {
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10
+              }
+            },
+            "cutlass_address32": {
+              "median_us": 50.256402237610246,
+              "round_range_us": [
+                48.6542893655645,
+                51.59889077240566
+              ],
+              "paired_change_vs_cute_pct": 1.4630056065761288,
+              "paired_change_vs_matched_pct": 0.04648092564205619,
+              "bootstrap_interval_vs_cute_pct": [
+                1.3990110830125468,
+                1.505106311837312
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.3507356963636141,
+                1.462242032731842,
+                1.5329199512111202,
+                1.5007323511309734,
+                1.4966288177461706
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                2.6905583982994585e-06,
+                0.07772868198900884,
+                0.08998555923733775,
+                0.10204080174913699,
+                -0.0756900885739542
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10
+              }
+            },
+            "cutlass_fixed_loop": {
+              "median_us": 50.41931860102048,
+              "round_range_us": [
+                49.07250254409118,
+                51.03235424689527
+              ],
+              "paired_change_vs_cute_pct": 1.8198171159658383,
+              "paired_change_vs_matched_pct": 0.38530385425230573,
+              "bootstrap_interval_vs_cute_pct": [
+                1.762361112775923,
+                1.8703094997848169
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.7102009382250039,
+                1.833735864509567,
+                1.9461158569271886,
+                1.8286752890874336,
+                1.8568100403969945
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.3353363241502816,
+                0.39991960481366995,
+                0.3837629206928206,
+                0.4363213410851774,
+                0.41530525123172346
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "73, 2288, 100.97, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "74, 2288, 100.05, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "74, 2281, 99.64, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "75, 2275, 99.71, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "75, 2281, 99.85, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "75, 2275, 98.90, 96"
+            }
+          ]
+        }
+      ],
+      "complete": true,
+      "missing_shapes": []
+    },
+    "paired_run2": {
+      "cases": [
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_1024_1024_1536.json",
+          "sha256": "4075860b11caed1cf7b9157af09e960d648259d3a7d58a44708407e133354604",
+          "shape": [
+            1024,
+            1024,
+            1536
+          ],
+          "nodes": 248,
+          "results": {
+            "cute": {
+              "median_us": 28.147677260060462,
+              "round_range_us": [
+                28.084258879384688,
+                28.64142002597932
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -0.45060362128668263,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.4813930710766301,
+                -0.43054033860931984,
+                -0.4752796867875775,
+                -0.415041625002599
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 9,
+                "6": 9,
+                "5": 9,
+                "4": 9,
+                "3": 8,
+                "2": 8,
+                "1": 8
+              }
+            },
+            "cutlass_production": {
+              "median_us": 28.271935639842866,
+              "round_range_us": [
+                28.230451768444432,
+                28.688000094506048
+              ],
+              "paired_change_vs_cute_pct": 0.4544000502107126,
+              "paired_change_vs_matched_pct": -0.0027372337704667515,
+              "bootstrap_interval_vs_cute_pct": [
+                0.430572436809884,
+                0.47015300253419046
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.4787882382172981,
+                0.40823451247538056,
+                0.47522482168762537,
+                0.4096722038475775
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.022605557802402032,
+                -0.00821648562727706,
+                -0.006387746622604773,
+                -0.006845213207562484
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "1": 9,
+                "0": 9,
+                "6": 9,
+                "5": 9,
+                "4": 8,
+                "3": 8,
+                "2": 8
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 28.272902773272605,
+              "round_range_us": [
+                28.217290678331928,
+                28.68516214432255
+              ],
+              "paired_change_vs_cute_pct": 0.4526432797173463,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                0.41677140248659317,
+                0.47248766129706077
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.4837235197944878,
+                0.4324078125750308,
+                0.4775496370127197,
+                0.41677140248659317
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "2": 9,
+                "1": 9,
+                "0": 9,
+                "6": 9,
+                "5": 8,
+                "4": 8,
+                "3": 8
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 28.272968146108813,
+              "round_range_us": [
+                28.23328971862793,
+                29.059871550529234
+              ],
+              "paired_change_vs_cute_pct": 0.45118965997050786,
+              "paired_change_vs_matched_pct": 0.002282139251397197,
+              "bootstrap_interval_vs_cute_pct": [
+                0.4362077368862405,
+                0.4793126153924021
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.49923069503989836,
+                0.44357433124910806,
+                0.4909939171763078,
+                0.4357581326618787
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.02147355851591648,
+                0.0059328917047407614,
+                -0.0002278215544104789,
+                -0.00045552043516083884
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "3": 9,
+                "2": 9,
+                "1": 9,
+                "0": 9,
+                "6": 8,
+                "5": 8,
+                "4": 8
+              }
+            },
+            "cutlass_fixed_loop": {
+              "median_us": 28.25019436497842,
+              "round_range_us": [
+                28.185419497951383,
+                28.332644893277077
+              ],
+              "paired_change_vs_cute_pct": 0.34780725848211347,
+              "paired_change_vs_matched_pct": -0.08009707449703196,
+              "bootstrap_interval_vs_cute_pct": [
+                0.32934459373235025,
+                0.38379954503373614
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.3453838320276237,
+                0.32230432753621585,
+                0.40194002748124014,
+                0.3774580694529295
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.16177739369773736,
+                -0.12689705094852677,
+                -0.06228031242987431,
+                -0.07116274800079703
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "4": 9,
+                "3": 9,
+                "2": 9,
+                "1": 9,
+                "0": 8,
+                "6": 8,
+                "5": 8
+              }
+            },
+            "cutlass_minimum_k": {
+              "median_us": 28.288323071695146,
+              "round_range_us": [
+                28.253418783987723,
+                29.176129448798395
+              ],
+              "paired_change_vs_cute_pct": 0.51397610528503,
+              "paired_change_vs_matched_pct": 0.058880041559383756,
+              "bootstrap_interval_vs_cute_pct": [
+                0.4965527777003542,
+                0.5348432075992449
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.5654662733731941,
+                0.5098264302711097,
+                0.5291600923285511,
+                0.49983006619611636
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.08746584236392074,
+                0.050428129241009145,
+                0.05751266934499455,
+                0.06528067700504181
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "5": 9,
+                "4": 9,
+                "3": 9,
+                "2": 9,
+                "1": 8,
+                "0": 8,
+                "6": 8
+              }
+            },
+            "cutlass_ungrouped": {
+              "median_us": 28.11819314956665,
+              "round_range_us": [
+                28.03664438186153,
+                28.583741957141505
+              ],
+              "paired_change_vs_cute_pct": -0.14503974772586137,
+              "paired_change_vs_matched_pct": -0.5912392258686117,
+              "bootstrap_interval_vs_cute_pct": [
+                -0.1773755871199545,
+                -0.118370833382897
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                -0.157538304912741,
+                -0.17040344126623141,
+                -0.10289458445955635,
+                -0.12834858259616055
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.6342700816221014,
+                -0.5527026838092031,
+                -0.5333750140090299,
+                -0.5689328281589301
+              ],
+              "rounds_faster_than_cute": 49,
+              "positions": {
+                "6": 9,
+                "5": 9,
+                "4": 9,
+                "3": 9,
+                "2": 8,
+                "1": 8,
+                "0": 8
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "59, 2372, 96.02, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "61, 2372, 97.08, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "63, 2366, 98.21, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "64, 2366, 99.13, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "65, 2366, 100.21, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "66, 2366, 99.94, 96"
+            }
+          ]
+        },
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_1024_1536_1024.json",
+          "sha256": "daa9f35bb3b8b6b7cd6ec9b93bf0e6a50ea10692d3fba33da019f528a979c94f",
+          "shape": [
+            1024,
+            1536,
+            1024
+          ],
+          "nodes": 274,
+          "results": {
+            "cute": {
+              "median_us": 24.414832574607683,
+              "round_range_us": [
+                24.151241692313313,
+                25.11381058797349
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -1.387230467874212,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -1.4594491041015845,
+                -1.4633385579895242,
+                -1.3417770613521895,
+                -1.3670531034008393
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 9,
+                "6": 9,
+                "5": 9,
+                "4": 9,
+                "3": 8,
+                "2": 8,
+                "1": 8
+              }
+            },
+            "cutlass_production": {
+              "median_us": 24.750190059634022,
+              "round_range_us": [
+                24.516554644508084,
+                25.0849636801838
+              ],
+              "paired_change_vs_cute_pct": 1.4015759349010004,
+              "paired_change_vs_matched_pct": 0.006382288142692261,
+              "bootstrap_interval_vs_cute_pct": [
+                1.3553466780160672,
+                1.4541974186263351
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.4697535499344383,
+                1.4601512696226004,
+                1.377309895542167,
+                1.3840535593900194
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.01921315990425221,
+                -0.01864223986769442,
+                -0.019092246274454716,
+                -0.003431446370316671
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "1": 9,
+                "0": 9,
+                "6": 9,
+                "5": 9,
+                "4": 8,
+                "3": 8,
+                "2": 8
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 24.75854080088817,
+              "round_range_us": [
+                24.543765687594448,
+                25.02516760443249
+              ],
+              "paired_change_vs_cute_pct": 1.406745433901535,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                1.3577812114311083,
+                1.471745892256715
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.4810798008884074,
+                1.4850711911318815,
+                1.3600255928387872,
+                1.386001981978291
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "2": 9,
+                "1": 9,
+                "0": 9,
+                "6": 9,
+                "5": 8,
+                "4": 8,
+                "3": 8
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 24.75789776683724,
+              "round_range_us": [
+                24.50394108347649,
+                25.069664864644515
+              ],
+              "paired_change_vs_cute_pct": 1.4231703854289846,
+              "paired_change_vs_matched_pct": 0.012942757875311628,
+              "bootstrap_interval_vs_cute_pct": [
+                1.3855003162659418,
+                1.47623452316048
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.4672517827315712,
+                1.4486708821823457,
+                1.3945167690995186,
+                1.3791725538786936
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.023185666467240296,
+                -0.00566161939369314,
+                0.008724091457934513,
+                -0.02611176787233882
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "3": 9,
+                "2": 9,
+                "1": 9,
+                "0": 9,
+                "6": 8,
+                "5": 8,
+                "4": 8
+              }
+            },
+            "cutlass_fixed_loop": {
+              "median_us": 24.91404453333277,
+              "round_range_us": [
+                24.782248657115183,
+                25.357197671041
+              ],
+              "paired_change_vs_cute_pct": 2.1192666044797193,
+              "paired_change_vs_matched_pct": 0.6886968697617846,
+              "bootstrap_interval_vs_cute_pct": [
+                2.0801644201706715,
+                2.179859749486579
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                2.2059519077040513,
+                2.171843478800861,
+                2.09119752039415,
+                2.087682033810001
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.7220175761840197,
+                0.6583938333869943,
+                0.6856157082375525,
+                0.6762061484504311
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "4": 9,
+                "3": 9,
+                "2": 9,
+                "1": 9,
+                "0": 8,
+                "6": 8,
+                "5": 8
+              }
+            },
+            "cutlass_minimum_k": {
+              "median_us": 23.947562614496604,
+              "round_range_us": [
+                23.596495607473553,
+                24.28356226343308
+              ],
+              "paired_change_vs_cute_pct": -1.987150010398886,
+              "paired_change_vs_matched_pct": -3.357405356570875,
+              "bootstrap_interval_vs_cute_pct": [
+                -2.064017197876411,
+                -1.9496475580509265
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                -2.067729556954645,
+                -1.9308508376413624,
+                -1.9692433497054629,
+                -2.041383093858118
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -3.4576299058293625,
+                -3.3350810786548113,
+                -3.3152071711390896,
+                -3.396523398521767
+              ],
+              "rounds_faster_than_cute": 60,
+              "positions": {
+                "5": 9,
+                "4": 9,
+                "3": 9,
+                "2": 9,
+                "1": 8,
+                "0": 8,
+                "6": 8
+              }
+            },
+            "cutlass_ungrouped": {
+              "median_us": 24.854948920925167,
+              "round_range_us": [
+                24.65401426719053,
+                25.670423994969276
+              ],
+              "paired_change_vs_cute_pct": 1.7725597285964678,
+              "paired_change_vs_matched_pct": 0.3442193586217446,
+              "bootstrap_interval_vs_cute_pct": [
+                1.7089216606675839,
+                1.8110502372736814
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.7769441923880969,
+                1.795196312972669,
+                1.7762581628212093,
+                1.7745659789724977
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.30963823005794033,
+                0.36126674590093444,
+                0.38460824771995306,
+                0.3405622168414002
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "6": 9,
+                "5": 9,
+                "4": 9,
+                "3": 9,
+                "2": 8,
+                "1": 8,
+                "0": 8
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "67, 2353, 102.19, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "69, 2346, 102.75, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "69, 2320, 100.21, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "70, 2340, 102.03, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "71, 2340, 101.76, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "71, 2333, 102.23, 96"
+            }
+          ]
+        },
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_1024_2048_1536.json",
+          "sha256": "d40251cff58de76d14e4e14d0defec1c5e23cf5033dccdca34dd3d443e7c69b7",
+          "shape": [
+            1024,
+            2048,
+            1536
+          ],
+          "nodes": 167,
+          "results": {
+            "cute": {
+              "median_us": 48.145342729762646,
+              "round_range_us": [
+                47.134082474394475,
+                49.74888898655326
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -1.5040009215183892,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -1.4516455587416766,
+                -1.3390795933602595,
+                -1.5085431838114394,
+                -1.5533829461555682
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 9,
+                "6": 9,
+                "5": 9,
+                "4": 9,
+                "3": 8,
+                "2": 8,
+                "1": 8
+              }
+            },
+            "cutlass_production": {
+              "median_us": 48.864384611209715,
+              "round_range_us": [
+                47.94538806298536,
+                49.56703985522607
+              ],
+              "paired_change_vs_cute_pct": 1.5278256735820062,
+              "paired_change_vs_matched_pct": -0.016846941037385044,
+              "bootstrap_interval_vs_cute_pct": [
+                1.4967781306922667,
+                1.5652909325279074
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.5514937562729259,
+                1.4634604796555317,
+                1.5434114140432387,
+                1.5231652708826537
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.03322137202588227,
+                0.03265982478812823,
+                -0.01941431918089931,
+                0.0052994177665466324
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "1": 9,
+                "0": 9,
+                "6": 9,
+                "5": 9,
+                "4": 8,
+                "3": 8,
+                "2": 8
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 48.899353621248714,
+              "round_range_us": [
+                47.95075605015555,
+                49.51473053343996
+              ],
+              "paired_change_vs_cute_pct": 1.526966632290483,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                1.4572415205556633,
+                1.5618244013020366
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.4730537645652575,
+                1.3572693409574565,
+                1.5316487670491874,
+                1.5778936896282403
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 6,
+              "positions": {
+                "2": 9,
+                "1": 9,
+                "0": 9,
+                "6": 9,
+                "5": 8,
+                "4": 8,
+                "3": 8
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 48.841582086985696,
+              "round_range_us": [
+                47.931785355071106,
+                49.526802793948235
+              ],
+              "paired_change_vs_cute_pct": 1.5373836179395362,
+              "paired_change_vs_matched_pct": -0.01922658277134781,
+              "bootstrap_interval_vs_cute_pct": [
+                1.489099681908379,
+                1.5587385280078525
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.5271011581313498,
+                1.4031661633058246,
+                1.494086760037261,
+                1.5707138346355176
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.059189845365648086,
+                0.023781400270461717,
+                -0.036725730335329665,
+                -0.017216561676247633
+              ],
+              "rounds_faster_than_cute": 6,
+              "positions": {
+                "3": 9,
+                "2": 9,
+                "1": 9,
+                "0": 9,
+                "6": 8,
+                "5": 8,
+                "4": 8
+              }
+            },
+            "cutlass_fixed_loop": {
+              "median_us": 49.15123499796062,
+              "round_range_us": [
+                48.496097861649744,
+                49.99549660140169
+              ],
+              "paired_change_vs_cute_pct": 2.1217611752808008,
+              "paired_change_vs_matched_pct": 0.6175595931948274,
+              "bootstrap_interval_vs_cute_pct": [
+                2.0534111601845595,
+                2.1828401834590894
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                2.0534111601845595,
+                2.0872338939572854,
+                2.1819560879737354,
+                2.13976339398112
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.5156959066557665,
+                0.6445149622967827,
+                0.6583822440080489,
+                0.5555203958782062
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "4": 9,
+                "3": 9,
+                "2": 9,
+                "1": 9,
+                "0": 8,
+                "6": 8,
+                "5": 8
+              }
+            },
+            "cutlass_minimum_k": {
+              "median_us": 47.03932893490363,
+              "round_range_us": [
+                46.13652771818424,
+                48.94600942463218
+              ],
+              "paired_change_vs_cute_pct": -2.2519308046747177,
+              "paired_change_vs_matched_pct": -3.726026561908191,
+              "bootstrap_interval_vs_cute_pct": [
+                -2.288303369268574,
+                -2.223885804571535
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                -2.2231903541619413,
+                -2.2438572620508523,
+                -2.2510076440110494,
+                -2.271450921193585
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -3.735005573614747,
+                -3.620231748546998,
+                -3.7220000696162048,
+                -3.7932131746442166
+              ],
+              "rounds_faster_than_cute": 60,
+              "positions": {
+                "5": 9,
+                "4": 9,
+                "3": 9,
+                "2": 9,
+                "1": 8,
+                "0": 8,
+                "6": 8
+              }
+            },
+            "cutlass_ungrouped": {
+              "median_us": 49.09527944233603,
+              "round_range_us": [
+                48.28800269943511,
+                50.641436776715125
+              ],
+              "paired_change_vs_cute_pct": 2.000043313029609,
+              "paired_change_vs_matched_pct": 0.4688177741250854,
+              "bootstrap_interval_vs_cute_pct": [
+                1.9140751462276784,
+                2.0603650479619207
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                2.0730496304089963,
+                1.924648635641879,
+                2.024546300487362,
+                1.9896981823575244
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.4588984706159316,
+                0.6116181079323102,
+                0.43013842343229136,
+                0.44284611945979435
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "6": 9,
+                "5": 9,
+                "4": 9,
+                "3": 9,
+                "2": 8,
+                "1": 8,
+                "0": 8
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "72, 2288, 101.80, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "73, 2307, 101.60, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "73, 2275, 98.89, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "74, 2301, 101.88, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "74, 2301, 102.47, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "75, 2294, 102.01, 96"
+            }
+          ]
+        },
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_2048_151936_1536.json",
+          "sha256": "a1398af54530f2cbbe15afb52e8b44d1b2e34ae74df3772c68758698fbfe7a49",
+          "shape": [
+            2048,
+            151936,
+            1536
+          ],
+          "nodes": 1,
+          "results": {
+            "cute": {
+              "median_us": 6809.632062911987,
+              "round_range_us": [
+                6760.191917419434,
+                7597.951889038086
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -3.03269586022219,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -3.0717245731123555,
+                -3.0627786369820553,
+                -2.980667518574376,
+                -2.7711870821985785
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 9,
+                "6": 9,
+                "5": 9,
+                "4": 9,
+                "3": 8,
+                "2": 8,
+                "1": 8
+              }
+            },
+            "cutlass_production": {
+              "median_us": 7024.592161178589,
+              "round_range_us": [
+                6476.223945617676,
+                7066.656112670898
+              ],
+              "paired_change_vs_cute_pct": 3.2202825308111915,
+              "paired_change_vs_matched_pct": 0.05776366769145724,
+              "bootstrap_interval_vs_cute_pct": [
+                3.169000207828776,
+                3.295051780814351
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                3.2683451431477994,
+                3.3049878143552203,
+                3.0523904797436163,
+                2.949251910203854
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.11925339700173954,
+                0.06252562111201954,
+                -0.08665131248999369,
+                -0.0020503036395114194
+              ],
+              "rounds_faster_than_cute": 5,
+              "positions": {
+                "1": 9,
+                "0": 9,
+                "6": 9,
+                "5": 9,
+                "4": 8,
+                "3": 8,
+                "2": 8
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 7021.584033966064,
+              "round_range_us": [
+                6535.232067108154,
+                7566.463947296143
+              ],
+              "paired_change_vs_cute_pct": 3.1275464290989596,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                3.0072873068563766,
+                3.199672395891806
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                3.1690706508542776,
+                3.159552105423513,
+                3.0722409647567783,
+                2.8502419909538057
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 5,
+              "positions": {
+                "2": 9,
+                "1": 9,
+                "0": 9,
+                "6": 9,
+                "5": 8,
+                "4": 8,
+                "3": 8
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 6981.45604133606,
+              "round_range_us": [
+                6897.119998931885,
+                7412.6081466674805
+              ],
+              "paired_change_vs_cute_pct": 2.495544654587567,
+              "paired_change_vs_matched_pct": -0.6503465963392019,
+              "bootstrap_interval_vs_cute_pct": [
+                2.351772347626424,
+                2.635276669266906
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                2.5781000814638855,
+                2.6414202757901517,
+                2.2022750300246807,
+                2.288694058484131
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.5868613500041753,
+                -0.5260960191409203,
+                -0.9022163552142581,
+                -0.5977698177242585
+              ],
+              "rounds_faster_than_cute": 4,
+              "positions": {
+                "3": 9,
+                "2": 9,
+                "1": 9,
+                "0": 9,
+                "6": 8,
+                "5": 8,
+                "4": 8
+              }
+            },
+            "cutlass_fixed_loop": {
+              "median_us": 7022.079944610596,
+              "round_range_us": [
+                6975.647926330566,
+                7152.736186981201
+              ],
+              "paired_change_vs_cute_pct": 3.125476422049167,
+              "paired_change_vs_matched_pct": 0.007739960935371215,
+              "bootstrap_interval_vs_cute_pct": [
+                3.001389204206051,
+                3.2429350995344164
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                3.1978650885557958,
+                3.200510269794399,
+                2.8672392373895406,
+                2.9745149318462616
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.11718426687843397,
+                0.043822165655305056,
+                -0.12274880418308154,
+                -0.006582931435827888
+              ],
+              "rounds_faster_than_cute": 4,
+              "positions": {
+                "4": 9,
+                "3": 9,
+                "2": 9,
+                "1": 9,
+                "0": 8,
+                "6": 8,
+                "5": 8
+              }
+            },
+            "cutlass_minimum_k": {
+              "median_us": 7002.624034881592,
+              "round_range_us": [
+                6478.14416885376,
+                7298.079967498779
+              ],
+              "paired_change_vs_cute_pct": 2.893373496990481,
+              "paired_change_vs_matched_pct": -0.20909682136858176,
+              "bootstrap_interval_vs_cute_pct": [
+                2.7679868302995514,
+                3.0066186772036207
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                3.0629690136965593,
+                2.9023305199467053,
+                2.844545809016741,
+                2.710627601243809
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.15992036390233277,
+                -0.25700816489846456,
+                -0.188460689826897,
+                -0.21106546174392005
+              ],
+              "rounds_faster_than_cute": 5,
+              "positions": {
+                "5": 9,
+                "4": 9,
+                "3": 9,
+                "2": 9,
+                "1": 8,
+                "0": 8,
+                "6": 8
+              }
+            },
+            "cutlass_ungrouped": {
+              "median_us": 7043.999910354614,
+              "round_range_us": [
+                7001.632213592529,
+                7324.128150939941
+              ],
+              "paired_change_vs_cute_pct": 3.492831416207265,
+              "paired_change_vs_matched_pct": 0.3217140394031093,
+              "bootstrap_interval_vs_cute_pct": [
+                3.3355304388941187,
+                3.5649875911334394
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                3.5915031911549766,
+                3.5120038891315986,
+                3.2070888870634473,
+                3.3887695623906477
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.3927821500949946,
+                0.3217140394031093,
+                0.26078577332988573,
+                0.4105357262358833
+              ],
+              "rounds_faster_than_cute": 4,
+              "positions": {
+                "6": 9,
+                "5": 9,
+                "4": 9,
+                "3": 9,
+                "2": 8,
+                "1": 8,
+                "0": 8
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "76, 2171, 95.06, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "76, 2158, 93.47, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "77, 2164, 94.68, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "77, 2151, 94.67, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "78, 2151, 94.29, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "78, 2145, 93.28, 96"
+            }
+          ]
+        },
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_2048_1536_1024.json",
+          "sha256": "3f58d61a73a067cb43dc75604291b2894c035225494759dd99f7b1a3f4a1a7ef",
+          "shape": [
+            2048,
+            1536,
+            1024
+          ],
+          "nodes": 165,
+          "results": {
+            "cute": {
+              "median_us": 49.777455763383344,
+              "round_range_us": [
+                48.26317700472745,
+                50.18879861542673
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -1.2226055212977038,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -1.158919569700867,
+                -1.2670706751655825,
+                -1.2520180235625844,
+                -1.2703976354609847
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 9,
+                "6": 9,
+                "5": 9,
+                "4": 9,
+                "3": 8,
+                "2": 8,
+                "1": 8
+              }
+            },
+            "cutlass_production": {
+              "median_us": 50.40339267615116,
+              "round_range_us": [
+                48.697795289935485,
+                51.60998720111269
+              ],
+              "paired_change_vs_cute_pct": 1.2455180119368414,
+              "paired_change_vs_matched_pct": 0.044698261761144664,
+              "bootstrap_interval_vs_cute_pct": [
+                1.1982405916459493,
+                1.3316509448552782
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.2416067640248496,
+                1.1993353944880658,
+                1.3656260974739265,
+                1.2856714912518719
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.04716433926237329,
+                -0.053698611665864426,
+                0.02428649140935324,
+                0.0552096986822459
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "1": 9,
+                "0": 9,
+                "6": 9,
+                "5": 9,
+                "4": 8,
+                "3": 8,
+                "2": 8
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 50.39350336248224,
+              "round_range_us": [
+                48.73056700735381,
+                50.73512684215199
+              ],
+              "paired_change_vs_cute_pct": 1.2377381879746352,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                1.201879593580335,
+                1.3088983126466225
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.1725154355076484,
+                1.283344225412053,
+                1.2678957370688693,
+                1.2867450295169114
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "2": 9,
+                "1": 9,
+                "0": 9,
+                "6": 9,
+                "5": 8,
+                "4": 8,
+                "3": 8
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 50.40601383556019,
+              "round_range_us": [
+                48.77304308342211,
+                50.96455776330197
+              ],
+              "paired_change_vs_cute_pct": 1.283583720166881,
+              "paired_change_vs_matched_pct": 0.050601894024993044,
+              "bootstrap_interval_vs_cute_pct": [
+                1.229466062762996,
+                1.3133604930539056
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.2320929174312933,
+                1.2705910834578393,
+                1.2900714841719507,
+                1.3052922781489285
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.1579559246503992,
+                -0.009768470785298522,
+                -0.07342425915490836,
+                0.1254629680652819
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "3": 9,
+                "2": 9,
+                "1": 9,
+                "0": 9,
+                "6": 8,
+                "5": 8,
+                "4": 8
+              }
+            },
+            "cutlass_fixed_loop": {
+              "median_us": 50.51859364365086,
+              "round_range_us": [
+                49.378325722434305,
+                51.730421817663945
+              ],
+              "paired_change_vs_cute_pct": 1.4846122150546481,
+              "paired_change_vs_matched_pct": 0.2572811089048388,
+              "bootstrap_interval_vs_cute_pct": [
+                1.4317291866664972,
+                1.5618735036347475
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.4882797456639452,
+                1.4739415693417302,
+                1.491363444077276,
+                1.4523242202456377
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.26579024640831506,
+                0.2572811089048388,
+                0.05209947702142781,
+                0.1898432855847787
+              ],
+              "rounds_faster_than_cute": 3,
+              "positions": {
+                "4": 9,
+                "3": 9,
+                "2": 9,
+                "1": 9,
+                "0": 8,
+                "6": 8,
+                "5": 8
+              }
+            },
+            "cutlass_minimum_k": {
+              "median_us": 48.93420537312825,
+              "round_range_us": [
+                47.543855146928266,
+                49.33255513509115
+              ],
+              "paired_change_vs_cute_pct": -1.6256400922725733,
+              "paired_change_vs_matched_pct": -2.834058544301654,
+              "bootstrap_interval_vs_cute_pct": [
+                -1.6795911024596544,
+                -1.5808630784022615
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                -1.5668660978309656,
+                -1.6134745876931866,
+                -1.682692340740577,
+                -1.624441046589098
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -2.696724897016689,
+                -2.8355590399660624,
+                -2.967634322965629,
+                -2.8464201940504696
+              ],
+              "rounds_faster_than_cute": 59,
+              "positions": {
+                "5": 9,
+                "4": 9,
+                "3": 9,
+                "2": 9,
+                "1": 8,
+                "0": 8,
+                "6": 8
+              }
+            },
+            "cutlass_ungrouped": {
+              "median_us": 50.403782815644234,
+              "round_range_us": [
+                48.841892589222304,
+                50.83229180538293
+              ],
+              "paired_change_vs_cute_pct": 1.2660889476299841,
+              "paired_change_vs_matched_pct": 0.04098485517536332,
+              "bootstrap_interval_vs_cute_pct": [
+                1.222834899188685,
+                1.317547167700095
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.2386497319492484,
+                1.2565081350113028,
+                1.354195612844511,
+                1.235293438326357
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.12897089346917134,
+                0.010113807078271364,
+                0.08339825552092783,
+                -0.05025672938102632
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "6": 9,
+                "5": 9,
+                "4": 9,
+                "3": 9,
+                "2": 8,
+                "1": 8,
+                "0": 8
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "75, 2288, 100.61, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "75, 2268, 100.71, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "76, 2281, 101.20, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "76, 2262, 100.67, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "77, 2275, 99.64, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "77, 2275, 100.22, 96"
+            }
+          ]
+        }
+      ],
+      "complete": true,
+      "missing_shapes": []
+    },
+    "paired_run3": {
+      "cases": [
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run3/case_1024_1024_1536.json",
+          "sha256": "9fc717a2c596c6abce9991c79a64dc024d37d261c4289860aeb3542cf8e5c942",
+          "shape": [
+            1024,
+            1024,
+            1536
+          ],
+          "nodes": 242,
+          "results": {
+            "cute": {
+              "median_us": 28.119008403179073,
+              "round_range_us": [
+                28.03702393839182,
+                29.2181160824358
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -0.49233130010114534,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.5859298265037838,
+                -0.5351327362654534,
+                -0.5159429819009187,
+                -0.44308201793195057,
+                -0.2874455446931101
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10
+              }
+            },
+            "cutlass_production": {
+              "median_us": 28.243173252452504,
+              "round_range_us": [
+                28.167669438133554,
+                29.315702186143103
+              ],
+              "paired_change_vs_cute_pct": 0.448492733835093,
+              "paired_change_vs_matched_pct": -0.008669364738600471,
+              "bootstrap_interval_vs_cute_pct": [
+                0.39604596822284677,
+                0.5258369284272923
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.5129059925394586,
+                0.46582467263571736,
+                0.5501866970540004,
+                0.3395497246236445,
+                0.34144151526871447
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.12113725270057607,
+                -0.029931608997102455,
+                0.041707055786077696,
+                -0.0121548739205668,
+                0.010723575543036823
+              ],
+              "rounds_faster_than_cute": 3,
+              "positions": {
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 28.261421140560437,
+              "round_range_us": [
+                28.171503839413983,
+                29.437354773529304
+              ],
+              "paired_change_vs_cute_pct": 0.4947671941462506,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                0.4532149067852487,
+                0.54393941681945
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.5893909961804944,
+                0.5380118339017192,
+                0.5186189502695893,
+                0.4450632141796973,
+                0.2882759038493221
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 3,
+              "positions": {
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 28.24436337494653,
+              "round_range_us": [
+                28.18155288696289,
+                29.284760971699864
+              ],
+              "paired_change_vs_cute_pct": 0.4867784749212678,
+              "paired_change_vs_matched_pct": -0.022817186246104626,
+              "bootstrap_interval_vs_cute_pct": [
+                0.4171725753650879,
+                0.5118012530531679
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.5120176863011583,
+                0.4916226703255422,
+                0.5295511903623984,
+                0.3067077220604286,
+                0.25800731024419044
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.08947268070396142,
+                -0.028101555406989664,
+                0.05247959736753849,
+                -0.0062916216491126775,
+                -0.037520221659281816
+              ],
+              "rounds_faster_than_cute": 4,
+              "positions": {
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10
+              }
+            },
+            "cutlass_minimum_k": {
+              "median_us": 28.29553667178824,
+              "round_range_us": [
+                28.213554177402465,
+                28.7888917055997
+              ],
+              "paired_change_vs_cute_pct": 0.5857599680017422,
+              "paired_change_vs_matched_pct": 0.089263756399105,
+              "bootstrap_interval_vs_cute_pct": [
+                0.5112851494547987,
+                0.6456541756688416
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.7331353384696371,
+                0.5755053120554354,
+                0.644272568951143,
+                0.32628291324170444,
+                0.32952120773699356
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.11167495860342491,
+                0.05506070097254234,
+                0.18492840627064577,
+                0.05835480174027907,
+                0.014910073932372647
+              ],
+              "rounds_faster_than_cute": 5,
+              "positions": {
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10
+              }
+            },
+            "cutlass_ungrouped": {
+              "median_us": 28.048793146432924,
+              "round_range_us": [
+                27.978577889686775,
+                28.5783799226619
+              ],
+              "paired_change_vs_cute_pct": -0.18182395809724916,
+              "paired_change_vs_matched_pct": -0.6943951302846196,
+              "bootstrap_interval_vs_cute_pct": [
+                -0.2327561651017218,
+                -0.15086928717255033
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                -0.15606592354682203,
+                -0.26970703192472634,
+                -0.1766821977000177,
+                -0.24890489369964186,
+                -0.06354627811460123
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.7105306613276796,
+                -0.7420347152725437,
+                -0.6848657011360282,
+                -0.6817489602077287,
+                -0.31516165247289507
+              ],
+              "rounds_faster_than_cute": 50,
+              "positions": {
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "65, 2366, 99.12, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "66, 2359, 101.13, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "68, 2359, 101.90, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "69, 2359, 101.91, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "69, 2366, 101.50, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "70, 2340, 101.29, 96"
+            }
+          ]
+        },
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run3/case_1024_1536_1024.json",
+          "sha256": "dd5b185c55208e836c72bc29359af625d3a0bc81d89dee4dbfa4d2adfddb74c1",
+          "shape": [
+            1024,
+            1536,
+            1024
+          ],
+          "nodes": 278,
+          "results": {
+            "cute": {
+              "median_us": 24.73933748204073,
+              "round_range_us": [
+                24.11142527628288,
+                25.042072474527703
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -1.12646642219969,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -1.4455072983231343,
+                -1.0402713110796435,
+                -1.0458498225360047,
+                -1.1334568632605513,
+                -1.1321046322673056
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10
+              }
+            },
+            "cutlass_production": {
+              "median_us": 25.032979121311104,
+              "round_range_us": [
+                24.51015890931054,
+                25.317180070945685
+              ],
+              "paired_change_vs_cute_pct": 1.1892300938042055,
+              "paired_change_vs_matched_pct": 0.010640828081376341,
+              "bootstrap_interval_vs_cute_pct": [
+                1.1135338207704848,
+                1.296879780659288
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.3298565722184907,
+                1.5774682203740564,
+                1.1173766162792642,
+                1.104077549622673,
+                1.1157325703209153
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.010786622605585272,
+                0.4583894108871167,
+                0.0034487793498350072,
+                0.008221122114449031,
+                -0.05467938951357887
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 25.034762972550425,
+              "round_range_us": [
+                24.53421517241773,
+                25.270446598958625
+              ],
+              "paired_change_vs_cute_pct": 1.1393024843393107,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                1.0792825742402146,
+                1.201488986304744
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.4669836334332942,
+                1.0512175558692771,
+                1.056903462304315,
+                1.14645625144989,
+                1.1450773612551757
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 25.040287765667593,
+              "round_range_us": [
+                24.513266927046743,
+                25.33858971630069
+              ],
+              "paired_change_vs_cute_pct": 1.2013094355888043,
+              "paired_change_vs_matched_pct": 0.060966061178624464,
+              "bootstrap_interval_vs_cute_pct": [
+                1.1448502689586526,
+                1.3370497414239013
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.4028163971906649,
+                1.342539966270495,
+                1.106224811489298,
+                1.1843519034835381,
+                1.1878683191115513
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.03547686755012158,
+                0.08400017671255089,
+                0.07760464261235,
+                0.05551283755895753,
+                0.12540398431744038
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10
+              }
+            },
+            "cutlass_minimum_k": {
+              "median_us": 24.294215998203633,
+              "round_range_us": [
+                23.57513612980465,
+                24.543539225626336
+              ],
+              "paired_change_vs_cute_pct": -1.877197117830598,
+              "paired_change_vs_matched_pct": -2.964822783443277,
+              "bootstrap_interval_vs_cute_pct": [
+                -1.9373836668115985,
+                -1.8194400314130776
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                -1.8872374164570882,
+                -1.9416902072501685,
+                -1.813717711533469,
+                -1.8788236243021617,
+                -1.8686037041625303
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -3.1804157427429036,
+                -3.1536131651732857,
+                -2.8567797794775474,
+                -2.929794748977077,
+                -2.936033310813424
+              ],
+              "rounds_faster_than_cute": 58,
+              "positions": {
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10
+              }
+            },
+            "cutlass_ungrouped": {
+              "median_us": 25.085064147016126,
+              "round_range_us": [
+                24.64483453215455,
+                25.36069060401093
+              ],
+              "paired_change_vs_cute_pct": 1.417102242422752,
+              "paired_change_vs_matched_pct": 0.2684715012458927,
+              "bootstrap_interval_vs_cute_pct": [
+                1.355620975484939,
+                1.5249890296221702
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.6391704050585876,
+                1.4401600888538368,
+                1.3647803502436107,
+                1.3694197604607439,
+                1.408477817805709
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.3392968780648653,
+                0.19228411819209867,
+                0.2852798259544542,
+                0.22495879207453662,
+                0.23934619956857972
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "71, 2340, 101.56, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "72, 2327, 102.03, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "72, 2314, 100.99, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "73, 2301, 102.48, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "73, 2294, 100.96, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "74, 2301, 101.69, 96"
+            }
+          ]
+        },
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run3/case_1024_2048_1536.json",
+          "sha256": "0125a0c05729d8ce81f22fff6fcbe7e546e8bdda4ba798654c43cf57094c9c7b",
+          "shape": [
+            1024,
+            2048,
+            1536
+          ],
+          "nodes": 168,
+          "results": {
+            "cute": {
+              "median_us": 48.33495049249558,
+              "round_range_us": [
+                47.169903914133705,
+                48.74419030689058
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -1.552611114462743,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -1.4501189491406885,
+                -1.566028917977902,
+                -1.5306110778136484,
+                -1.5128577798275478,
+                -1.664548437502078
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10
+              }
+            },
+            "cutlass_production": {
+              "median_us": 49.05952158428374,
+              "round_range_us": [
+                48.135047867184596,
+                49.57904702141171
+              ],
+              "paired_change_vs_cute_pct": 1.5390046521030598,
+              "paired_change_vs_matched_pct": -0.023475132260331044,
+              "bootstrap_interval_vs_cute_pct": [
+                1.4977332517704278,
+                1.563505446956115
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.4596985852257216,
+                1.5384916219852496,
+                1.5485313468265094,
+                1.5426358501422932,
+                1.6074732325901842
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.004675596509673419,
+                -0.046492008413845376,
+                0.016345496943004356,
+                0.00951559636890309,
+                -0.06851101415891181
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 49.096666631244474,
+              "round_range_us": [
+                48.07428518931071,
+                50.51333563668387
+              ],
+              "paired_change_vs_cute_pct": 1.5770973028679247,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                1.5248743665601472,
+                1.605129750613643
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.471458363217315,
+                1.590943600475403,
+                1.554404614972471,
+                1.5361032908176142,
+                1.6927250044214137
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 1,
+              "positions": {
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 49.07895269848052,
+              "round_range_us": [
+                47.987427030290874,
+                49.42476181756882
+              ],
+              "paired_change_vs_cute_pct": 1.5549804185462257,
+              "paired_change_vs_matched_pct": -0.001743853933811046,
+              "bootstrap_interval_vs_cute_pct": [
+                1.52500522688932,
+                1.583545435946232
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.482944659574148,
+                1.5655266721043892,
+                1.5558235045642022,
+                1.562566257028375,
+                1.6105548019907268
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.017622522751903347,
+                0.006260121685341957,
+                0.0005856729142106332,
+                0.07253636770314653,
+                -0.08274794206239999
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10
+              }
+            },
+            "cutlass_minimum_k": {
+              "median_us": 47.171713340850104,
+              "round_range_us": [
+                45.98285754521688,
+                47.779616855439684
+              ],
+              "paired_change_vs_cute_pct": -2.3408679076379,
+              "paired_change_vs_matched_pct": -3.85443828769072,
+              "bootstrap_interval_vs_cute_pct": [
+                -2.3621598074400785,
+                -2.288994593158933
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                -2.4022023994163644,
+                -2.273315446251789,
+                -2.344515857066165,
+                -2.351429877191702,
+                -2.287335516863709
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -3.8545818304527746,
+                -3.8434769888914144,
+                -3.8780032287352606,
+                -3.7672967032166493,
+                -3.9022363347998024
+              ],
+              "rounds_faster_than_cute": 59,
+              "positions": {
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10
+              }
+            },
+            "cutlass_ungrouped": {
+              "median_us": 49.27018994376773,
+              "round_range_us": [
+                48.34381171635219,
+                50.246477127075195
+              ],
+              "paired_change_vs_cute_pct": 1.9060649844603983,
+              "paired_change_vs_matched_pct": 0.3517638454284988,
+              "bootstrap_interval_vs_cute_pct": [
+                1.8585610737174685,
+                1.9794498696662277
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.854588455061057,
+                1.9178514537077307,
+                1.915258988518742,
+                1.9509372468175856,
+                1.9371239382551586
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.4123216000637697,
+                0.3552008548934671,
+                0.3454286004339613,
+                0.36598413547748176,
+                0.2404328017855839
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "74, 2301, 101.85, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "75, 2301, 101.75, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "76, 2294, 101.87, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "76, 2294, 102.01, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "77, 2288, 101.34, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "77, 2281, 100.35, 96"
+            }
+          ]
+        },
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run3/case_2048_151936_1536.json",
+          "sha256": "928eed51d0b264be1200abc53bc9ed22cab2a97244545b6ddef4de313f71b62c",
+          "shape": [
+            2048,
+            151936,
+            1536
+          ],
+          "nodes": 1,
+          "results": {
+            "cute": {
+              "median_us": 6841.952085494995,
+              "round_range_us": [
+                6780.767917633057,
+                7405.759811401367
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -2.8786968565817417,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -2.792301060788094,
+                -2.7046363202412937,
+                -2.8872895538905485,
+                -2.972498839182991,
+                -1.9072316197867756
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10
+              }
+            },
+            "cutlass_production": {
+              "median_us": 7039.072036743164,
+              "round_range_us": [
+                6806.784152984619,
+                7370.143890380859
+              ],
+              "paired_change_vs_cute_pct": 2.8663392754248562,
+              "paired_change_vs_matched_pct": 0.09879381635173878,
+              "bootstrap_interval_vs_cute_pct": [
+                2.688543404714605,
+                3.1404850931782136
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                2.699107414567825,
+                2.7359716409322443,
+                3.1240996604112503,
+                3.103150340417793,
+                2.0713555735873523
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.07671358987186849,
+                0.06067806014440347,
+                0.16770048614862532,
+                0.05075173980357839,
+                0.17979929869746947
+              ],
+              "rounds_faster_than_cute": 6,
+              "positions": {
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 7033.31184387207,
+              "round_range_us": [
+                6451.039791107178,
+                7291.071891784668
+              ],
+              "paired_change_vs_cute_pct": 2.964022123188026,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                2.508060302209314,
+                3.1195024483435363
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                2.8730600171299914,
+                2.7798206925988556,
+                2.9731326952065373,
+                3.063654927818593,
+                1.947052907053859
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 8,
+              "positions": {
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 6997.0879554748535,
+              "round_range_us": [
+                6757.279872894287,
+                7537.536144256592
+              ],
+              "paired_change_vs_cute_pct": 2.2722097170281508,
+              "paired_change_vs_matched_pct": -0.5628648411216131,
+              "bootstrap_interval_vs_cute_pct": [
+                2.0418059159603708,
+                2.427253383127037
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                2.468620884549555,
+                2.5583599550120573,
+                2.0546984054867767,
+                2.4191008909674627,
+                1.328014193573468
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.5773707906393089,
+                -0.20804310381791202,
+                -0.5267412052349041,
+                -0.5983414265510412,
+                -0.6676188664368143
+              ],
+              "rounds_faster_than_cute": 5,
+              "positions": {
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10
+              }
+            },
+            "cutlass_minimum_k": {
+              "median_us": 7015.056133270264,
+              "round_range_us": [
+                6707.071781158447,
+                7401.4081954956055
+              ],
+              "paired_change_vs_cute_pct": 2.736982543823241,
+              "paired_change_vs_matched_pct": -0.24498219511368546,
+              "bootstrap_interval_vs_cute_pct": [
+                2.322970014539827,
+                2.820440318178763
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                2.790385371847126,
+                2.6533727501821147,
+                2.6814341274490117,
+                2.869532217543469,
+                1.7972615703146566
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.18996207026520384,
+                -0.3197270047609835,
+                -0.22166890652361992,
+                -0.25401368315911554,
+                -0.3090224646431272
+              ],
+              "rounds_faster_than_cute": 6,
+              "positions": {
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10
+              }
+            },
+            "cutlass_ungrouped": {
+              "median_us": 7048.735857009888,
+              "round_range_us": [
+                6577.023983001709,
+                7419.74401473999
+              ],
+              "paired_change_vs_cute_pct": 3.2154485099272323,
+              "paired_change_vs_matched_pct": 0.2817767105465663,
+              "bootstrap_interval_vs_cute_pct": [
+                2.911691041910869,
+                3.360221381996187
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                3.0962474707614263,
+                3.263551179048063,
+                3.128157461976544,
+                3.3819933014575643,
+                2.641129449542179
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.19099247182365886,
+                0.3143882220161043,
+                0.2507070912191267,
+                0.16257339537730786,
+                0.3971770573827804
+              ],
+              "rounds_faster_than_cute": 4,
+              "positions": {
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "77, 2164, 94.57, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "77, 2158, 94.61, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "77, 2151, 93.29, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "77, 2145, 93.01, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "78, 2151, 94.71, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "78, 2145, 93.32, 96"
+            }
+          ]
+        },
+        {
+          "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run3/case_2048_1536_1024.json",
+          "sha256": "2bdd19865e7c5346a08c9e8876dd928481f919bacefe05d87c7e0c9036f18484",
+          "shape": [
+            2048,
+            1536,
+            1024
+          ],
+          "nodes": 162,
+          "results": {
+            "cute": {
+              "median_us": 50.23970427336516,
+              "round_range_us": [
+                47.78745733661416,
+                51.0933310897262
+              ],
+              "paired_change_vs_cute_pct": 0.0,
+              "paired_change_vs_matched_pct": -1.627980396722306,
+              "bootstrap_interval_vs_cute_pct": [
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -1.6007650196297574,
+                -1.6224302504997068,
+                -1.6412282825681745,
+                -1.7043797160126495,
+                -1.6160039108118363
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10
+              }
+            },
+            "cutlass_production": {
+              "median_us": 51.071702698130665,
+              "round_range_us": [
+                48.73204819950057,
+                52.21926135781371
+              ],
+              "paired_change_vs_cute_pct": 1.658522779730065,
+              "paired_change_vs_matched_pct": 0.00174277583131488,
+              "bootstrap_interval_vs_cute_pct": [
+                1.6390579797086247,
+                1.7234887829309375
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.6168656346418953,
+                1.7269492829761646,
+                1.6280873086802483,
+                1.7541651766208366,
+                1.650018502563455
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -0.040068370932166975,
+                0.02224230865892629,
+                -0.030676050015809864,
+                0.07128044161663905,
+                -0.12923603413288465
+              ],
+              "rounds_faster_than_cute": 3,
+              "positions": {
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10
+              }
+            },
+            "cutlass_matched": {
+              "median_us": 51.06943036303108,
+              "round_range_us": [
+                49.01491271124946,
+                51.88997292224272
+              ],
+              "paired_change_vs_cute_pct": 1.6549222658037488,
+              "paired_change_vs_matched_pct": 0.0,
+              "bootstrap_interval_vs_cute_pct": [
+                1.623597617704653,
+                1.7034367304247233
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.6268063677804756,
+                1.6491871884151799,
+                1.6686152872629645,
+                1.733962779669529,
+                1.6425506595801886
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "rounds_faster_than_cute": 3,
+              "positions": {
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10,
+                "3": 10
+              }
+            },
+            "cutlass_no_tail": {
+              "median_us": 51.046715842352974,
+              "round_range_us": [
+                50.030814276801216,
+                51.3821236881209
+              ],
+              "paired_change_vs_cute_pct": 1.594401246585897,
+              "paired_change_vs_matched_pct": -0.038682086937447124,
+              "bootstrap_interval_vs_cute_pct": [
+                1.5821462129812947,
+                1.6231360492470426
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.6316957312707103,
+                1.613015639170845,
+                1.6110317614614678,
+                1.5661542987893906,
+                1.5852997939075575
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.015709619043180467,
+                -0.0372080519049689,
+                -0.03848211775125954,
+                -0.14637349283680434,
+                -0.04339558262484999
+              ],
+              "rounds_faster_than_cute": 2,
+              "positions": {
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10,
+                "4": 10
+              }
+            },
+            "cutlass_minimum_k": {
+              "median_us": 49.56957734661338,
+              "round_range_us": [
+                47.11466659734278,
+                50.087899337580176
+              ],
+              "paired_change_vs_cute_pct": -1.3456561656691735,
+              "paired_change_vs_matched_pct": -2.953634248030379,
+              "bootstrap_interval_vs_cute_pct": [
+                -1.3887895530308447,
+                -1.3192517183434727
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                -1.4013687396142727,
+                -1.3330993243553801,
+                -1.289036674888866,
+                -1.3088496864674726,
+                -1.4047441869639021
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                -2.941803967318757,
+                -2.9348170881096536,
+                -2.8830025106565405,
+                -2.987131672173571,
+                -3.0335879775603036
+              ],
+              "rounds_faster_than_cute": 58,
+              "positions": {
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10,
+                "5": 10
+              }
+            },
+            "cutlass_ungrouped": {
+              "median_us": 51.12454331951377,
+              "round_range_us": [
+                48.86794973302771,
+                51.769286026189356
+              ],
+              "paired_change_vs_cute_pct": 1.734889671621831,
+              "paired_change_vs_matched_pct": 0.09749699507510812,
+              "bootstrap_interval_vs_cute_pct": [
+                1.7042604518414883,
+                1.775890614776321
+              ],
+              "complete_balanced_block_change_vs_cute_pct": [
+                1.7399652420984957,
+                1.7611986468828222,
+                1.7601853702592152,
+                1.7233056954790937,
+                1.6550204148596315
+              ],
+              "complete_balanced_block_change_vs_matched_pct": [
+                0.1164770364256329,
+                0.08763290402717949,
+                0.10761179003713206,
+                -0.08039314356935723,
+                0.09948812251479033
+              ],
+              "rounds_faster_than_cute": 0,
+              "positions": {
+                "5": 10,
+                "4": 10,
+                "3": 10,
+                "2": 10,
+                "1": 10,
+                "0": 10
+              }
+            }
+          },
+          "sensors": [
+            {
+              "round": 0,
+              "temperature_clock_power_util": "76, 2249, 97.03, 96"
+            },
+            {
+              "round": 10,
+              "temperature_clock_power_util": "76, 2249, 98.26, 96"
+            },
+            {
+              "round": 20,
+              "temperature_clock_power_util": "77, 2242, 97.69, 96"
+            },
+            {
+              "round": 30,
+              "temperature_clock_power_util": "77, 2242, 96.92, 96"
+            },
+            {
+              "round": 40,
+              "temperature_clock_power_util": "77, 2242, 96.98, 96"
+            },
+            {
+              "round": 50,
+              "temperature_clock_power_util": "77, 2242, 97.29, 96"
+            }
+          ]
+        }
+      ],
+      "complete": true,
+      "missing_shapes": []
+    }
+  },
+  "source_hashes": {
+    "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_benchmark.py": "8af07682367be4de73deeea104f4c8df6202dce53207123752d6bb9eb8a7b764",
+    "/home/pengcuo/spark/experiments/grain-cutlass-optimized/compare_optimized.py": "22b08483080df195a7afa704b51c8a956623980d8bc53253d74ad0b2b856646d"
+  },
+  "static_review": {
+    "closure_binding": "paired_benchmark.py:75 binds native=lib and config=cfg",
+    "same_inputs": "lines 64-76 allocate one shared input/scale/output tensor set per shape",
+    "same_graph_nodes": "lines 87-96 use one nodes scalar for all captured variant graphs",
+    "timing": "lines 107-120 preallocate events, synchronize, convert ms to us, divide by common nodes",
+    "independent_loading": "lines 41-54 capture Native instances holding per-path CDLL handles and direct symbol pointers",
+    "post_capture_check": "line 95 repeats sampled and full-finite checks after graph replay"
+  },
+  "limitations": [
+    "Correctness is 32x32 sampled output plus full-output finite checks in hashed source; tensors are not saved.",
+    "Same inputs, common graph node count and bound closures are source-verified, not reconstructed CUDA graphs.",
+    "All runs use the same input seed, device and software; these are separate processes, not independent machine/session samples.",
+    "Round bootstrap ignores adjacent-round correlation and multiple comparisons; intervals describe each run only.",
+    "Rotated/reversed order balances position in runs 1 and 3; deterministic order does not eliminate clock drift or carry-over.",
+    "Run 2 has seven paths across 60 rounds, so positions occur eight or nine times; run 3 is the balanced replication."
+  ],
+  "library_hashes": {
+    "cute": "4c1940d5105732617cebb3b799a753a66565061d5e3440b2af8bd133e573c0ce",
+    "cutlass_production": "e44f2c0d8679a8374d42bb0e26929c8e8ace158fe908f14cfc0bdefcf177ce2b",
+    "cutlass_matched": "2ce2b1d949ecac17e627db419a05eb295f61901c65d8f11095c45480c57b8637",
+    "cutlass_no_tail": "f87fa2dc578b92b6bbe5eeee9196e6e3361c6b66b773a846ff2cf4860a2afc25",
+    "cutlass_address32": "b8b90c6adb3b04b1ecf8440e7f35b5c37c0203ac66a7be764475e04e73c42222",
+    "cutlass_fixed_loop": "3e4db76fd030477e0552bf28c37661c4b142d17ab93b00be32e3bb5cddfd799e",
+    "cutlass_minimum_k": "411ca1be0d55df19e6ac4db7ba29052742245545290dc4950c8200e72aa7a7b7",
+    "cutlass_ungrouped": "0f619136d90d70a954aa5ffb8efb781de338f3a4a49ec94177733d0dc42e17d0"
+  },
+  "environment": [
+    "NVIDIA GB10",
+    "2.14.0+cu130",
+    "13.0"
+  ],
+  "record_count": 95,
+  "raw_replay_sample_count": 17100
+}

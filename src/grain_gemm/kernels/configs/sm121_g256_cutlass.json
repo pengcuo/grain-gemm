@@ -1,0 +1,140 @@
+{
+  "gpu": "NVIDIA GB10",
+  "compute_capability": [
+    12,
+    1
+  ],
+  "group_size": 256,
+  "output_dtype": "bfloat16",
+  "native_library_sha256": "e44f2c0d8679a8374d42bb0e26929c8e8ace158fe908f14cfc0bdefcf177ce2b",
+  "selection": "Per-shape minimum median across 32 CUTLASS candidates; independently remeasured on fresh inputs.",
+  "scope": "Explicit backend=cutlass only; auto, cuda, and triton policies are unchanged.",
+  "configs": {
+    "1024x512x1536": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 15
+      },
+      "measurement_sha256": "ea743b60fa186a82f7ca6606b628dc0ec9e28d2bb1d664fa1be716b25ec9dac7"
+    },
+    "1024x1024x1536": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 11
+      },
+      "measurement_sha256": "b441e506a184d8ef96692a0d4f5c458c770723f33a7d8afe39a5f1ca5b81c4fd"
+    },
+    "1024x1536x1024": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 15
+      },
+      "measurement_sha256": "75ed91cdf8e4968d29aae2fd5422cad9418ea989d07a66a0125139cb9d271073"
+    },
+    "1024x1536x3072": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 15
+      },
+      "measurement_sha256": "697544a390465f176d839860ca39f0850a0c0874d1df6fd4e8002b4b6392ba17"
+    },
+    "1024x2048x1536": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 15
+      },
+      "measurement_sha256": "45d4148bc3da4ec01b2e9edbd970e481f6e835f29a2eb76cf29a923e5a21cddd"
+    },
+    "1024x3072x1536": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 15
+      },
+      "measurement_sha256": "9a801cdfa9f34a312dd5dea726060f47fd8384f35c757dd824359fde9942b193"
+    },
+    "1024x4096x1536": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 15
+      },
+      "measurement_sha256": "44872298c510c84bc87cc9d0a856555c278e22ee4de0a594a852f893047fca08"
+    },
+    "1024x151936x1536": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 23
+      },
+      "measurement_sha256": "ce74c719ed8db35654cc03d1d5f6f50bbdd0acf0bfb8e20ae6d4c5220a26e926"
+    },
+    "1024x262144x1536": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 23
+      },
+      "measurement_sha256": "d11c6873857d7c7e6e3dbd2c76be186b63c721b0bd0255d0626ecf5f60e3b7fd"
+    },
+    "2048x512x1536": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 11
+      },
+      "measurement_sha256": "cae0823528dfdb706f440007b5a88354c21146279f38a76b89555b5414e49ed0"
+    },
+    "2048x1024x1536": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 15
+      },
+      "measurement_sha256": "6d1cee8233f1803576e6cf39e0a6c663de3ee33601e76e0679f0f62c485eb175"
+    },
+    "2048x1536x1024": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 15
+      },
+      "measurement_sha256": "f22630098b9aa29f313dd235f1671419df07497e1dca0f56652147d79f855137"
+    },
+    "2048x1536x3072": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 15
+      },
+      "measurement_sha256": "e79d9a9643c88bcd10ab8f53a6255b92f75e931018145e051a8867f1463e95de"
+    },
+    "2048x2048x1536": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 7
+      },
+      "measurement_sha256": "4362aa10c2e0957445b46c5fe12a0c9b61fc67c1982b264fe4ef51d4a34ad6ce"
+    },
+    "2048x3072x1536": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 15
+      },
+      "measurement_sha256": "7cd846e3c5be0ae55e775e37021612f78e62c27f1cc580a6533d5a0ac4a324d4"
+    },
+    "2048x4096x1536": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 15
+      },
+      "measurement_sha256": "351fb76016d71a8ceca28be4020e45e3a735fddc17393fab0b72c6b202a67eeb"
+    },
+    "2048x151936x1536": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 23
+      },
+      "measurement_sha256": "d0464d5d5611b2a74b950b63f357fe3b55053c11b23b4a5e5cad772e59676b6b"
+    },
+    "2048x262144x1536": {
+      "config": {
+        "backend": "cutlass",
+        "config_id": 23
+      },
+      "measurement_sha256": "42bf86ac477c8f47379d640d143763a106b17cb6f4ae64961762684c65b33a14"
+    }
+  }
+}

@@ -2,6 +2,32 @@
 
 Validation, measurements, and reproduction instructions for GrainGEMM and the standalone SGLang Triton baseline. See the [project README](../README.md) for the operation, API, and research basis.
 
+For the separate CUTLASS collective backend, see
+[CUTLASS build, correctness checks, and comparison instructions](cutlass.md).
+
+## Published GB10 experiments
+
+The reports below retain explicit M/N/K, latency and throughput for every
+shape, with raw measurements and source provenance. INT8 throughput is TOPS;
+historical equivalent-TFLOPS columns use the same `2MNK/time` convention.
+All measure prequantized GEMM, including group scaling and output conversion;
+they exclude input quantization and do not measure end-to-end model inference.
+
+| Experiment | Scope | Results |
+|---|---|---|
+| LLM prefill | 51 shapes covering 54 projection uses, including routed experts and both vocabulary sizes | [Report and raw data](results/llm-prefill/README.md) |
+| M=256 dispatch diagnosis | 14 cases, tile choices and CTA-capacity boundary sweeps | [Diagnosis and measurements](results/m256-dispatch/README.md) |
+| Initial CUTLASS comparison | Three M=256 projections and 16 square sizes, original eight CUTLASS configurations | [Per-shape table](results/cutlass/initial/README.md) |
+| Model projections | M=1024/2048, 18 shapes, CuTe/CUTLASS/Triton | [Original comparison](results/cutlass/model-projections/README.md) |
+| CUTLASS optimization | The same 18 projection shapes, eight versus 32 CUTLASS configurations, with freshly measured CuTe/Triton | [Optimization and ablations](results/cutlass/optimized/README.md) |
+| Remaining CuTe/CUTLASS gap | Three paired runs and four M=4096 cases, fixed configurations | [Root-cause experiments](results/cutlass/residual-gap/README.md) · [M=4096 latency and TOPS](results/cutlass/residual-gap/paired_m4096/report.md) |
+
+Each report documents its own candidate set and measurement protocol. Do not
+combine latencies from separate runs into a speedup. Historical forced-backend
+defaults may differ from current dispatch; the three measured M=256 choices
+are now integrated into `auto`. K-lower-bound and tail-synchronization
+ablations remain [isolated experiments](../experiments/cutlass/README.md).
+
 Run all commands below from the **repository root**, using a CUDA-enabled PyTorch build and a compatible Triton version. Install the test and plotting dependencies with:
 
 ```bash

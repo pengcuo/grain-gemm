@@ -1,0 +1,33 @@
+# Independent CPU audit of paired_run2 and E mechanism
+
+No GPU or repository changes. `audit_run2_cpu.py` independently reproduces all 35 records: per-round medians, summary medians/ranges, paired ratios and exact seeded bootstrap endpoints. Machine-readable results are in `paired-run2-cpu-audit.json`.
+
+Run2 has seven variants and 60 rounds: each variant appears in each position 8 or 9 times, so the complete run is not exactly position-balanced. Its first 56 rounds are exactly balanced (eight appearances per position), comprising four complete forward/reverse 14-round blocks. Recomputing on those 56 rounds preserves the material findings; these blocks are within-run sensitivity checks, not independent-session replications.
+
+| M,N,K | E change vs matched, all60 | E change vs matched, balanced56 | E change vs CuTe, all60 | E four balanced blocks vs matched, % |
+|---|---:|---:|---:|---|
+| 1024,1024,1536 | +0.059% | +0.059% | +0.514% | +0.087, +0.050, +0.058, +0.065 |
+| 1024,1536,1024 | -3.357% | -3.367% | -1.987% | -3.458, -3.335, -3.315, -3.397 |
+| 1024,2048,1536 | -3.726% | -3.726% | -2.252% | -3.735, -3.620, -3.722, -3.793 |
+| 2048,151936,1536 | -0.209% | -0.209% | +2.893% | -0.160, -0.257, -0.188, -0.211 |
+| 2048,1536,1024 | -2.834% | -2.834% | -1.626% | -2.697, -2.836, -2.968, -2.846 |
+
+The three CL15 cases improve 2.83–3.73% against matched CUTLASS and are 1.63–2.25% faster than CuTe in this run. CL11 does not improve (+0.059% against matched). Thus E is shape/configuration-dependent; it is not a universal removal of the CuTe/CUTLASS gap. CL23 head improves only about 0.21% with E. A tail-sync removal instead improves head 0.65% against matched (0.63% in balanced56), with every full block improving. Run1 A improvement was 0.60%; this is consistent evidence across the two measurements.
+
+## What the E static evidence confirms
+
+E adds a legal-range guard (`if (K < 256) return`) to the kernel, giving the compiler information that the host already guarantees for accepted inputs. The retained core operation remains the same INT8 MMA with per-G256 FP32 scale-and-accumulate semantics. The tiles, CTA grids, stage count, barriers, shared memory and core math operation counts remain the same. CL15 registers remain exactly 250; its resource-bound resident-CTA count cannot explain the measured speedup.
+
+Tracing all 64 later FFMA destination registers on the small-K path confirms two initial zero writes per FP32 accumulator in baseline and one in E. The check excludes the skipped grouped prologue and counts paired CS2R writes plus single-register MOV-to-zero. Details, exact addresses and each register are stored in `positive-k-clear-evidence.json`. This is stronger evidence than comparing global CS2R totals, which also include other state and register-reuse effects. For CL11, baseline R40 clears at 0x6e0 and 0x1240; E R40 clears only at 0x9b0 before the first IMMA.
+
+For CL15 the compiled mainloop also shrinks from 447 to 429 static instruction sites, not just the prologue. Its core IMMA, INT32-to-FP32, FMUL, FFMA, shared operand load and scale load counts are unchanged. Changes include 14 fewer LOP3, five fewer SHF.L.U32, three fewer IADD3, and one fewer IMAD, accompanied by new uniform-register/predicate arithmetic. At baseline 0x1600 the group condition is `ISETP.NE.U32.AND P0, PT, R75, 0x1, PT`; in E it is `UISETP.NE.U32.AND UP0, UPT, UR4, 0x1, UPT` at 0x1400. This confirms different scalar/uniform control and index code as well as register scheduling. It does not measure their runtime latency.
+
+The defensible mechanism is: supplying the legal K range changes the compiler control-flow/range analysis, eliminates redundant FP32-sum initialization, and changes mainloop index/control generation and scheduling. The measured improvement is the combined effect of this source-level intervention. Do not divide the speedup into a CS2R component and a mainloop component without further isolated experiments or counters. CL11 eliminates the same duplicated initialization yet does not speed up, directly showing that counting removed clears is insufficient to predict the result.
+
+F likewise alters executable mainloop instructions and register assignments after removing the compile-time grouped path; it is not a measurement of the skipped grouped code cost. F improves CL11 by about 0.59%, but worsens the first two CL15 cases by 0.34% and 0.47%, with negligible change in the third and a 0.32% head slowdown in run2. This further supports configuration-dependent compiler code generation rather than an inherent high-level CUTLASS overhead.
+
+## Limits
+
+Paired ratios and position balance reduce sequential thermal/order drift but do not remove all autocorrelation. The provided bootstrap describes sampled rounds from this run, not independent machine sessions; narrow intervals on tiny negative controls should not be overinterpreted. Run3 with six paths and 60 rounds is the independent validation planned by the root agent. No run3 data were used here.
+
+Resource/SASS and measurement evidence support the source intervention and observed behavior, not a claim of a particular hardware stall or a general ranking of CuTe versus CUTLASS.

@@ -1,0 +1,233 @@
+[
+  {
+    "variant": "baseline",
+    "config": 11,
+    "registers": 252,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 1008,
+    "same_sass_as_baseline": true,
+    "bar_sync_count": 4,
+    "depbar_count": 3
+  },
+  {
+    "variant": "baseline",
+    "config": 15,
+    "registers": 250,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 960,
+    "same_sass_as_baseline": true,
+    "bar_sync_count": 4,
+    "depbar_count": 3
+  },
+  {
+    "variant": "baseline",
+    "config": 23,
+    "registers": 238,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 896,
+    "same_sass_as_baseline": true,
+    "bar_sync_count": 3,
+    "depbar_count": 3
+  },
+  {
+    "variant": "no_direct_tail_barrier",
+    "config": 11,
+    "registers": 252,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 1008,
+    "same_sass_as_baseline": true,
+    "bar_sync_count": 4,
+    "depbar_count": 3
+  },
+  {
+    "variant": "no_direct_tail_barrier",
+    "config": 15,
+    "registers": 250,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 960,
+    "same_sass_as_baseline": true,
+    "bar_sync_count": 4,
+    "depbar_count": 3
+  },
+  {
+    "variant": "no_direct_tail_barrier",
+    "config": 23,
+    "registers": 238,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 896,
+    "same_sass_as_baseline": false,
+    "bar_sync_count": 2,
+    "depbar_count": 2
+  },
+  {
+    "variant": "bf16_uint4_i32_address",
+    "config": 11,
+    "registers": 252,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 1008,
+    "same_sass_as_baseline": false,
+    "bar_sync_count": 4,
+    "depbar_count": 3
+  },
+  {
+    "variant": "bf16_uint4_i32_address",
+    "config": 15,
+    "registers": 250,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 960,
+    "same_sass_as_baseline": false,
+    "bar_sync_count": 4,
+    "depbar_count": 3
+  },
+  {
+    "variant": "bf16_uint4_i32_address",
+    "config": 23,
+    "registers": 238,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 896,
+    "same_sass_as_baseline": true,
+    "bar_sync_count": 3,
+    "depbar_count": 3
+  },
+  {
+    "variant": "bf16_fixed_store_loop",
+    "config": 11,
+    "registers": 252,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 976,
+    "same_sass_as_baseline": false,
+    "bar_sync_count": 4,
+    "depbar_count": 3
+  },
+  {
+    "variant": "bf16_fixed_store_loop",
+    "config": 15,
+    "registers": 250,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 944,
+    "same_sass_as_baseline": false,
+    "bar_sync_count": 4,
+    "depbar_count": 3
+  },
+  {
+    "variant": "bf16_fixed_store_loop",
+    "config": 23,
+    "registers": 238,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 896,
+    "same_sass_as_baseline": true,
+    "bar_sync_count": 3,
+    "depbar_count": 3
+  },
+  {
+    "variant": "late_fp32_accumulator_clear",
+    "config": 11,
+    "registers": 252,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 1008,
+    "same_sass_as_baseline": true,
+    "bar_sync_count": 4,
+    "depbar_count": 3
+  },
+  {
+    "variant": "late_fp32_accumulator_clear",
+    "config": 15,
+    "registers": 250,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 960,
+    "same_sass_as_baseline": true,
+    "bar_sync_count": 4,
+    "depbar_count": 3
+  },
+  {
+    "variant": "late_fp32_accumulator_clear",
+    "config": 23,
+    "registers": 238,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 896,
+    "same_sass_as_baseline": true,
+    "bar_sync_count": 3,
+    "depbar_count": 3
+  },
+  {
+    "variant": "minimum_k_guard",
+    "config": 11,
+    "registers": 246,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 952,
+    "same_sass_as_baseline": false,
+    "bar_sync_count": 4,
+    "depbar_count": 3
+  },
+  {
+    "variant": "minimum_k_guard",
+    "config": 15,
+    "registers": 250,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 912,
+    "same_sass_as_baseline": false,
+    "bar_sync_count": 4,
+    "depbar_count": 3
+  },
+  {
+    "variant": "minimum_k_guard",
+    "config": 23,
+    "registers": 244,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 856,
+    "same_sass_as_baseline": false,
+    "bar_sync_count": 3,
+    "depbar_count": 3
+  },
+  {
+    "variant": "ungrouped_specialization",
+    "config": 11,
+    "registers": 250,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 936,
+    "same_sass_as_baseline": false,
+    "bar_sync_count": 4,
+    "depbar_count": 3
+  },
+  {
+    "variant": "ungrouped_specialization",
+    "config": 15,
+    "registers": 246,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 896,
+    "same_sass_as_baseline": false,
+    "bar_sync_count": 4,
+    "depbar_count": 3
+  },
+  {
+    "variant": "ungrouped_specialization",
+    "config": 23,
+    "registers": 238,
+    "stack_bytes": 0,
+    "local_bytes": 0,
+    "instruction_count": 824,
+    "same_sass_as_baseline": false,
+    "bar_sync_count": 3,
+    "depbar_count": 3
+  }
+]

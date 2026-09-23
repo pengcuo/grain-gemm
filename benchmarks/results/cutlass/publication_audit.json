@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "verbatim_and_derived_file_hashes_checked": 87,
+  "optimized_cases": 18,
+  "tuning_records": 1188,
+  "optimized_replay_samples": 14292,
+  "optimized_final_records": 144,
+  "paired_cases": 19,
+  "paired_paths": 115,
+  "paired_replay_samples": 20700,
+  "csv_rows_checked": 179,
+  "relative_links_checked": 75,
+  "limitations": [
+    "CPU-only audit of published bytes and stored timings; no GPU or binary revalidation.",
+    "Historical binary/source audits are archived evidence, not rerun here.",
+    "Bootstrap intervals are retained; this verifier recomputes point estimates, not bootstrap draws.",
+    "Sampled correctness records are checked; original inputs are not retained for independent recomputation."
+  ]
+}

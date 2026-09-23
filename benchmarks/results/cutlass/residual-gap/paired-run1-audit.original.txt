@@ -1,0 +1,65 @@
+# Independent CPU audit of paired_run1 and ablation SASS
+
+Only completed JSON, Python source and SASS were read; no Torch import or GPU operation was performed. The reproducible checker is `audit_paired_cpu.py`; machine-readable results and artifact SHA256 values are in `paired-run1-cpu-audit.json`.
+
+## Measurement and arithmetic audit
+
+All 30 variant/shape records passed independent recomputation of the 60 per-round medians, overall medians, min/max round medians, paired median ratios, and exact seeded 4000-resample bootstrap endpoints. Six variants each occupy every execution-order position exactly 10 times. Each 12-round block contains a complete forward/reverse rotation. The five blocks are descriptive blocks within one run, not independent sessions.
+
+The closures bind the native library and config by default argument. Variants receive the same seeded prequantized INT8 tensors, FP32 G256 scales, BF16 output and graph-node count within each shape. Reusing the same output is valid because every kernel overwrites all output elements; measurements run serially. CUDA events enclose graph replay, are synchronized before reading, and divide milliseconds by the common node count with the correct 1000 conversion to microseconds. All event objects are created before timed rounds. Host ABI/dispatch is excluded.
+
+Correctness checks compare a deterministic 32 x 32 sampled output grid against an INT32 group-dot reference with FP32 scale products and single-rounding FP32 accumulation, then check all output values are finite. The check is repeated after graph capture. This is a sampled BF16-tolerance check, not bitwise or exhaustive correctness; separate pytest/sanitizer validation supplies broader coverage. The benchmark itself does not tune, and no fresh-input tuning issue arises.
+
+No arithmetic or closure/capture/input mismatch was found. JSON is written directly at completed-case end, so an interrupted write is not atomic and interrupted cases have no partial-round checkpoint; all audited files are complete and parse successfully.
+
+## Results and within-run robustness
+
+Changes below are median paired ratios against the same-round matched-build CUTLASS baseline. Negative values mean faster. Round ranges are ranges of the 60 round medians, not min/max individual graph samples.
+
+| M,N,K | Variant | Paired change | Five balanced-block changes, % | Median us [round range] |
+|---|---|---:|---|---|
+| 1024,1024,1536 | fixed_loop | -0.191% | -0.224, -0.200, -0.193, -0.176, -0.153 | 28.209 [28.126, 28.322] |
+| 1024,1024,1536 | no_tail | +0.018% | +0.037, +0.005, +0.009, +0.017, +0.024 | 28.264 [28.182, 28.715] |
+| 1024,1024,1536 | address32 | +0.031% | +0.047, +0.063, +0.020, -0.003, +0.037 | 28.265 [28.197, 28.688] |
+| 1024,1536,1024 | fixed_loop | +0.742% | +0.837, +0.767, +0.756, +0.664, +0.668 | 24.811 [24.727, 25.278] |
+| 1024,1536,1024 | no_tail | -0.040% | -0.033, -0.069, -0.029, -0.012, -0.030 | 24.625 [24.463, 24.858] |
+| 1024,1536,1024 | address32 | -0.056% | -0.086, -0.033, -0.027, -0.125, -0.076 | 24.617 [24.471, 24.923] |
+| 1024,2048,1536 | fixed_loop | +0.550% | +0.679, +0.593, +0.517, +0.552, +0.538 | 48.906 [48.290, 49.284] |
+| 1024,2048,1536 | no_tail | -0.017% | -0.019, -0.001, +0.007, -0.008, -0.069 | 48.651 [47.908, 48.836] |
+| 1024,2048,1536 | address32 | -0.052% | -0.018, -0.023, -0.051, -0.052, -0.129 | 48.643 [47.949, 48.882] |
+| 2048,151936,1536 | fixed_loop | -0.066% | -0.147, -0.030, -0.093, -0.054, -0.019 | 7008.720 [6643.648, 7190.624] |
+| 2048,151936,1536 | no_tail | -0.602% | -0.745, -0.611, -0.569, -0.460, -0.643 | 6966.256 [6866.784, 7297.728] |
+| 2048,151936,1536 | address32 | -0.067% | +0.022, -0.144, -0.073, -0.068, -0.056 | 7006.576 [6875.136, 7042.912] |
+| 2048,1536,1024 | fixed_loop | +0.385% | +0.335, +0.400, +0.384, +0.436, +0.415 | 50.419 [49.073, 51.032] |
+| 2048,1536,1024 | no_tail | +0.015% | -0.038, -0.001, +0.039, +0.062, +0.143 | 50.266 [48.688, 50.809] |
+| 2048,1536,1024 | address32 | +0.046% | +0.000, +0.078, +0.090, +0.102, -0.076 | 50.256 [48.654, 51.599] |
+
+C improves CL11 by about 0.19% in this run but slows all three CL15 cases by about 0.39–0.74%. Every one of the five balanced blocks has the same direction for each case. A improves the direct-store head case by about 0.60%, with every block improving. These patterns are not caused solely by a single timing outlier, but independent reruns are still needed.
+
+B effects are roughly -0.07% to +0.05% here, within the scale of apparent shifts among unchanged-kernel controls. Some unchanged-kernel contrasts also have bootstrap intervals excluding 1. Adjacent-round correlation, thermal trajectory, sequential within-round timing, fixed deterministic order and multiple comparisons limit interpretation of narrow bootstrap intervals. Rotation balances positions; it does not make clocks identical at each pair of measurements. Do not treat these intervals as independent-session confidence or declare B beneficial on their basis.
+
+Telemetry trends from approximately 2372 MHz at the first shape to 2151 MHz late in the head shape. Cross-shape absolute timings must not be compared as if taken at a common clock. Same-round paired comparisons and balanced blocks reduce this problem but do not eliminate all correlated drift. The head uses one graph node; smaller shapes use 159–272, so these are each valid within-shape comparisons rather than a common-duration cross-shape protocol.
+
+## C: fewer guards do not identify a performance mechanism
+
+C removes all seven conditional output-loop EXIT sites from CL11 and all three from CL15, restoring eight LDS.128 before eight STG.E.128. The original predicates compare thread index with the unrolled loop-trip thresholds; they are not M/N residue bounds and are false for the valid block sizes. Both implementations have correct launch_bounds.
+
+However, C is only a single source change. It is not an epilogue-only binary patch: CL11 and CL15 instruction text differs from baseline starting at address 0x10, with changed register allocation and scheduling throughout the prologue and mainloop. The mainloop spans change from 452 to 441 instructions for CL11 and 447 to 440 for CL15; IMAD counts in that span change 10 to 6 and 7 to 3. Core IMMA/conversion/FMUL/FFMA counts remain equal. CL23 is instruction-text identical as expected.
+
+Consequently, the CL15 slowdown cannot be assigned specifically to batching shared loads, branch removal, reduced static instruction count, or a particular stall mechanism. Register liveness, instruction dependency scheduling and address generation all changed together at machine-code level. Hardware counters or narrower binary/source controls would be needed to separate them. The observed C regression is evidence against the earlier simplistic hypothesis that these never-taken guards are the general explanation for the gap.
+
+## D, E and F static follow-up
+
+D (moving FP32 initialization after prefetch) produces exactly the same instruction text as the matched baseline for CL11/15/23. It provides no machine-code intervention to test; source placement alone is not the explanation.
+
+E (early K < 256 return) removes the duplicate initial clear chain for FP32 sums on the legal small-K path. In baseline CL11, for example, the later FFMA accumulator R40 is zeroed at 0x6e0 and again at 0x1240; in E its new assignment is zeroed once at 0x9b0. Tracking the 64 FFMA destination registers after the grouped branch join and before first IMMA shows two initial clears per baseline accumulator and one per E accumulator for all three configs. Earlier temporary use of a register in the grouped path must not be counted as an accumulator clear.
+
+E also changes the executed mainloop and register allocation: loop static instructions 452→443 / 447→429 / 447→419; registers 252→246 / 250→250 / 238→244 for CL11/15/23. Thus an E speedup would support the benefit of providing the compiler the legal K range, including its resulting clear elimination and scheduling changes; it would not isolate the cost of clear instructions alone.
+
+F (compile-time ungrouped specialization) also changes actual mainloop code, not just the skipped grouped prologue. Loop static instructions 452→459 / 447→460 / 447→451; registers 252→250 / 250→246 / 238→238. In CL11, baseline first IMMA at 0x1790 uses R192/R176 operands; F first IMMA at 0x1290 uses R184/R168. F adds S2R SR_CTAID.X at 0x12c0 inside the loop and changes scalar/uniform arithmetic scheduling. A performance change cannot be attributed only to deleting the unexecuted grouped branch.
+
+## What remains supported
+
+The matched CuTe/CUTLASS kernels use the same INT8 tensor-core operation and equal core scale/math instruction counts, with no local/stack spills. Shared-memory capacity permits only one resident block per SM for either side; resource evidence does not support a resident-CTA occupancy difference. These facts rule out several coarse explanations but do not identify the remaining sub-percent-to-few-percent scheduling difference. Static instruction counts measure encoded sites, not executed instructions, issue latency, or observed stalls.
+
+Full initial provenance and paired CuTe/CUTLASS resource/opcode evidence remain in `static-report.md` and `static-comparison.json`.

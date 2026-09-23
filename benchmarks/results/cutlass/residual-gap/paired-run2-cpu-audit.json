@@ -1,0 +1,970 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "shape": {
+        "m": 1024,
+        "n": 1024,
+        "k": 1536
+      },
+      "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_1024_1024_1536.json",
+      "sha256": "4075860b11caed1cf7b9157af09e960d648259d3a7d58a44708407e133354604",
+      "results": {
+        "cute": {
+          "median_us": 28.147677260060462,
+          "range_us": [
+            28.084258879384688,
+            28.64142002597932
+          ],
+          "paired_change_cute_percent": 0.0,
+          "paired_change_matched_percent": -0.45060362128668263,
+          "balanced_first56_change_cute_percent": 0.0,
+          "balanced_first56_change_matched_percent": -0.4553521736632149,
+          "four_balanced_14round_blocks_matched_percent": [
+            -0.4813930710766301,
+            -0.43054033860931984,
+            -0.4752796867875775,
+            -0.415041625002599
+          ],
+          "positions": {
+            "0": 9,
+            "6": 9,
+            "5": 9,
+            "4": 9,
+            "3": 8,
+            "2": 8,
+            "1": 8
+          }
+        },
+        "cutlass_production": {
+          "median_us": 28.271935639842866,
+          "range_us": [
+            28.230451768444432,
+            28.688000094506048
+          ],
+          "paired_change_cute_percent": 0.4544000502107126,
+          "paired_change_matched_percent": -0.0027372337704667515,
+          "balanced_first56_change_cute_percent": 0.4551720162802253,
+          "balanced_first56_change_matched_percent": -0.0027372337704667515,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.022605557802402032,
+            -0.00821648562727706,
+            -0.006387746622604773,
+            -0.006845213207562484
+          ],
+          "positions": {
+            "1": 9,
+            "0": 9,
+            "6": 9,
+            "5": 9,
+            "4": 8,
+            "3": 8,
+            "2": 8
+          }
+        },
+        "cutlass_matched": {
+          "median_us": 28.272902773272605,
+          "range_us": [
+            28.217290678331928,
+            28.68516214432255
+          ],
+          "paired_change_cute_percent": 0.4526432797173463,
+          "paired_change_matched_percent": 0.0,
+          "balanced_first56_change_cute_percent": 0.45743512199616365,
+          "balanced_first56_change_matched_percent": 0.0,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "positions": {
+            "2": 9,
+            "1": 9,
+            "0": 9,
+            "6": 9,
+            "5": 8,
+            "4": 8,
+            "3": 8
+          }
+        },
+        "cutlass_no_tail": {
+          "median_us": 28.272968146108813,
+          "range_us": [
+            28.23328971862793,
+            29.059871550529234
+          ],
+          "paired_change_cute_percent": 0.45118965997050786,
+          "paired_change_matched_percent": 0.002282139251397197,
+          "balanced_first56_change_cute_percent": 0.4630215211629096,
+          "balanced_first56_change_matched_percent": 0.002282139251397197,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.02147355851591648,
+            0.0059328917047407614,
+            -0.0002278215544104789,
+            -0.00045552043516083884
+          ],
+          "positions": {
+            "3": 9,
+            "2": 9,
+            "1": 9,
+            "0": 9,
+            "6": 8,
+            "5": 8,
+            "4": 8
+          }
+        },
+        "cutlass_fixed_loop": {
+          "median_us": 28.25019436497842,
+          "range_us": [
+            28.185419497951383,
+            28.332644893277077
+          ],
+          "paired_change_cute_percent": 0.34780725848211347,
+          "paired_change_matched_percent": -0.08009707449703196,
+          "balanced_first56_change_cute_percent": 0.3532971883572156,
+          "balanced_first56_change_matched_percent": -0.08377413667621791,
+          "four_balanced_14round_blocks_matched_percent": [
+            -0.16177739369773736,
+            -0.12689705094852677,
+            -0.06228031242987431,
+            -0.07116274800079703
+          ],
+          "positions": {
+            "4": 9,
+            "3": 9,
+            "2": 9,
+            "1": 9,
+            "0": 8,
+            "6": 8,
+            "5": 8
+          }
+        },
+        "cutlass_minimum_k": {
+          "median_us": 28.288323071695146,
+          "range_us": [
+            28.253418783987723,
+            29.176129448798395
+          ],
+          "paired_change_cute_percent": 0.51397610528503,
+          "paired_change_matched_percent": 0.058880041559383756,
+          "balanced_first56_change_cute_percent": 0.5187202741648633,
+          "balanced_first56_change_matched_percent": 0.058880041559383756,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.08746584236392074,
+            0.050428129241009145,
+            0.05751266934499455,
+            0.06528067700504181
+          ],
+          "positions": {
+            "5": 9,
+            "4": 9,
+            "3": 9,
+            "2": 9,
+            "1": 8,
+            "0": 8,
+            "6": 8
+          }
+        },
+        "cutlass_ungrouped": {
+          "median_us": 28.11819314956665,
+          "range_us": [
+            28.03664438186153,
+            28.583741957141505
+          ],
+          "paired_change_cute_percent": -0.14503974772586137,
+          "paired_change_matched_percent": -0.5912392258686117,
+          "balanced_first56_change_cute_percent": -0.14386187173829335,
+          "balanced_first56_change_matched_percent": -0.5961640121916911,
+          "four_balanced_14round_blocks_matched_percent": [
+            -0.6342700816221014,
+            -0.5527026838092031,
+            -0.5333750140090299,
+            -0.5689328281589301
+          ],
+          "positions": {
+            "6": 9,
+            "5": 9,
+            "4": 9,
+            "3": 9,
+            "2": 8,
+            "1": 8,
+            "0": 8
+          }
+        }
+      }
+    },
+    {
+      "shape": {
+        "m": 1024,
+        "n": 1536,
+        "k": 1024
+      },
+      "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_1024_1536_1024.json",
+      "sha256": "daa9f35bb3b8b6b7cd6ec9b93bf0e6a50ea10692d3fba33da019f528a979c94f",
+      "results": {
+        "cute": {
+          "median_us": 24.414832574607683,
+          "range_us": [
+            24.151241692313313,
+            25.11381058797349
+          ],
+          "paired_change_cute_percent": 0.0,
+          "paired_change_matched_percent": -1.387230467874212,
+          "balanced_first56_change_cute_percent": 0.0,
+          "balanced_first56_change_matched_percent": -1.4044653262647366,
+          "four_balanced_14round_blocks_matched_percent": [
+            -1.4594491041015845,
+            -1.4633385579895242,
+            -1.3417770613521895,
+            -1.3670531034008393
+          ],
+          "positions": {
+            "0": 9,
+            "6": 9,
+            "5": 9,
+            "4": 9,
+            "3": 8,
+            "2": 8,
+            "1": 8
+          }
+        },
+        "cutlass_production": {
+          "median_us": 24.750190059634022,
+          "range_us": [
+            24.516554644508084,
+            25.0849636801838
+          ],
+          "paired_change_cute_percent": 1.4015759349010004,
+          "paired_change_matched_percent": 0.006382288142692261,
+          "balanced_first56_change_cute_percent": 1.436433768456924,
+          "balanced_first56_change_matched_percent": 0.004964635559057129,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.01921315990425221,
+            -0.01864223986769442,
+            -0.019092246274454716,
+            -0.003431446370316671
+          ],
+          "positions": {
+            "1": 9,
+            "0": 9,
+            "6": 9,
+            "5": 9,
+            "4": 8,
+            "3": 8,
+            "2": 8
+          }
+        },
+        "cutlass_matched": {
+          "median_us": 24.75854080088817,
+          "range_us": [
+            24.543765687594448,
+            25.02516760443249
+          ],
+          "paired_change_cute_percent": 1.406745433901535,
+          "paired_change_matched_percent": 0.0,
+          "balanced_first56_change_cute_percent": 1.4244730118796234,
+          "balanced_first56_change_matched_percent": 0.0,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "positions": {
+            "2": 9,
+            "1": 9,
+            "0": 9,
+            "6": 9,
+            "5": 8,
+            "4": 8,
+            "3": 8
+          }
+        },
+        "cutlass_no_tail": {
+          "median_us": 24.75789776683724,
+          "range_us": [
+            24.50394108347649,
+            25.069664864644515
+          ],
+          "paired_change_cute_percent": 1.4231703854289846,
+          "paired_change_matched_percent": 0.012942757875311628,
+          "balanced_first56_change_cute_percent": 1.4321597110122264,
+          "balanced_first56_change_matched_percent": 0.008724091457934513,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.023185666467240296,
+            -0.00566161939369314,
+            0.008724091457934513,
+            -0.02611176787233882
+          ],
+          "positions": {
+            "3": 9,
+            "2": 9,
+            "1": 9,
+            "0": 9,
+            "6": 8,
+            "5": 8,
+            "4": 8
+          }
+        },
+        "cutlass_fixed_loop": {
+          "median_us": 24.91404453333277,
+          "range_us": [
+            24.782248657115183,
+            25.357197671041
+          ],
+          "paired_change_cute_percent": 2.1192666044797193,
+          "paired_change_matched_percent": 0.6886968697617846,
+          "balanced_first56_change_cute_percent": 2.1303445289864165,
+          "balanced_first56_change_matched_percent": 0.683674327811179,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.7220175761840197,
+            0.6583938333869943,
+            0.6856157082375525,
+            0.6762061484504311
+          ],
+          "positions": {
+            "4": 9,
+            "3": 9,
+            "2": 9,
+            "1": 9,
+            "0": 8,
+            "6": 8,
+            "5": 8
+          }
+        },
+        "cutlass_minimum_k": {
+          "median_us": 23.947562614496604,
+          "range_us": [
+            23.596495607473553,
+            24.28356226343308
+          ],
+          "paired_change_cute_percent": -1.987150010398886,
+          "paired_change_matched_percent": -3.357405356570875,
+          "balanced_first56_change_cute_percent": -1.986453408300859,
+          "balanced_first56_change_matched_percent": -3.366633857244361,
+          "four_balanced_14round_blocks_matched_percent": [
+            -3.4576299058293625,
+            -3.3350810786548113,
+            -3.3152071711390896,
+            -3.396523398521767
+          ],
+          "positions": {
+            "5": 9,
+            "4": 9,
+            "3": 9,
+            "2": 9,
+            "1": 8,
+            "0": 8,
+            "6": 8
+          }
+        },
+        "cutlass_ungrouped": {
+          "median_us": 24.854948920925167,
+          "range_us": [
+            24.65401426719053,
+            25.670423994969276
+          ],
+          "paired_change_cute_percent": 1.7725597285964678,
+          "paired_change_matched_percent": 0.3442193586217446,
+          "balanced_first56_change_cute_percent": 1.7838128971318534,
+          "balanced_first56_change_matched_percent": 0.34396582562901123,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.30963823005794033,
+            0.36126674590093444,
+            0.38460824771995306,
+            0.3405622168414002
+          ],
+          "positions": {
+            "6": 9,
+            "5": 9,
+            "4": 9,
+            "3": 9,
+            "2": 8,
+            "1": 8,
+            "0": 8
+          }
+        }
+      }
+    },
+    {
+      "shape": {
+        "m": 1024,
+        "n": 2048,
+        "k": 1536
+      },
+      "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_1024_2048_1536.json",
+      "sha256": "d40251cff58de76d14e4e14d0defec1c5e23cf5033dccdca34dd3d443e7c69b7",
+      "results": {
+        "cute": {
+          "median_us": 48.145342729762646,
+          "range_us": [
+            47.134082474394475,
+            49.74888898655326
+          ],
+          "paired_change_cute_percent": 0.0,
+          "paired_change_matched_percent": -1.5040009215183892,
+          "balanced_first56_change_cute_percent": 0.0,
+          "balanced_first56_change_matched_percent": -1.5040009215183892,
+          "four_balanced_14round_blocks_matched_percent": [
+            -1.4516455587416766,
+            -1.3390795933602595,
+            -1.5085431838114394,
+            -1.5533829461555682
+          ],
+          "positions": {
+            "0": 9,
+            "6": 9,
+            "5": 9,
+            "4": 9,
+            "3": 8,
+            "2": 8,
+            "1": 8
+          }
+        },
+        "cutlass_production": {
+          "median_us": 48.864384611209715,
+          "range_us": [
+            47.94538806298536,
+            49.56703985522607
+          ],
+          "paired_change_cute_percent": 1.5278256735820062,
+          "paired_change_matched_percent": -0.016846941037385044,
+          "balanced_first56_change_cute_percent": 1.5278256735820062,
+          "balanced_first56_change_matched_percent": -0.016846941037385044,
+          "four_balanced_14round_blocks_matched_percent": [
+            -0.03322137202588227,
+            0.03265982478812823,
+            -0.01941431918089931,
+            0.0052994177665466324
+          ],
+          "positions": {
+            "1": 9,
+            "0": 9,
+            "6": 9,
+            "5": 9,
+            "4": 8,
+            "3": 8,
+            "2": 8
+          }
+        },
+        "cutlass_matched": {
+          "median_us": 48.899353621248714,
+          "range_us": [
+            47.95075605015555,
+            49.51473053343996
+          ],
+          "paired_change_cute_percent": 1.526966632290483,
+          "paired_change_matched_percent": 0.0,
+          "balanced_first56_change_cute_percent": 1.526966632290483,
+          "balanced_first56_change_matched_percent": 0.0,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "positions": {
+            "2": 9,
+            "1": 9,
+            "0": 9,
+            "6": 9,
+            "5": 8,
+            "4": 8,
+            "3": 8
+          }
+        },
+        "cutlass_no_tail": {
+          "median_us": 48.841582086985696,
+          "range_us": [
+            47.931785355071106,
+            49.526802793948235
+          ],
+          "paired_change_cute_percent": 1.5373836179395362,
+          "paired_change_matched_percent": -0.01922658277134781,
+          "balanced_first56_change_cute_percent": 1.5322553449514498,
+          "balanced_first56_change_matched_percent": -0.020193165520676626,
+          "four_balanced_14round_blocks_matched_percent": [
+            -0.059189845365648086,
+            0.023781400270461717,
+            -0.036725730335329665,
+            -0.017216561676247633
+          ],
+          "positions": {
+            "3": 9,
+            "2": 9,
+            "1": 9,
+            "0": 9,
+            "6": 8,
+            "5": 8,
+            "4": 8
+          }
+        },
+        "cutlass_fixed_loop": {
+          "median_us": 49.15123499796062,
+          "range_us": [
+            48.496097861649744,
+            49.99549660140169
+          ],
+          "paired_change_cute_percent": 2.1217611752808008,
+          "paired_change_matched_percent": 0.6175595931948274,
+          "balanced_first56_change_cute_percent": 2.1111730300921394,
+          "balanced_first56_change_matched_percent": 0.6175595931948274,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.5156959066557665,
+            0.6445149622967827,
+            0.6583822440080489,
+            0.5555203958782062
+          ],
+          "positions": {
+            "4": 9,
+            "3": 9,
+            "2": 9,
+            "1": 9,
+            "0": 8,
+            "6": 8,
+            "5": 8
+          }
+        },
+        "cutlass_minimum_k": {
+          "median_us": 47.03932893490363,
+          "range_us": [
+            46.13652771818424,
+            48.94600942463218
+          ],
+          "paired_change_cute_percent": -2.2519308046747177,
+          "paired_change_matched_percent": -3.726026561908191,
+          "balanced_first56_change_cute_percent": -2.250494839586936,
+          "balanced_first56_change_matched_percent": -3.726026561908191,
+          "four_balanced_14round_blocks_matched_percent": [
+            -3.735005573614747,
+            -3.620231748546998,
+            -3.7220000696162048,
+            -3.7932131746442166
+          ],
+          "positions": {
+            "5": 9,
+            "4": 9,
+            "3": 9,
+            "2": 9,
+            "1": 8,
+            "0": 8,
+            "6": 8
+          }
+        },
+        "cutlass_ungrouped": {
+          "median_us": 49.09527944233603,
+          "range_us": [
+            48.28800269943511,
+            50.641436776715125
+          ],
+          "paired_change_cute_percent": 2.000043313029609,
+          "paired_change_matched_percent": 0.4688177741250854,
+          "balanced_first56_change_cute_percent": 2.000043313029609,
+          "balanced_first56_change_matched_percent": 0.48024234576620195,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.4588984706159316,
+            0.6116181079323102,
+            0.43013842343229136,
+            0.44284611945979435
+          ],
+          "positions": {
+            "6": 9,
+            "5": 9,
+            "4": 9,
+            "3": 9,
+            "2": 8,
+            "1": 8,
+            "0": 8
+          }
+        }
+      }
+    },
+    {
+      "shape": {
+        "m": 2048,
+        "n": 151936,
+        "k": 1536
+      },
+      "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_2048_151936_1536.json",
+      "sha256": "a1398af54530f2cbbe15afb52e8b44d1b2e34ae74df3772c68758698fbfe7a49",
+      "results": {
+        "cute": {
+          "median_us": 6809.632062911987,
+          "range_us": [
+            6760.191917419434,
+            7597.951889038086
+          ],
+          "paired_change_cute_percent": 0.0,
+          "paired_change_matched_percent": -3.03269586022219,
+          "balanced_first56_change_cute_percent": 0.0,
+          "balanced_first56_change_matched_percent": -3.03269586022219,
+          "four_balanced_14round_blocks_matched_percent": [
+            -3.0717245731123555,
+            -3.0627786369820553,
+            -2.980667518574376,
+            -2.7711870821985785
+          ],
+          "positions": {
+            "0": 9,
+            "6": 9,
+            "5": 9,
+            "4": 9,
+            "3": 8,
+            "2": 8,
+            "1": 8
+          }
+        },
+        "cutlass_production": {
+          "median_us": 7024.592161178589,
+          "range_us": [
+            6476.223945617676,
+            7066.656112670898
+          ],
+          "paired_change_cute_percent": 3.2202825308111915,
+          "paired_change_matched_percent": 0.05776366769145724,
+          "balanced_first56_change_cute_percent": 3.224850339846985,
+          "balanced_first56_change_matched_percent": 0.05776366769145724,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.11925339700173954,
+            0.06252562111201954,
+            -0.08665131248999369,
+            -0.0020503036395114194
+          ],
+          "positions": {
+            "1": 9,
+            "0": 9,
+            "6": 9,
+            "5": 9,
+            "4": 8,
+            "3": 8,
+            "2": 8
+          }
+        },
+        "cutlass_matched": {
+          "median_us": 7021.584033966064,
+          "range_us": [
+            6535.232067108154,
+            7566.463947296143
+          ],
+          "paired_change_cute_percent": 3.1275464290989596,
+          "paired_change_matched_percent": 0.0,
+          "balanced_first56_change_cute_percent": 3.1275464290989596,
+          "balanced_first56_change_matched_percent": 0.0,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "positions": {
+            "2": 9,
+            "1": 9,
+            "0": 9,
+            "6": 9,
+            "5": 8,
+            "4": 8,
+            "3": 8
+          }
+        },
+        "cutlass_no_tail": {
+          "median_us": 6981.45604133606,
+          "range_us": [
+            6897.119998931885,
+            7412.6081466674805
+          ],
+          "paired_change_cute_percent": 2.495544654587567,
+          "paired_change_matched_percent": -0.6503465963392019,
+          "balanced_first56_change_cute_percent": 2.495544654587567,
+          "balanced_first56_change_matched_percent": -0.6322372649065988,
+          "four_balanced_14round_blocks_matched_percent": [
+            -0.5868613500041753,
+            -0.5260960191409203,
+            -0.9022163552142581,
+            -0.5977698177242585
+          ],
+          "positions": {
+            "3": 9,
+            "2": 9,
+            "1": 9,
+            "0": 9,
+            "6": 8,
+            "5": 8,
+            "4": 8
+          }
+        },
+        "cutlass_fixed_loop": {
+          "median_us": 7022.079944610596,
+          "range_us": [
+            6975.647926330566,
+            7152.736186981201
+          ],
+          "paired_change_cute_percent": 3.125476422049167,
+          "paired_change_matched_percent": 0.007739960935371215,
+          "balanced_first56_change_cute_percent": 3.120808969745781,
+          "balanced_first56_change_matched_percent": 0.007739960935371215,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.11718426687843397,
+            0.043822165655305056,
+            -0.12274880418308154,
+            -0.006582931435827888
+          ],
+          "positions": {
+            "4": 9,
+            "3": 9,
+            "2": 9,
+            "1": 9,
+            "0": 8,
+            "6": 8,
+            "5": 8
+          }
+        },
+        "cutlass_minimum_k": {
+          "median_us": 7002.624034881592,
+          "range_us": [
+            6478.14416885376,
+            7298.079967498779
+          ],
+          "paired_change_cute_percent": 2.893373496990481,
+          "paired_change_matched_percent": -0.20909682136858176,
+          "balanced_first56_change_cute_percent": 2.909158871710593,
+          "balanced_first56_change_matched_percent": -0.20909682136858176,
+          "four_balanced_14round_blocks_matched_percent": [
+            -0.15992036390233277,
+            -0.25700816489846456,
+            -0.188460689826897,
+            -0.21106546174392005
+          ],
+          "positions": {
+            "5": 9,
+            "4": 9,
+            "3": 9,
+            "2": 9,
+            "1": 8,
+            "0": 8,
+            "6": 8
+          }
+        },
+        "cutlass_ungrouped": {
+          "median_us": 7043.999910354614,
+          "range_us": [
+            7001.632213592529,
+            7324.128150939941
+          ],
+          "paired_change_cute_percent": 3.492831416207265,
+          "paired_change_matched_percent": 0.3217140394031093,
+          "balanced_first56_change_cute_percent": 3.492831416207265,
+          "balanced_first56_change_matched_percent": 0.3345603840246625,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.3927821500949946,
+            0.3217140394031093,
+            0.26078577332988573,
+            0.4105357262358833
+          ],
+          "positions": {
+            "6": 9,
+            "5": 9,
+            "4": 9,
+            "3": 9,
+            "2": 8,
+            "1": 8,
+            "0": 8
+          }
+        }
+      }
+    },
+    {
+      "shape": {
+        "m": 2048,
+        "n": 1536,
+        "k": 1024
+      },
+      "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run2/case_2048_1536_1024.json",
+      "sha256": "3f58d61a73a067cb43dc75604291b2894c035225494759dd99f7b1a3f4a1a7ef",
+      "results": {
+        "cute": {
+          "median_us": 49.777455763383344,
+          "range_us": [
+            48.26317700472745,
+            50.18879861542673
+          ],
+          "paired_change_cute_percent": 0.0,
+          "paired_change_matched_percent": -1.2226055212977038,
+          "balanced_first56_change_cute_percent": 0.0,
+          "balanced_first56_change_matched_percent": -1.2226055212977038,
+          "four_balanced_14round_blocks_matched_percent": [
+            -1.158919569700867,
+            -1.2670706751655825,
+            -1.2520180235625844,
+            -1.2703976354609847
+          ],
+          "positions": {
+            "0": 9,
+            "6": 9,
+            "5": 9,
+            "4": 9,
+            "3": 8,
+            "2": 8,
+            "1": 8
+          }
+        },
+        "cutlass_production": {
+          "median_us": 50.40339267615116,
+          "range_us": [
+            48.697795289935485,
+            51.60998720111269
+          ],
+          "paired_change_cute_percent": 1.2455180119368414,
+          "paired_change_matched_percent": 0.044698261761144664,
+          "balanced_first56_change_cute_percent": 1.2411920802689824,
+          "balanced_first56_change_matched_percent": 0.0394716451046051,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.04716433926237329,
+            -0.053698611665864426,
+            0.02428649140935324,
+            0.0552096986822459
+          ],
+          "positions": {
+            "1": 9,
+            "0": 9,
+            "6": 9,
+            "5": 9,
+            "4": 8,
+            "3": 8,
+            "2": 8
+          }
+        },
+        "cutlass_matched": {
+          "median_us": 50.39350336248224,
+          "range_us": [
+            48.73056700735381,
+            50.73512684215199
+          ],
+          "paired_change_cute_percent": 1.2377381879746352,
+          "paired_change_matched_percent": 0.0,
+          "balanced_first56_change_cute_percent": 1.2377381879746352,
+          "balanced_first56_change_matched_percent": 0.0,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "positions": {
+            "2": 9,
+            "1": 9,
+            "0": 9,
+            "6": 9,
+            "5": 8,
+            "4": 8,
+            "3": 8
+          }
+        },
+        "cutlass_no_tail": {
+          "median_us": 50.40601383556019,
+          "range_us": [
+            48.77304308342211,
+            50.96455776330197
+          ],
+          "paired_change_cute_percent": 1.283583720166881,
+          "paired_change_matched_percent": 0.050601894024993044,
+          "balanced_first56_change_cute_percent": 1.283583720166881,
+          "balanced_first56_change_matched_percent": 0.06932919433517704,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.1579559246503992,
+            -0.009768470785298522,
+            -0.07342425915490836,
+            0.1254629680652819
+          ],
+          "positions": {
+            "3": 9,
+            "2": 9,
+            "1": 9,
+            "0": 9,
+            "6": 8,
+            "5": 8,
+            "4": 8
+          }
+        },
+        "cutlass_fixed_loop": {
+          "median_us": 50.51859364365086,
+          "range_us": [
+            49.378325722434305,
+            51.730421817663945
+          ],
+          "paired_change_cute_percent": 1.4846122150546481,
+          "paired_change_matched_percent": 0.2572811089048388,
+          "balanced_first56_change_cute_percent": 1.476398179920091,
+          "balanced_first56_change_matched_percent": 0.2547320398851083,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.26579024640831506,
+            0.2572811089048388,
+            0.05209947702142781,
+            0.1898432855847787
+          ],
+          "positions": {
+            "4": 9,
+            "3": 9,
+            "2": 9,
+            "1": 9,
+            "0": 8,
+            "6": 8,
+            "5": 8
+          }
+        },
+        "cutlass_minimum_k": {
+          "median_us": 48.93420537312825,
+          "range_us": [
+            47.543855146928266,
+            49.33255513509115
+          ],
+          "paired_change_cute_percent": -1.6256400922725733,
+          "paired_change_matched_percent": -2.834058544301654,
+          "balanced_first56_change_cute_percent": -1.6256400922725733,
+          "balanced_first56_change_matched_percent": -2.834058544301654,
+          "four_balanced_14round_blocks_matched_percent": [
+            -2.696724897016689,
+            -2.8355590399660624,
+            -2.967634322965629,
+            -2.8464201940504696
+          ],
+          "positions": {
+            "5": 9,
+            "4": 9,
+            "3": 9,
+            "2": 9,
+            "1": 8,
+            "0": 8,
+            "6": 8
+          }
+        },
+        "cutlass_ungrouped": {
+          "median_us": 50.403782815644234,
+          "range_us": [
+            48.841892589222304,
+            50.83229180538293
+          ],
+          "paired_change_cute_percent": 1.2660889476299841,
+          "paired_change_matched_percent": 0.04098485517536332,
+          "balanced_first56_change_cute_percent": 1.2573226014368277,
+          "balanced_first56_change_matched_percent": 0.02922898332711199,
+          "four_balanced_14round_blocks_matched_percent": [
+            0.12897089346917134,
+            0.010113807078271364,
+            0.08339825552092783,
+            -0.05025672938102632
+          ],
+          "positions": {
+            "6": 9,
+            "5": 9,
+            "4": 9,
+            "3": 9,
+            "2": 8,
+            "1": 8,
+            "0": 8
+          }
+        }
+      }
+    }
+  ]
+}

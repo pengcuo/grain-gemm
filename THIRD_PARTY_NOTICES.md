@@ -34,3 +34,26 @@ and writes BF16 output. It adds launch configurations, tile scheduling, and a
 C ABI launcher. CUTLASS headers are an external build dependency; they are not
 vendored into this repository. The SGLang baseline remains a separate reference
 implementation.
+
+## CUTLASS collective CUDA implementation
+
+`src/grain_gemm/kernels/csrc/grain_cutlass_collective.hpp` adapts
+[CUTLASS's SM80 multistage collective](https://github.com/NVIDIA/cutlass/blob/098de2a652cf8f00fd70b2df54051c7eccbb855a/include/cutlass/gemm/collective/sm80_mma_multistage.hpp).
+`grain_cutlass_kernel.hpp` extends the device composition in
+[the SM70/SM80 GemmUniversal kernel](https://github.com/NVIDIA/cutlass/blob/098de2a652cf8f00fd70b2df54051c7eccbb855a/include/cutlass/gemm/kernel/sm70_gemm.hpp).
+Both use commit `098de2a652cf8f00fd70b2df54051c7eccbb855a` and retain the
+upstream BSD-3-Clause notice. The full license is included in
+[licenses/CUTLASS-LICENSE](licenses/CUTLASS-LICENSE).
+
+GrainGEMM adds INT32 K256 group reductions, FP32 row/column scaling and running
+sums, and a bridge that passes scale parameters and FP32 fragments to the
+collective, with optional asynchronous scale staging. `grain_cutlass.cu`
+composes this collective with `GemmUniversalAdapter` and either CUTLASS's
+vectorized epilogue or the BF16 shared/direct variants in
+`grain_cutlass_epilogue.hpp`. It is independent of `grain_cute.cu`.
+
+The source snapshots and ablation variants under `experiments/cutlass/` retain
+the corresponding source notices and the same CUTLASS dependency. Archived
+GrainGEMM package snapshots may also contain the SGLang baseline described
+above. These archives preserve measurement provenance; they do not include
+the external CUTLASS checkout or precompiled libraries.

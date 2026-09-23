@@ -1,0 +1,1765 @@
+{
+  "method": "CPU-only recomputation; no Torch imports, CUDA calls, or new timing",
+  "cases": [
+    {
+      "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_1024_1024_1536.json",
+      "sha256": "4d33ac1b3a3c0e17cc8d3ec31319150ca3e9fda9247590f57abb73cd8347be41",
+      "shape": {
+        "m": 1024,
+        "n": 1024,
+        "k": 1536
+      },
+      "nodes": 249,
+      "results": {
+        "cute": {
+          "median_us": 28.071518403938015,
+          "round_median_range_us": [
+            28.017735385511774,
+            28.527807519139056
+          ],
+          "paired_change_vs_matched_percent": -0.6381912781562304,
+          "five_balanced_12_round_blocks_percent": [
+            -0.6077881011525066,
+            -0.6229972751746304,
+            -0.6470728679769722,
+            -0.6387706470182719,
+            -0.653134947291989
+          ],
+          "positions": {
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_production": {
+          "median_us": 28.25824898409556,
+          "round_median_range_us": [
+            28.182876157952123,
+            29.207647086147325
+          ],
+          "paired_change_vs_matched_percent": 0.03186908605830041,
+          "five_balanced_12_round_blocks_percent": [
+            0.01548838539711106,
+            0.050087215249994266,
+            0.06070312481814,
+            0.04047543448191249,
+            -0.00796065373247501
+          ],
+          "positions": {
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_matched": {
+          "median_us": 28.25471483559972,
+          "round_median_range_us": [
+            28.199454387986517,
+            29.326264638019854
+          ],
+          "paired_change_vs_matched_percent": 0.0,
+          "five_balanced_12_round_blocks_percent": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "positions": {
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_no_tail": {
+          "median_us": 28.26409646306172,
+          "round_median_range_us": [
+            28.18236102062057,
+            28.714923016038764
+          ],
+          "paired_change_vs_matched_percent": 0.017973985173558304,
+          "five_balanced_12_round_blocks_percent": [
+            0.037111412435386626,
+            0.0045555920243689485,
+            0.009093012475425155,
+            0.017277947192928522,
+            0.024088038557423808
+          ],
+          "positions": {
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_address32": {
+          "median_us": 28.265188018002185,
+          "round_median_range_us": [
+            28.196754225765368,
+            28.68754988214577
+          ],
+          "paired_change_vs_matched_percent": 0.030695470697827965,
+          "five_balanced_12_round_blocks_percent": [
+            0.04713187802505292,
+            0.06283001850064807,
+            0.02023095111229889,
+            -0.0034093075734098477,
+            0.03682801939066671
+          ],
+          "positions": {
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_fixed_loop": {
+          "median_us": 28.209028473819593,
+          "round_median_range_us": [
+            28.125814644687146,
+            28.321670241145245
+          ],
+          "paired_change_vs_matched_percent": -0.19096286158524212,
+          "five_balanced_12_round_blocks_percent": [
+            -0.2242404941471987,
+            -0.20027619056893764,
+            -0.19340614975974502,
+            -0.17619897205202184,
+            -0.1530136426612927
+          ],
+          "positions": {
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      },
+      "sensors": [
+        {
+          "round": 0,
+          "temperature_clock_power_util": "58, 2372, 96.19, 96"
+        },
+        {
+          "round": 10,
+          "temperature_clock_power_util": "60, 2372, 96.92, 96"
+        },
+        {
+          "round": 20,
+          "temperature_clock_power_util": "61, 2372, 97.03, 96"
+        },
+        {
+          "round": 30,
+          "temperature_clock_power_util": "63, 2366, 98.47, 96"
+        },
+        {
+          "round": 40,
+          "temperature_clock_power_util": "64, 2366, 100.14, 96"
+        },
+        {
+          "round": 50,
+          "temperature_clock_power_util": "65, 2366, 100.32, 96"
+        }
+      ]
+    },
+    {
+      "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_1024_1536_1024.json",
+      "sha256": "b8c8b311b4d74a2df9af878cc880898ca210604eef558db8f9580b55f5211d0c",
+      "shape": {
+        "m": 1024,
+        "n": 1536,
+        "k": 1024
+      },
+      "nodes": 272,
+      "results": {
+        "cute": {
+          "median_us": 24.26658833728117,
+          "round_median_range_us": [
+            24.048118030323703,
+            24.48588259079877
+          ],
+          "paired_change_vs_matched_percent": -1.5597419928128131,
+          "five_balanced_12_round_blocks_percent": [
+            -1.6256412846614055,
+            -1.600482735939046,
+            -1.5527060952303717,
+            -1.5532442028833193,
+            -1.4826660582210271
+          ],
+          "positions": {
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_production": {
+          "median_us": 24.635764605858746,
+          "round_median_range_us": [
+            24.489646448808557,
+            24.97035264968872
+          ],
+          "paired_change_vs_matched_percent": -0.014617673271899445,
+          "five_balanced_12_round_blocks_percent": [
+            -0.02444696759510423,
+            -0.05785995091873719,
+            0.0009292496254031946,
+            -0.010504898206720181,
+            -0.04760506610705928
+          ],
+          "positions": {
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_matched": {
+          "median_us": 24.640235830755792,
+          "round_median_range_us": [
+            24.478588034124936,
+            24.877528933917773
+          ],
+          "paired_change_vs_matched_percent": 0.0,
+          "five_balanced_12_round_blocks_percent": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "positions": {
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_no_tail": {
+          "median_us": 24.624529130318585,
+          "round_median_range_us": [
+            24.46282435865963,
+            24.858353769077976
+          ],
+          "paired_change_vs_matched_percent": -0.040124594681878456,
+          "five_balanced_12_round_blocks_percent": [
+            -0.03325821120574446,
+            -0.06910262631873998,
+            -0.028655154203560684,
+            -0.012146909184618249,
+            -0.03024642781215281
+          ],
+          "positions": {
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_address32": {
+          "median_us": 24.617412511040182,
+          "round_median_range_us": [
+            24.470823652604047,
+            24.92329478263855
+          ],
+          "paired_change_vs_matched_percent": -0.056053101786912585,
+          "five_balanced_12_round_blocks_percent": [
+            -0.08612323865351268,
+            -0.03251475894763267,
+            -0.02675746800069323,
+            -0.12483555253706147,
+            -0.07623559266212165
+          ],
+          "positions": {
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_fixed_loop": {
+          "median_us": 24.811117964632373,
+          "round_median_range_us": [
+            24.72741112989538,
+            25.27823518304264
+          ],
+          "paired_change_vs_matched_percent": 0.7424098662543788,
+          "five_balanced_12_round_blocks_percent": [
+            0.8374353697230941,
+            0.7672800289361126,
+            0.7560343524157354,
+            0.6641608183453718,
+            0.6681015140115321
+          ],
+          "positions": {
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      },
+      "sensors": [
+        {
+          "round": 0,
+          "temperature_clock_power_util": "66, 2340, 101.81, 96"
+        },
+        {
+          "round": 10,
+          "temperature_clock_power_util": "67, 2353, 102.00, 96"
+        },
+        {
+          "round": 20,
+          "temperature_clock_power_util": "68, 2346, 102.43, 96"
+        },
+        {
+          "round": 30,
+          "temperature_clock_power_util": "69, 2346, 102.38, 96"
+        },
+        {
+          "round": 40,
+          "temperature_clock_power_util": "69, 2346, 101.19, 96"
+        },
+        {
+          "round": 50,
+          "temperature_clock_power_util": "70, 2340, 101.43, 96"
+        }
+      ]
+    },
+    {
+      "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_1024_2048_1536.json",
+      "sha256": "e9a85999924c38406537e4e913cefef8a8b63e5c95134b0e5079771cdfce0f79",
+      "shape": {
+        "m": 1024,
+        "n": 2048,
+        "k": 1536
+      },
+      "nodes": 165,
+      "results": {
+        "cute": {
+          "median_us": 47.97604878743489,
+          "round_median_range_us": [
+            47.10419394753196,
+            48.3634428544478
+          ],
+          "paired_change_vs_matched_percent": -1.4022485641671523,
+          "five_balanced_12_round_blocks_percent": [
+            -1.4896569819739192,
+            -1.3457153891036633,
+            -1.3496467462736361,
+            -1.3772553773975238,
+            -1.4917516775141193
+          ],
+          "positions": {
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_production": {
+          "median_us": 48.64581714976917,
+          "round_median_range_us": [
+            47.8803403449781,
+            48.99083917791193
+          ],
+          "paired_change_vs_matched_percent": -0.012372643081093315,
+          "five_balanced_12_round_blocks_percent": [
+            0.02532869904205981,
+            0.05191664938126728,
+            -0.011760418746686874,
+            -0.04038208575123381,
+            -0.12127646983979279
+          ],
+          "positions": {
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_matched": {
+          "median_us": 48.64669279618697,
+          "round_median_range_us": [
+            47.96625484119762,
+            49.17158647017045
+          ],
+          "paired_change_vs_matched_percent": 0.0,
+          "five_balanced_12_round_blocks_percent": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "positions": {
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_no_tail": {
+          "median_us": 48.6514409383138,
+          "round_median_range_us": [
+            47.90768478855942,
+            48.83626880067767
+          ],
+          "paired_change_vs_matched_percent": -0.0170436739301838,
+          "five_balanced_12_round_blocks_percent": [
+            -0.01887915476281865,
+            -0.0005938494428425756,
+            0.007352951158923204,
+            -0.008261968255940388,
+            -0.06857608456964925
+          ],
+          "positions": {
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_address32": {
+          "median_us": 48.643297137636125,
+          "round_median_range_us": [
+            47.94879971128522,
+            48.88184287331321
+          ],
+          "paired_change_vs_matched_percent": -0.05197566201706749,
+          "five_balanced_12_round_blocks_percent": [
+            -0.01815638706135214,
+            -0.023147696776781856,
+            -0.05140304157608133,
+            -0.05197566201706749,
+            -0.12895896111151384
+          ],
+          "positions": {
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_fixed_loop": {
+          "median_us": 48.90637542262222,
+          "round_median_range_us": [
+            48.29013419873787,
+            49.28368655118075
+          ],
+          "paired_change_vs_matched_percent": 0.550201045427734,
+          "five_balanced_12_round_blocks_percent": [
+            0.679204149730106,
+            0.5929415008314898,
+            0.517258582285951,
+            0.5515737030797663,
+            0.5383548524584558
+          ],
+          "positions": {
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      },
+      "sensors": [
+        {
+          "round": 0,
+          "temperature_clock_power_util": "71, 2340, 102.53, 96"
+        },
+        {
+          "round": 10,
+          "temperature_clock_power_util": "71, 2333, 102.50, 96"
+        },
+        {
+          "round": 20,
+          "temperature_clock_power_util": "72, 2307, 101.18, 96"
+        },
+        {
+          "round": 30,
+          "temperature_clock_power_util": "72, 2307, 101.97, 96"
+        },
+        {
+          "round": 40,
+          "temperature_clock_power_util": "73, 2307, 101.43, 96"
+        },
+        {
+          "round": 50,
+          "temperature_clock_power_util": "73, 2307, 102.14, 96"
+        }
+      ]
+    },
+    {
+      "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_2048_151936_1536.json",
+      "sha256": "4150072668e0a9af3e7639c2e4b6e3cc1dc5e9a246c7d887e4c0099402fb3911",
+      "shape": {
+        "m": 2048,
+        "n": 151936,
+        "k": 1536
+      },
+      "nodes": 1,
+      "results": {
+        "cute": {
+          "median_us": 6798.480033874512,
+          "round_median_range_us": [
+            6745.920181274414,
+            7350.783824920654
+          ],
+          "paired_change_vs_matched_percent": -3.0446964728596093,
+          "five_balanced_12_round_blocks_percent": [
+            -3.1256353423528727,
+            -3.0227973625937654,
+            -3.015835928619448,
+            -2.7737963454842696,
+            -3.042246841394536
+          ],
+          "positions": {
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_production": {
+          "median_us": 7010.384082794189,
+          "round_median_range_us": [
+            6854.112148284912,
+            7303.264141082764
+          ],
+          "paired_change_vs_matched_percent": -0.03105287109232968,
+          "five_balanced_12_round_blocks_percent": [
+            0.0015519066872693443,
+            -0.10853169964091247,
+            -0.031488143559277315,
+            -0.044787141634272665,
+            0.07076514916031229
+          ],
+          "positions": {
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_matched": {
+          "median_us": 7011.744022369385,
+          "round_median_range_us": [
+            6914.815902709961,
+            7174.304008483887
+          ],
+          "paired_change_vs_matched_percent": 0.0,
+          "five_balanced_12_round_blocks_percent": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "positions": {
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_no_tail": {
+          "median_us": 6966.256141662598,
+          "round_median_range_us": [
+            6866.78409576416,
+            7297.728061676025
+          ],
+          "paired_change_vs_matched_percent": -0.6021267238811356,
+          "five_balanced_12_round_blocks_percent": [
+            -0.7450907611334934,
+            -0.6114422039961376,
+            -0.5692609945221472,
+            -0.4600841045095283,
+            -0.6429801675047697
+          ],
+          "positions": {
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_address32": {
+          "median_us": 7006.576061248779,
+          "round_median_range_us": [
+            6875.135898590088,
+            7042.912006378174
+          ],
+          "paired_change_vs_matched_percent": -0.06732875563306706,
+          "five_balanced_12_round_blocks_percent": [
+            0.021664871517335094,
+            -0.14403577017393365,
+            -0.07307711845676579,
+            -0.0683989444393518,
+            -0.05636520858725014
+          ],
+          "positions": {
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_fixed_loop": {
+          "median_us": 7008.72015953064,
+          "round_median_range_us": [
+            6643.648147583008,
+            7190.624237060547
+          ],
+          "paired_change_vs_matched_percent": -0.06647583117609379,
+          "five_balanced_12_round_blocks_percent": [
+            -0.14681021699998187,
+            -0.029878738918265313,
+            -0.09264206527765939,
+            -0.054027589131699916,
+            -0.01939458841160313
+          ],
+          "positions": {
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      },
+      "sensors": [
+        {
+          "round": 0,
+          "temperature_clock_power_util": "74, 2164, 94.83, 96"
+        },
+        {
+          "round": 10,
+          "temperature_clock_power_util": "75, 2171, 94.79, 96"
+        },
+        {
+          "round": 20,
+          "temperature_clock_power_util": "76, 2164, 93.16, 96"
+        },
+        {
+          "round": 30,
+          "temperature_clock_power_util": "76, 2158, 93.43, 96"
+        },
+        {
+          "round": 40,
+          "temperature_clock_power_util": "76, 2151, 93.44, 96"
+        },
+        {
+          "round": 50,
+          "temperature_clock_power_util": "77, 2151, 94.80, 96"
+        }
+      ]
+    },
+    {
+      "file": "/home/pengcuo/spark/experiments/grain-cutlass-residual-gap/paired_run1/case_2048_1536_1024.json",
+      "sha256": "48a77241ca38359d67741294f678dccb025e51a8763f6e96a29e0bcab71300d4",
+      "shape": {
+        "m": 2048,
+        "n": 1536,
+        "k": 1024
+      },
+      "nodes": 159,
+      "results": {
+        "cute": {
+          "median_us": 49.51507040539627,
+          "round_median_range_us": [
+            47.99456566384753,
+            50.18888029662318
+          ],
+          "paired_change_vs_matched_percent": -1.417496352108838,
+          "five_balanced_12_round_blocks_percent": [
+            -1.2830584452336757,
+            -1.4543721211341287,
+            -1.4398743164806715,
+            -1.385659162507924,
+            -1.4559093047017857
+          ],
+          "positions": {
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_production": {
+          "median_us": 50.26646530103383,
+          "round_median_range_us": [
+            48.55728449311646,
+            50.80714315738318
+          ],
+          "paired_change_vs_matched_percent": 0.08572913864053344,
+          "five_balanced_12_round_blocks_percent": [
+            0.04967177871844086,
+            0.051377448712486284,
+            0.0918523277839034,
+            0.12028770569960656,
+            0.10224565650298612
+          ],
+          "positions": {
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_matched": {
+          "median_us": 50.26596147309309,
+          "round_median_range_us": [
+            48.74002408681426,
+            50.646943866081955
+          ],
+          "paired_change_vs_matched_percent": 0.0,
+          "five_balanced_12_round_blocks_percent": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "positions": {
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10,
+            "3": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_no_tail": {
+          "median_us": 50.26586250689044,
+          "round_median_range_us": [
+            48.687898887778225,
+            50.808756606383895
+          ],
+          "paired_change_vs_matched_percent": 0.01520398773178222,
+          "five_balanced_12_round_blocks_percent": [
+            -0.03786017635241112,
+            -0.0007871099061640408,
+            0.039252442187120984,
+            0.061916602813649746,
+            0.1434016594396681
+          ],
+          "positions": {
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10,
+            "4": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_address32": {
+          "median_us": 50.256402237610246,
+          "round_median_range_us": [
+            48.6542893655645,
+            51.59889077240566
+          ],
+          "paired_change_vs_matched_percent": 0.04648092564205619,
+          "five_balanced_12_round_blocks_percent": [
+            2.6905583982994585e-06,
+            0.07772868198900884,
+            0.08998555923733775,
+            0.10204080174913699,
+            -0.0756900885739542
+          ],
+          "positions": {
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10,
+            "5": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        "cutlass_fixed_loop": {
+          "median_us": 50.41931860102048,
+          "round_median_range_us": [
+            49.07250254409118,
+            51.03235424689527
+          ],
+          "paired_change_vs_matched_percent": 0.38530385425230573,
+          "five_balanced_12_round_blocks_percent": [
+            0.3353363241502816,
+            0.39991960481366995,
+            0.3837629206928206,
+            0.4363213410851774,
+            0.41530525123172346
+          ],
+          "positions": {
+            "5": 10,
+            "4": 10,
+            "3": 10,
+            "2": 10,
+            "1": 10,
+            "0": 10
+          },
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      },
+      "sensors": [
+        {
+          "round": 0,
+          "temperature_clock_power_util": "73, 2288, 100.97, 96"
+        },
+        {
+          "round": 10,
+          "temperature_clock_power_util": "74, 2288, 100.05, 96"
+        },
+        {
+          "round": 20,
+          "temperature_clock_power_util": "74, 2281, 99.64, 96"
+        },
+        {
+          "round": 30,
+          "temperature_clock_power_util": "75, 2275, 99.71, 96"
+        },
+        {
+          "round": 40,
+          "temperature_clock_power_util": "75, 2281, 99.85, 96"
+        },
+        {
+          "round": 50,
+          "temperature_clock_power_util": "75, 2275, 98.90, 96"
+        }
+      ]
+    }
+  ],
+  "static": {
+    "baseline": {
+      "11": {
+        "registers": 252,
+        "instruction_count": 1008,
+        "matches_baseline_instruction_text": true,
+        "first_differing_address": null,
+        "mainloop_span": [
+          "0x1790",
+          "0x33c0"
+        ],
+        "mainloop_instruction_count": 452,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "USHF.L.U32": 1,
+          "UMOV": 2,
+          "UISETP.GT.AND": 2,
+          "SHF.L.U32": 3,
+          "IMAD": 10,
+          "IADD3": 16,
+          "LOP3.LUT": 14,
+          "LDSM.16.M88.4": 24,
+          "MOV": 2,
+          "SHF.R.S32.HI": 4,
+          "UIADD3": 12,
+          "ISETP.NE.U32.AND": 1,
+          "ISETP.NE.AND": 1,
+          "SEL": 1,
+          "LDC.64": 1,
+          "SHF.R.U32.HI": 4,
+          "IMAD.WIDE": 9,
+          "LDG.E": 16,
+          "LEA": 6,
+          "IADD.64": 16,
+          "LDS": 3,
+          "LDGSTS.E.BYPASS.LTC128B.128": 12,
+          "LDGDEPBAR": 1,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "FMUL": 64,
+          "FFMA": 64,
+          "CS2R": 32,
+          "BRA.U": 1
+        },
+        "conditional_exit_count": 7,
+        "pre_mainloop_CS2R": 100
+      },
+      "15": {
+        "registers": 250,
+        "instruction_count": 960,
+        "matches_baseline_instruction_text": true,
+        "first_differing_address": null,
+        "mainloop_span": [
+          "0x1540",
+          "0x3120"
+        ],
+        "mainloop_instruction_count": 447,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "USHF.L.U32": 1,
+          "UMOV": 2,
+          "UISETP.GT.AND": 2,
+          "IADD3": 15,
+          "LOP3.LUT": 18,
+          "IMAD": 7,
+          "MOV": 2,
+          "LDSM.16.M88.4": 24,
+          "ISETP.NE.U32.AND": 1,
+          "SHF.R.S32.HI": 4,
+          "SHF.L.U32": 5,
+          "UIADD3": 15,
+          "ISETP.NE.AND": 1,
+          "LDC.64": 1,
+          "SEL": 1,
+          "SHF.R.U32.HI": 3,
+          "IADD.64": 12,
+          "IMAD.WIDE": 5,
+          "LDG.E": 20,
+          "LEA": 5,
+          "LDS": 3,
+          "LDGSTS.E.BYPASS.LTC128B.128": 8,
+          "LDGDEPBAR": 1,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "CS2R": 32,
+          "FMUL": 64,
+          "FFMA": 64,
+          "BRA.U": 1
+        },
+        "conditional_exit_count": 3,
+        "pre_mainloop_CS2R": 105
+      },
+      "23": {
+        "registers": 238,
+        "instruction_count": 896,
+        "matches_baseline_instruction_text": true,
+        "first_differing_address": null,
+        "mainloop_span": [
+          "0x1590",
+          "0x3170"
+        ],
+        "mainloop_instruction_count": 447,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "ULOP3.LUT": 1,
+          "MOV": 5,
+          "UIADD3": 24,
+          "UISETP.NE.U32.AND": 1,
+          "LOP3.LUT": 18,
+          "SHF.L.U32": 7,
+          "PLOP3.LUT": 1,
+          "IADD.64": 8,
+          "SEL": 2,
+          "ULEA": 1,
+          "IADD3": 15,
+          "ISETP.GT.U32.AND": 1,
+          "LDSM.16.M88.4": 24,
+          "LDC.64": 2,
+          "LEA": 6,
+          "SHF.R.U32.HI": 2,
+          "LDC": 2,
+          "LDS.64": 8,
+          "UISETP.NE.AND": 1,
+          "USEL": 1,
+          "LDS": 7,
+          "LDGSTS.E.BYPASS.LTC128B.128": 8,
+          "IMAD": 2,
+          "IMAD.WIDE": 3,
+          "IMAD.WIDE.U32": 1,
+          "FMUL": 64,
+          "LDGSTS.E.LTC128B": 2,
+          "LDGDEPBAR": 1,
+          "ISETP.GT.AND": 2,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "FFMA": 64,
+          "CS2R": 32,
+          "BRA": 1
+        },
+        "conditional_exit_count": 0,
+        "pre_mainloop_CS2R": 103
+      }
+    },
+    "bf16_fixed_store_loop": {
+      "11": {
+        "registers": 252,
+        "instruction_count": 976,
+        "matches_baseline_instruction_text": false,
+        "first_differing_address": "0x10",
+        "mainloop_span": [
+          "0x1720",
+          "0x32a0"
+        ],
+        "mainloop_instruction_count": 441,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "USHF.L.U32": 1,
+          "UMOV": 2,
+          "UISETP.GT.AND": 2,
+          "IADD3": 16,
+          "IADD.64": 12,
+          "LDSM.16.M88.4": 24,
+          "MOV": 2,
+          "UIADD3": 14,
+          "LOP3.LUT": 14,
+          "ISETP.NE.U32.AND": 1,
+          "SHF.L.U32": 3,
+          "ISETP.NE.AND": 1,
+          "SEL": 1,
+          "LDC.64": 1,
+          "SHF.R.U32.HI": 3,
+          "IMAD": 6,
+          "IMAD.WIDE": 9,
+          "LDG.E": 16,
+          "LEA": 6,
+          "LDS": 3,
+          "LDGSTS.E.BYPASS.LTC128B.128": 12,
+          "LDGDEPBAR": 1,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "FMUL": 64,
+          "CS2R": 32,
+          "FFMA": 64,
+          "BRA.U": 1
+        },
+        "conditional_exit_count": 0,
+        "pre_mainloop_CS2R": 104
+      },
+      "15": {
+        "registers": 250,
+        "instruction_count": 944,
+        "matches_baseline_instruction_text": false,
+        "first_differing_address": "0x10",
+        "mainloop_span": [
+          "0x1530",
+          "0x30a0"
+        ],
+        "mainloop_instruction_count": 440,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "USHF.L.U32": 1,
+          "UMOV": 2,
+          "UISETP.GT.AND": 2,
+          "IADD3": 15,
+          "IADD.64": 8,
+          "LDSM.16.M88.4": 24,
+          "UIADD3": 20,
+          "MOV": 2,
+          "LOP3.LUT": 18,
+          "SHF.L.U32": 5,
+          "ISETP.NE.U32.AND": 1,
+          "ISETP.NE.AND": 1,
+          "LDC.64": 1,
+          "SEL": 1,
+          "SHF.R.U32.HI": 3,
+          "IMAD": 3,
+          "IMAD.WIDE": 5,
+          "LDG.E": 20,
+          "LEA": 5,
+          "LDS": 3,
+          "LDGSTS.E.BYPASS.LTC128B.128": 8,
+          "LDGDEPBAR": 1,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "CS2R": 32,
+          "FMUL": 64,
+          "FFMA": 64,
+          "BRA.U": 1
+        },
+        "conditional_exit_count": 0,
+        "pre_mainloop_CS2R": 103
+      },
+      "23": {
+        "registers": 238,
+        "instruction_count": 896,
+        "matches_baseline_instruction_text": true,
+        "first_differing_address": null,
+        "mainloop_span": [
+          "0x1590",
+          "0x3170"
+        ],
+        "mainloop_instruction_count": 447,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "ULOP3.LUT": 1,
+          "MOV": 5,
+          "UIADD3": 24,
+          "UISETP.NE.U32.AND": 1,
+          "LOP3.LUT": 18,
+          "SHF.L.U32": 7,
+          "PLOP3.LUT": 1,
+          "IADD.64": 8,
+          "SEL": 2,
+          "ULEA": 1,
+          "IADD3": 15,
+          "ISETP.GT.U32.AND": 1,
+          "LDSM.16.M88.4": 24,
+          "LDC.64": 2,
+          "LEA": 6,
+          "SHF.R.U32.HI": 2,
+          "LDC": 2,
+          "LDS.64": 8,
+          "UISETP.NE.AND": 1,
+          "USEL": 1,
+          "LDS": 7,
+          "LDGSTS.E.BYPASS.LTC128B.128": 8,
+          "IMAD": 2,
+          "IMAD.WIDE": 3,
+          "IMAD.WIDE.U32": 1,
+          "FMUL": 64,
+          "LDGSTS.E.LTC128B": 2,
+          "LDGDEPBAR": 1,
+          "ISETP.GT.AND": 2,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "FFMA": 64,
+          "CS2R": 32,
+          "BRA": 1
+        },
+        "conditional_exit_count": 0,
+        "pre_mainloop_CS2R": 103
+      }
+    },
+    "late_fp32_accumulator_clear": {
+      "11": {
+        "registers": 252,
+        "instruction_count": 1008,
+        "matches_baseline_instruction_text": true,
+        "first_differing_address": null,
+        "mainloop_span": [
+          "0x1790",
+          "0x33c0"
+        ],
+        "mainloop_instruction_count": 452,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "USHF.L.U32": 1,
+          "UMOV": 2,
+          "UISETP.GT.AND": 2,
+          "SHF.L.U32": 3,
+          "IMAD": 10,
+          "IADD3": 16,
+          "LOP3.LUT": 14,
+          "LDSM.16.M88.4": 24,
+          "MOV": 2,
+          "SHF.R.S32.HI": 4,
+          "UIADD3": 12,
+          "ISETP.NE.U32.AND": 1,
+          "ISETP.NE.AND": 1,
+          "SEL": 1,
+          "LDC.64": 1,
+          "SHF.R.U32.HI": 4,
+          "IMAD.WIDE": 9,
+          "LDG.E": 16,
+          "LEA": 6,
+          "IADD.64": 16,
+          "LDS": 3,
+          "LDGSTS.E.BYPASS.LTC128B.128": 12,
+          "LDGDEPBAR": 1,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "FMUL": 64,
+          "FFMA": 64,
+          "CS2R": 32,
+          "BRA.U": 1
+        },
+        "conditional_exit_count": 7,
+        "pre_mainloop_CS2R": 100
+      },
+      "15": {
+        "registers": 250,
+        "instruction_count": 960,
+        "matches_baseline_instruction_text": true,
+        "first_differing_address": null,
+        "mainloop_span": [
+          "0x1540",
+          "0x3120"
+        ],
+        "mainloop_instruction_count": 447,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "USHF.L.U32": 1,
+          "UMOV": 2,
+          "UISETP.GT.AND": 2,
+          "IADD3": 15,
+          "LOP3.LUT": 18,
+          "IMAD": 7,
+          "MOV": 2,
+          "LDSM.16.M88.4": 24,
+          "ISETP.NE.U32.AND": 1,
+          "SHF.R.S32.HI": 4,
+          "SHF.L.U32": 5,
+          "UIADD3": 15,
+          "ISETP.NE.AND": 1,
+          "LDC.64": 1,
+          "SEL": 1,
+          "SHF.R.U32.HI": 3,
+          "IADD.64": 12,
+          "IMAD.WIDE": 5,
+          "LDG.E": 20,
+          "LEA": 5,
+          "LDS": 3,
+          "LDGSTS.E.BYPASS.LTC128B.128": 8,
+          "LDGDEPBAR": 1,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "CS2R": 32,
+          "FMUL": 64,
+          "FFMA": 64,
+          "BRA.U": 1
+        },
+        "conditional_exit_count": 3,
+        "pre_mainloop_CS2R": 105
+      },
+      "23": {
+        "registers": 238,
+        "instruction_count": 896,
+        "matches_baseline_instruction_text": true,
+        "first_differing_address": null,
+        "mainloop_span": [
+          "0x1590",
+          "0x3170"
+        ],
+        "mainloop_instruction_count": 447,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "ULOP3.LUT": 1,
+          "MOV": 5,
+          "UIADD3": 24,
+          "UISETP.NE.U32.AND": 1,
+          "LOP3.LUT": 18,
+          "SHF.L.U32": 7,
+          "PLOP3.LUT": 1,
+          "IADD.64": 8,
+          "SEL": 2,
+          "ULEA": 1,
+          "IADD3": 15,
+          "ISETP.GT.U32.AND": 1,
+          "LDSM.16.M88.4": 24,
+          "LDC.64": 2,
+          "LEA": 6,
+          "SHF.R.U32.HI": 2,
+          "LDC": 2,
+          "LDS.64": 8,
+          "UISETP.NE.AND": 1,
+          "USEL": 1,
+          "LDS": 7,
+          "LDGSTS.E.BYPASS.LTC128B.128": 8,
+          "IMAD": 2,
+          "IMAD.WIDE": 3,
+          "IMAD.WIDE.U32": 1,
+          "FMUL": 64,
+          "LDGSTS.E.LTC128B": 2,
+          "LDGDEPBAR": 1,
+          "ISETP.GT.AND": 2,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "FFMA": 64,
+          "CS2R": 32,
+          "BRA": 1
+        },
+        "conditional_exit_count": 0,
+        "pre_mainloop_CS2R": 103
+      }
+    },
+    "minimum_k_guard": {
+      "11": {
+        "registers": 246,
+        "instruction_count": 952,
+        "matches_baseline_instruction_text": false,
+        "first_differing_address": "0x10",
+        "mainloop_span": [
+          "0x14d0",
+          "0x3070"
+        ],
+        "mainloop_instruction_count": 443,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "USHF.L.U32": 2,
+          "UMOV": 4,
+          "ULOP3.LUT": 1,
+          "IADD3": 13,
+          "UISETP.NE.U32.AND": 1,
+          "LOP3.LUT": 5,
+          "LDSM.16.M88.4": 24,
+          "IMAD": 9,
+          "PLOP3.LUT": 1,
+          "UIADD3": 15,
+          "UISETP.GT.AND": 2,
+          "SHF.R.S32.HI": 3,
+          "UISETP.NE.AND": 1,
+          "USEL": 1,
+          "LDC.64": 1,
+          "IADD.64": 16,
+          "SHF.R.U32.HI": 2,
+          "IMAD.WIDE": 9,
+          "LDG.E": 16,
+          "LEA": 6,
+          "MOV": 4,
+          "LDS": 3,
+          "LDGSTS.E.BYPASS.LTC128B.128": 12,
+          "LDGDEPBAR": 1,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "FMUL": 64,
+          "CS2R": 32,
+          "FFMA": 64,
+          "BRA.U": 1
+        },
+        "conditional_exit_count": 8,
+        "pre_mainloop_CS2R": 71
+      },
+      "15": {
+        "registers": 250,
+        "instruction_count": 912,
+        "matches_baseline_instruction_text": false,
+        "first_differing_address": "0x10",
+        "mainloop_span": [
+          "0x1390",
+          "0x2e50"
+        ],
+        "mainloop_instruction_count": 429,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "USHF.L.U32": 1,
+          "UMOV": 4,
+          "ULOP3.LUT": 1,
+          "IADD3": 12,
+          "IMAD": 6,
+          "UISETP.NE.U32.AND": 1,
+          "UIADD3": 16,
+          "LDSM.16.M88.4": 24,
+          "SHF.R.S32.HI": 3,
+          "PLOP3.LUT": 1,
+          "UISETP.NE.AND": 1,
+          "UISETP.GT.AND": 2,
+          "USEL": 1,
+          "IADD.64": 12,
+          "LDC.64": 1,
+          "LOP3.LUT": 4,
+          "SHF.R.U32.HI": 3,
+          "IMAD.WIDE": 5,
+          "LDG.E": 20,
+          "LEA": 5,
+          "MOV": 3,
+          "LDS": 3,
+          "LDGSTS.E.BYPASS.LTC128B.128": 8,
+          "LDGDEPBAR": 1,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "FMUL": 64,
+          "FFMA": 64,
+          "CS2R": 32,
+          "BRA.U": 1
+        },
+        "conditional_exit_count": 4,
+        "pre_mainloop_CS2R": 74
+      },
+      "23": {
+        "registers": 244,
+        "instruction_count": 856,
+        "matches_baseline_instruction_text": false,
+        "first_differing_address": "0x10",
+        "mainloop_span": [
+          "0x14a0",
+          "0x2ec0"
+        ],
+        "mainloop_instruction_count": 419,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "ULOP3.LUT": 1,
+          "MOV": 5,
+          "UIADD3": 33,
+          "IADD3": 9,
+          "UISETP.NE.U32.AND": 1,
+          "LDSM.16.M88.4": 24,
+          "SHF.L.U32": 1,
+          "ISETP.GT.AND": 2,
+          "PLOP3.LUT": 1,
+          "ULEA": 1,
+          "IADD.64": 8,
+          "LOP3.LUT": 4,
+          "SHF.R.U32.HI": 2,
+          "LEA": 5,
+          "LDS": 7,
+          "LDS.64": 8,
+          "UISETP.NE.AND": 1,
+          "USEL": 1,
+          "IMAD": 1,
+          "LDGSTS.E.BYPASS.LTC128B.128": 8,
+          "IMAD.WIDE.U32": 1,
+          "IMAD.WIDE": 1,
+          "FMUL": 64,
+          "LDGSTS.E.LTC128B": 2,
+          "LDGDEPBAR": 1,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "FFMA": 64,
+          "CS2R": 32,
+          "BRA": 1
+        },
+        "conditional_exit_count": 1,
+        "pre_mainloop_CS2R": 74
+      }
+    },
+    "ungrouped_specialization": {
+      "11": {
+        "registers": 250,
+        "instruction_count": 936,
+        "matches_baseline_instruction_text": false,
+        "first_differing_address": "0x10",
+        "mainloop_span": [
+          "0x1290",
+          "0x2f30"
+        ],
+        "mainloop_instruction_count": 459,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "USHF.L.U32": 1,
+          "UMOV": 2,
+          "S2R": 2,
+          "UISETP.GT.AND": 2,
+          "SHF.L.U32": 5,
+          "IADD3": 15,
+          "LOP3.LUT": 14,
+          "MOV": 2,
+          "LDSM.16.M88.4": 24,
+          "UIADD3": 14,
+          "ISETP.NE.U32.AND": 1,
+          "ISETP.NE.AND": 1,
+          "SEL": 1,
+          "LDC.64": 1,
+          "SHF.R.U32.HI": 4,
+          "IMAD": 10,
+          "SHF.R.S32.HI": 4,
+          "LEA": 8,
+          "IMAD.WIDE": 9,
+          "LDG.E": 16,
+          "IADD.64": 16,
+          "LDS": 3,
+          "LDGSTS.E.BYPASS.LTC128B.128": 12,
+          "LDGDEPBAR": 1,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "FMUL": 64,
+          "FFMA": 64,
+          "CS2R": 32,
+          "BRA.U": 1
+        },
+        "conditional_exit_count": 7,
+        "pre_mainloop_CS2R": 103
+      },
+      "15": {
+        "registers": 246,
+        "instruction_count": 896,
+        "matches_baseline_instruction_text": false,
+        "first_differing_address": "0x10",
+        "mainloop_span": [
+          "0x1080",
+          "0x2d30"
+        ],
+        "mainloop_instruction_count": 460,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "USHF.L.U32": 3,
+          "UMOV": 4,
+          "ULOP3.LUT": 1,
+          "MOV": 5,
+          "IADD3": 12,
+          "UISETP.NE.U32.AND": 1,
+          "SHF.L.U32": 5,
+          "LDSM.16.M88.4": 24,
+          "UIADD3": 21,
+          "IMAD": 5,
+          "PLOP3.LUT": 1,
+          "UISETP.NE.AND": 1,
+          "UIMAD": 2,
+          "UISETP.GT.AND": 2,
+          "SHF.R.S32.HI": 2,
+          "LDC.64": 1,
+          "SHF.R.U32.HI": 3,
+          "LOP3.LUT": 17,
+          "LEA": 7,
+          "IMAD.WIDE": 5,
+          "LDG.E": 20,
+          "USHF.R.S32.HI": 2,
+          "IADD.64": 12,
+          "USEL": 1,
+          "LDS": 3,
+          "LDGSTS.E.BYPASS.LTC128B.128": 8,
+          "LDGDEPBAR": 1,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "CS2R": 32,
+          "FMUL": 64,
+          "FFMA": 64,
+          "BRA.U": 1
+        },
+        "conditional_exit_count": 3,
+        "pre_mainloop_CS2R": 104
+      },
+      "23": {
+        "registers": 238,
+        "instruction_count": 824,
+        "matches_baseline_instruction_text": false,
+        "first_differing_address": "0x10",
+        "mainloop_span": [
+          "0x10a0",
+          "0x2cc0"
+        ],
+        "mainloop_instruction_count": 451,
+        "mainloop_opcode_counts": {
+          "IMMA.16832.S8.S8": 64,
+          "ULOP3.LUT": 1,
+          "MOV": 5,
+          "UIADD3": 26,
+          "ISETP.GT.U32.AND": 1,
+          "UISETP.NE.U32.AND": 1,
+          "SHF.L.U32": 7,
+          "LOP3.LUT": 18,
+          "PLOP3.LUT": 1,
+          "IADD.64": 8,
+          "SEL": 2,
+          "ULEA": 1,
+          "LDC.64": 2,
+          "S2R": 2,
+          "LEA": 8,
+          "IADD3": 13,
+          "LDSM.16.M88.4": 24,
+          "LDC": 2,
+          "ISETP.GT.AND": 2,
+          "SHF.R.U32.HI": 2,
+          "LDS.64": 8,
+          "LDS": 7,
+          "LDGSTS.E.BYPASS.LTC128B.128": 8,
+          "UISETP.NE.AND": 1,
+          "USEL": 1,
+          "IMAD.WIDE.U32": 2,
+          "IMAD": 2,
+          "IMAD.WIDE": 2,
+          "FMUL": 64,
+          "LDGSTS.E.LTC128B": 2,
+          "LDGDEPBAR": 1,
+          "DEPBAR.LE": 1,
+          "BAR.SYNC.DEFER_BLOCKING": 1,
+          "I2FP.F32.S32": 64,
+          "FFMA": 64,
+          "CS2R": 32,
+          "BRA": 1
+        },
+        "conditional_exit_count": 0,
+        "pre_mainloop_CS2R": 104
+      }
+    }
+  },
+  "passed": true
+}

@@ -1,0 +1,58 @@
+# Remaining CUTLASS/CuTe gap: static evidence
+
+Historical static investigation; the [measured ablation report](report.md) supersedes its untested hypotheses. Full instruction dumps and binaries are not published. Public summary files retain resources, opcode counts and original hashes; they are derived, not original raw audits.
+
+CPU-only review of the current repository binaries and source. No GPU calls, builds, or repository edits were performed by this audit. The separate ablation agent built variants in this experiment directory; this report only reads their SASS.
+
+The matched pairs have the same tensor operations, scale arithmetic, major memory-operation counts, pipeline depth, block shape, and per-CTA shared-memory demand. The residual difference cannot be attributed to extra FP32 scale FMAs, a different tensor instruction, local-memory spills, or a different resident-CTA limit. Actual generated code differs in setup, epilogue control flow, address generation, and register allocation. These are candidates for measured ablation, not a static proof of the latency cause.
+
+## Matched resources
+
+| CUTLASS / CuTe | Shape / stages / threads | Registers per thread | Nominal registers/CTA | Dynamic shared B (both) | Static shared B (both) | Local / stack B |
+|---|---|---|---|---:|---:|---|
+| 11 / 3 | 128x64x128 / 3 / 128 | 252 / 236 | 32256 / 30208 | 73728 | 1024 | 0 / 0 |
+| 15 / 7 | 128x128x128 / 3 / 256 | 250 / 248 | 64000 / 63488 | 98304 | 1024 | 0 / 0 |
+| 23 / 15 | 128x128x128 / 3 / 256 | 238 / 234 | 60928 / 59904 | 101376 | 1024 | 0 / 0 |
+
+Prior device query `/home/pengcuo/spark/experiments/grain-m256-root-cause/occupancy.json` reports GB10: 48 SMs, 102,400 shared bytes/SM, 65,536 registers/SM. Each matched kernel requests more than half the SM shared capacity, so none can fit two CTAs/SM regardless of the small register differences. Prior CuTe driver queries report one CTA/SM for these configs. No new CUTLASS occupancy API was invoked here; its one-CTA upper bound follows from the same shared resource limit and known valid launches.
+
+## Arithmetic and mainloop
+
+For every pair, the compiled static body contains 64 `IMMA.16832.S8.S8`, 64 `I2FP.F32.S32`, 64 `FMUL`, 64 `FFMA`, 30 `LDSM.16.M88.4`, and 32 `F2FP.BF16.F32.PACK_AB` instructions. Scale conversion/multiply/FMA instructions are all parity-predicated: `@!P0` for register-scale pairs, `@!P1` for the async pair. They implement the same per-K256 operation and do not indicate a floating-point GEMM fallback.
+
+CL11/CuTe3 each have 36 operand `LDGSTS.E.BYPASS.LTC128B.128` and 16 global scale `LDG.E` sites. CL15/CuTe7 each have 24 operand copies and 20 global scale loads. CL23/CuTe15 each have 24 operand copies and 6 async scale-copy sites. These are static instruction sites, not measured dynamic counts.
+
+| Pair | Mainloop backedge span, CUTLASS | Mainloop span, CuTe | Static sites inside span, CL/CuTe |
+|---|---|---|---|
+| 11/3 | 0x1790–0x33c0 | 0xfb0–0x2d10 | 452/471 |
+| 15/7 | 0x1540–0x3120 | 0xe50–0x2ab0 | 447/455 |
+| 23/15 | 0x1590–0x3170 | 0xe40–0x2af0 | 447/460 |
+
+CUTLASS actually has fewer static sites in each mainloop span. Uniform-register and general-register address/control operations differ, as does their interleaving with MMA and scale math. CL23 ends its loop with a lane-predicated `@P0 BRA`, while CuTe15 uses uniform `BRA.U UP0`; both predicates are based on the CTA-uniform K loop. The original local `static-comparison.json` retained SASS encoding/control fields; those instruction arrays are omitted from the published summary. Static counts or register numbers do not establish stall time, dependency latency, register-bank pressure, or issue utilization.
+
+## Concrete differences and ablation targets
+
+1. **BF16 shared-store loop guards and scheduling.** In CL11, R6 is loaded from `SR_TID.X` at 0x1670 and remains the thread index for seven tail comparisons against 895, 767, 639, 511, 383, 255, 127. These are the unrolled `v < BM*BN/8` loop bounds, not tensor-edge/residue checks. All are false for the real 128-thread block. Their `@P0 EXIT` sites begin at 0x3960. CL15 analogously uses R9 from `SR_TID.X` at 0x1470 and checks 767/511/255, all false for its 256-thread block. Both kernels have correct launch bounds; absence of launch bounds is not the explanation.
+
+   CL11 emits one `LDS.128` then one `STG.E.128` around each guard; CuTe3 issues eight LDS sites then eight STG sites. CL15 batches the first five loads/stores, then serializes the remaining three around guards; CuTe7 batches all eight. The separate `bf16_fixed_store_loop` variant was independently inspected: all seven/three conditional EXITs vanish, and both variants issue all eight LDS before all eight STG. Registers and main arithmetic remain unchanged per the ablation audit. The `bf16_uint4_i32_address` variant retains the guards, so the two experiments isolate different source changes.
+
+   Source: `grain_cutlass_epilogue.hpp:93` uses an induction variable with runtime thread_idx. CuTe `grain_cute.cu:365` uses direct threadIdx.x. The fixed-trip experiment keeps the tensor address path and changes only loop expression. Performance causality awaits paired timing.
+
+2. **Async direct-store tail synchronization.** CL23 unconditionally drains async copies and synchronizes before the epilogue: `LDGDEPBAR` 0x3190, `DEPBAR.LE SB0,0` 0x3270, `BAR.SYNC.DEFER_BLOCKING` 0x3340. CuTe15 has no corresponding tail drain/barrier. Core-loop sync sites match. Source: `grain_cutlass_collective.hpp:421` versus the CuTe direct branch `grain_cute.cu:372`. This is an actual extra synchronization operation, but its latency contribution is not known from static inspection. The independent no-direct-tail-barrier variant is the direct ablation; correctness/sanitizer validation is required for changed async lifetime.
+
+3. **FP32 accumulator initialization placement / generated duplicate zeroing.** CL kernel `grain_cutlass_kernel.hpp:91` clears FP32 accumulators before collective prefetch; CuTe `grain_cute.cu:209` initializes after prefetch. CL11 has CS2R zero writes to R8–R70 in 0x0590–0x0e80 and again in 0x1150–0x1340 after its K>0 path branch. For example R40 is cleared at 0x06e0 and again at 0x1240, with no intervening use of R40 on the valid path. The corresponding CL prologues have 30/32/29 more CS2R sites than CuTe for configs 11/15/23. The source contains a single FP32 clear; the duplicated zero initialization is a compiler/control-flow result, not duplicated source statements. Moving the clear after prefetch is a separate safe-for-current-call ablation: prefetch does not read accum, src_accum is used only in static shape assertions, and the first value read is the group FMA. Keep INT32 initial/per-group clears.
+
+4. **Runtime grouped branch vs two compiled traversals.** CL begins with K>4096 and branches around 75/74/74 grouped-address instructions for small K. CuTe chooses Grouped=false/true on the host and compiles separate kernels. The optimized rectangular measurements use K<=3072, so expensive reciprocal/division instructions in CL grouped setup are bypassed. The branch and changes to overall register allocation may remain relevant; total static code size must not be described as executed work. A separately compiled Grouped=false CL instance isolates this difference.
+
+5. **Address provenance / expression.** CL passes groups=K/256 and columns=N independently and carries dA/dB/dD parameters; CuTe derives some of these from shape MNK. The two implementations therefore give the compiler different equality and range information even when runtime addresses match. BF16 output tensor indexing versus direct linear address is already isolated by the i32-address ablation. A separate scale-parameter-source experiment is possible; do not combine it with loop/synchronization changes.
+
+## Published evidence
+
+- [Static comparison summary](static-comparison.summary.json): resource/opcode/region counts and original hashes; per-instruction arrays omitted.
+- [Variant binary audit summary](binary-audit.summary.json): resource/opcode counts, code-equivalence results and original hashes; per-instruction arrays omitted.
+- [FP32 clearing evidence](positive-k-clear-evidence.json): original register-level evidence JSON.
+- [CL11/CuTe3 opcodes](cl11-cu3-opcodes.csv), [CL15/CuTe7 opcodes](cl15-cu7-opcodes.csv), [CL23/CuTe15 opcodes](cl23-cu15-opcodes.csv).
+- [CUTLASS resources](cutlass-resource.txt), [CuTe resources](cute-resource.txt): original resource outputs.
+- [Ablation sources and reproduction](../../../../experiments/cutlass/README.md).
+
+Source line numbers above describe the measured version, not necessarily current source. The [original report](static-report.original.txt) is preserved verbatim. This static report does not by itself establish a runtime bottleneck.
