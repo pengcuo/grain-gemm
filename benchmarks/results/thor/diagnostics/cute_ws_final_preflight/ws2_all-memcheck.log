@@ -1,0 +1,68 @@
+========= COMPUTE-SANITIZER
+library /tmp/thor-ws2-race-syncsf/probe.so
+========= CUDA API Error: Failed to load TileIR compiler
+=========     Saved host backtrace up to driver entry point at error
+=========         Host Frame:  [0x41eff] in libcudart.so.13
+=========         Host Frame:  [0x47683] in libcudart.so.13
+=========         Host Frame:  [0x8abdb] in libc.so.6
+=========         Host Frame:  [0x857c3] in libcudart.so.13
+=========         Host Frame:  [0x452c7] in libcudart.so.13
+=========         Host Frame: cudaGetDeviceCount [0x50533] in libcudart.so.13
+=========         Host Frame: c10::cuda::device_count_ensure_non_zero() [0x40e23] in libc10_cuda.so
+=========         Host Frame: at::cuda::detail::CUDAHooks::init() const [0xe28223] in libtorch_cuda.so
+=========         Host Frame: THCPModule_initExtension(_object*, _object*) [0xdaed17] in libtorch_python.so
+=========         Host Frame:  [0x1042e7] in python
+=========         Host Frame: PyObject_Vectorcall [0xc4aeb] in python
+=========         Host Frame: _PyEval_EvalFrameDefault [0x164803] in python
+=========         Host Frame: PyObject_CallMethod [0xc5607] in python
+=========         Host Frame: torch::utils::device_lazy_init(c10::DeviceType) [0xcf6a6f] in libtorch_python.so
+=========         Host Frame: torch::autograd::THPVariable_full(_object*, _object*, _object*) [0x3c4833] in libtorch_python.so
+=========         Host Frame:  [0x1047d3] in python
+=========         Host Frame: _PyObject_MakeTpCall [0xc3fef] in python
+=========         Host Frame: _PyEval_EvalFrameDefault [0x164803] in python
+=========         Host Frame: PyEval_EvalCode [0x162b53] in python
+=========         Host Frame:  [0x19bda3] in python
+=========         Host Frame:  [0x280c43] in python
+=========         Host Frame: _PyRun_SimpleFileObject [0x280817] in python
+=========         Host Frame: _PyRun_AnyFileObject [0x2805e3] in python
+=========         Host Frame: Py_RunMain [0x28b5db] in python
+=========         Host Frame: Py_BytesMain [0x28b197] in python
+=========         Host Frame:  [0x284c3] in libc.so.6
+=========         Host Frame: __libc_start_main [0x28597] in libc.so.6
+=========         Host Frame: _start [0x1f66ef] in python
+=========         Host Frame: _lazy_init in __init__.py:481
+=========         Host Frame: <module> in race_all.py:16
+========= 
+launch 256 256 256 2
+PASS
+launch 256 256 256 3
+PASS
+launch 256 512 512 2
+PASS
+launch 256 512 512 3
+PASS
+launch 256 512 4352 2
+PASS
+launch 256 512 4352 3
+PASS
+launch 1024 1024 768 2
+PASS
+launch 1024 1024 768 3
+PASS
+launch 768 1152 768 2
+PASS
+launch 768 1152 768 3
+PASS
+launch 2816 384 768 2
+PASS
+launch 2816 384 768 3
+PASS
+launch 256 128 768 2
+PASS
+launch 256 128 768 3
+PASS
+launch 256 384 4352 2
+PASS
+launch 256 384 4352 3
+PASS
+========= ERROR SUMMARY: 1 error

@@ -1,0 +1,3144 @@
+{
+  "complete": true,
+  "mode": "comparison",
+  "gpu": "NVIDIA Thor",
+  "compute_capability": [
+    11,
+    0
+  ],
+  "timestamp_utc": "2026-10-10T14:55:16.716018+00:00",
+  "expected_shapes": [
+    [
+      1024,
+      1024,
+      1024
+    ],
+    [
+      2048,
+      2048,
+      2048
+    ],
+    [
+      3072,
+      3072,
+      3072
+    ],
+    [
+      4096,
+      4096,
+      4096
+    ],
+    [
+      6144,
+      6144,
+      6144
+    ],
+    [
+      8192,
+      8192,
+      8192
+    ],
+    [
+      12288,
+      12288,
+      12288
+    ],
+    [
+      16384,
+      16384,
+      16384
+    ],
+    [
+      256,
+      1024,
+      1536
+    ],
+    [
+      256,
+      1536,
+      1024
+    ],
+    [
+      256,
+      2048,
+      1536
+    ],
+    [
+      1024,
+      1024,
+      1536
+    ],
+    [
+      1024,
+      1536,
+      1024
+    ],
+    [
+      1024,
+      4096,
+      1536
+    ],
+    [
+      2048,
+      2048,
+      1536
+    ],
+    [
+      2048,
+      151936,
+      1536
+    ]
+  ],
+  "software": {
+    "torch": "2.11.0a0+a6c236b9fd.nv26.03.46836102",
+    "triton": "3.6.0",
+    "cuda": "13.2",
+    "python": "3.12.3"
+  },
+  "seed": 2026,
+  "rounds": 5,
+  "rep_ms": 20,
+  "timing": "CUDA graphs; rotating order; median of round medians; repeated inputs; no cache flush",
+  "scope": "Prequantized G256 GEMM including scaling and BF16 conversion; excludes quantization, compilation, warmup and host dispatch",
+  "scale_layout": {
+    "a": "FP32 contiguous [M,K/256]",
+    "b": "FP32 contiguous [K/256,N]"
+  },
+  "source_hashes": {
+    "gemm.py": "16e3da62905bfe50497f1f25265c4cf873526904f1ca919d4059585615e132ea",
+    "__init__.py": "22c5685605c9d04d8168009cbead08dcb1d9000aaf606c4df633bb1f40c03d42",
+    "kernels/cuda.py": "91817c8e7891c94218519e5d8ab77fcf863a7c9598af07e12e09a4d592573604",
+    "kernels/__init__.py": "df3df411d10614aabefa0a3893e37899c67b80d984a70f2d82b6f334658f69ab",
+    "kernels/cutlass.py": "3f312dedce9cb933ece9e5ad5868d38d37471d1592dabb8f528cc2002659a806",
+    "kernels/_native.py": "289954afe2fd41d9484e0b15dd3f63f47269b005a302e4bfddbc64b0ab484f0b",
+    "kernels/triton.py": "0e4834f409c64c3cffb4481a985948239c8d737bb53b805270eabe15f029da21",
+    "baselines/__init__.py": "b045e960f98bbc0d0ffc1d9ad4ad3e9ecff31d859fd5761dd0f20423dd14c211",
+    "baselines/sglang.py": "cde6cf5e9cef6bb66a8da2af5cdb7a74bd744eee4ca50686bc39dae661953b81",
+    "kernels/configs/gb10_sm121_g256.json": "a88ae37bff252d6da04eb80ac7d1bb77e05e31f31bfa36a99a60f09674b3c529",
+    "kernels/configs/gb10_sm121_g256_cutlass.json": "5fe34e1093543dc239594c47a762a3a5eab8c58904560d66a706d02b520c9422",
+    "kernels/configs/thor_sm110_g256.json": "7ae2f0f4b21155550176b876d1bec99676aad904ff20a3f2e58d5773a555d8bb",
+    "kernels/_native/cutlass_build.json": "c17f33efa8bfb4ecadf2de9cc4191b2d5b088155c9222b86d02ac5ecabac2990",
+    "kernels/_native/build.json": "3df5e7b0c43cfbf709b05154a6e71344061b38dace4bcea915191522a6d5c781",
+    "kernels/csrc/sm12x/int8_g256_cute.cu": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148",
+    "kernels/csrc/sm110/int8_g256_cute.cu": "56127a18677b550855d63df921a8c537f426521207135cfbd02ce5f6f071c896",
+    "kernels/csrc/sm12x/cutlass/int8_g256.cu": "8d2f5dd34bd931d6be93264585d41edf747b5dc07baa0a94d1bcb4285a8651ac",
+    "kernels/csrc/sm12x/cutlass/kernel.hpp": "e979950bb2e1cb613e47ea335f1d7579a5c575a24faa1833a48728afbe3e028c",
+    "kernels/csrc/sm12x/cutlass/collective.hpp": "482a26e13af8acd2e097deabcc4b29cefe5c3664f5223ec952638937a26ff80c",
+    "kernels/csrc/sm12x/cutlass/epilogue.hpp": "a4a7d9c0b20322880eee6afe5a4f690096a0dac7a0012ee16a5e243dfd11bfcd"
+  },
+  "script_sha256": "e730b8323808c6b7dd759d8a27b7d9deff0c279387ac4445aab9ad64e2e7e9dd",
+  "native_library_sha256": "ac3b9e5deb8bfb88be3e49c141a471eb75d028ed388552983e26d27ba1bd7fa0",
+  "native_build": {
+    "architecture": "sm_110",
+    "cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+    "tested_cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+    "nvcc_version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Mon_Mar_02_09:52:54_PM_PST_2026\nCuda compilation tools, release 13.2, V13.2.51\nBuild cuda_13.2.r13.2/compiler.37434383_0",
+    "source_sha256": {
+      "sm110/int8_g256_cute.cu": "56127a18677b550855d63df921a8c537f426521207135cfbd02ce5f6f071c896",
+      "sm12x/int8_g256_cute.cu": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148"
+    },
+    "compiler_architecture": "sm_110a"
+  },
+  "gpu_properties": {
+    "multiprocessor_count": 20,
+    "shared_memory_per_block_optin": 232448
+  },
+  "cases": [
+    {
+      "shape": [
+        1024,
+        1024,
+        1024
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.03530613013676234,
+            0.035600718329934514,
+            0.03543664043059977,
+            0.03543396621453958,
+            0.03565132489768408
+          ],
+          "median_ms": 0.03543664043059977,
+          "effective_tops": 60.60065575927547,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.03682711213741248,
+            0.03710204005241394,
+            0.037189460936046775,
+            0.037102703694944034,
+            0.037087662119260977
+          ],
+          "median_ms": 0.03710204005241394,
+          "effective_tops": 57.88047355256628,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.03531890509701065,
+            0.03559262167193933,
+            0.035557378239992284,
+            0.035585060177079166,
+            0.03564861085679796
+          ],
+          "median_ms": 0.035585060177079166,
+          "effective_tops": 60.347899857795504,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            0.04870061110464485,
+            0.04898581633696685,
+            0.04900926577893994,
+            0.04874766075004966,
+            0.048949293829315337
+          ],
+          "median_ms": 0.048949293829315337,
+          "effective_tops": 43.87159609468951,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            0.018042891065060105,
+            0.01800624469405043,
+            0.01827887438111386,
+            0.018286852563801165,
+            0.01801326606847063
+          ],
+          "median_ms": 0.018042891065060105,
+          "effective_tflops": 119.02103938091066,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.04902587582667668,
+            0.04890682042571547,
+            0.04902975327699516,
+            0.04904380489040065,
+            0.04906077004949967
+          ],
+          "median_ms": 0.04902975327699516,
+          "effective_tops": 43.79960135364586,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          1024,
+          1
+        ],
+        "b": [
+          1,
+          1024
+        ],
+        "scale_a": [
+          4,
+          1
+        ],
+        "scale_b": [
+          1024,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.1983574444485694,
+            0.19856323285049265,
+            0.19851132443076686,
+            0.1985063245219569,
+            0.1984126241583573
+          ],
+          "median_ms": 0.1985063245219569,
+          "effective_tops": 86.54570188316455,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.1983670106868154,
+            0.19836749026649875,
+            0.19849999745686847,
+            0.19836696501701107,
+            0.19851268605983002
+          ],
+          "median_ms": 0.19836749026649875,
+          "effective_tops": 86.6062738451726,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.22480770304233214,
+            0.22482489362175082,
+            0.22486257553100586,
+            0.22482430180416832,
+            0.22503573099772134
+          ],
+          "median_ms": 0.22482489362175082,
+          "effective_tops": 76.41444373550422,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            0.2694659165933099,
+            0.2694334265303938,
+            0.26955155923332963,
+            0.26952811463238446,
+            0.2695420053270128
+          ],
+          "median_ms": 0.26952811463238446,
+          "effective_tops": 63.7405459813794,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            0.11364979743957519,
+            0.1133155987892316,
+            0.11271893395317925,
+            0.11330064952882946,
+            0.11377066657656715
+          ],
+          "median_ms": 0.1133155987892316,
+          "effective_tflops": 151.6108052868764,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.3544531379427229,
+            0.3546175870028409,
+            0.35471300645308057,
+            0.35456057461825286,
+            0.3545634405953544
+          ],
+          "median_ms": 0.3545634405953544,
+          "effective_tops": 48.45358324353167,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          2048,
+          1
+        ],
+        "b": [
+          1,
+          2048
+        ],
+        "scale_a": [
+          8,
+          1
+        ],
+        "scale_b": [
+          2048,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        3072,
+        3072,
+        3072
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.7801273266474406,
+            0.7730400085449218,
+            0.7757279968261719,
+            0.7770265579223633,
+            0.7752883148193359
+          ],
+          "median_ms": 0.7757279968261719,
+          "effective_tops": 74.74534725216685,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.7753209686279297,
+            0.7763750457763672,
+            0.7752409744262696,
+            0.7941593329111736,
+            0.7762438201904296
+          ],
+          "median_ms": 0.7762438201904296,
+          "effective_tops": 74.69567806900638,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.7376693443015769,
+            0.7349676909270111,
+            0.7351667697613056,
+            0.7374743708857783,
+            0.7341078299063224
+          ],
+          "median_ms": 0.7351667697613056,
+          "effective_tops": 78.86925916799211,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 23
+          },
+          "round_medians_ms": [
+            0.8280133406321208,
+            0.8272960186004639,
+            0.8274153073628743,
+            0.8283040005227793,
+            0.8285613059997559
+          ],
+          "median_ms": 0.8280133406321208,
+          "effective_tops": 70.02551245338078,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            0.498294561337202,
+            0.5016450380024158,
+            0.5027995965419672,
+            0.5022796154022218,
+            0.5007545883591111
+          ],
+          "median_ms": 0.5016450380024158,
+          "effective_tflops": 115.58383738208286,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            1.1512828153722428,
+            1.1513487310970532,
+            1.151214094722972,
+            1.1512752981746899,
+            1.1507011862362133
+          ],
+          "median_ms": 1.1512752981746899,
+          "effective_tops": 50.36333063684134,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          3072,
+          1
+        ],
+        "b": [
+          1,
+          3072
+        ],
+        "scale_a": [
+          12,
+          1
+        ],
+        "scale_b": [
+          3072,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        4096,
+        4096,
+        4096
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 20
+          },
+          "round_medians_ms": [
+            1.6706777919422495,
+            1.6598479747772217,
+            1.6521706581115723,
+            1.6635119915008545,
+            1.6531946659088135
+          ],
+          "median_ms": 1.6598479747772217,
+          "effective_tops": 82.8021334245665,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 20
+          },
+          "round_medians_ms": [
+            1.6575039227803547,
+            1.728817506269975,
+            1.6559621637517756,
+            1.6632706324259439,
+            1.655154835094105
+          ],
+          "median_ms": 1.6575039227803547,
+          "effective_tops": 82.9192326986805,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            1.748533855785023,
+            1.7523869601162998,
+            1.748442216352983,
+            1.7485673210837624,
+            1.7479272322221235
+          ],
+          "median_ms": 1.748533855785023,
+          "effective_tops": 78.60239767007275,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            1.961257553100586,
+            1.9606767654418946,
+            1.9607199668884276,
+            1.9604239463806152,
+            1.9595376014709474
+          ],
+          "median_ms": 1.9606767654418946,
+          "effective_tops": 70.09771110386174,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            1.3226666768391926,
+            1.1997482935587565,
+            1.093118985493978,
+            1.0999896666582893,
+            1.0909191237555609
+          ],
+          "median_ms": 1.0999896666582893,
+          "effective_tflops": 124.94567688943141,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            2.621113095964704,
+            2.6196937561035156,
+            2.6195543834141324,
+            2.6195588793073386,
+            2.619378226143973
+          ],
+          "median_ms": 2.6195588793073386,
+          "effective_tops": 52.46644943073067,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          4096,
+          1
+        ],
+        "b": [
+          1,
+          4096
+        ],
+        "scale_a": [
+          16,
+          1
+        ],
+        "scale_b": [
+          4096,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        6144,
+        6144,
+        6144
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 20
+          },
+          "round_medians_ms": [
+            5.261200110117595,
+            5.25059731801351,
+            5.2547520001729335,
+            5.255088011423747,
+            5.252501328786215
+          ],
+          "median_ms": 5.2547520001729335,
+          "effective_tops": 88.27371262292388,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 20
+          },
+          "round_medians_ms": [
+            5.263658682505289,
+            5.247957388559977,
+            5.265365282694499,
+            5.2639946937561035,
+            5.2620480855305996
+          ],
+          "median_ms": 5.263658682505289,
+          "effective_tops": 88.12434391114871,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            5.854005495707193,
+            5.8537708918253575,
+            5.8544212977091465,
+            5.85423469543457,
+            5.85366948445638
+          ],
+          "median_ms": 5.854005495707193,
+          "effective_tops": 79.23745003453637,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 23
+          },
+          "round_medians_ms": [
+            6.3523251215616865,
+            6.351696014404297,
+            6.351839701334635,
+            6.353141148885091,
+            6.353381156921387
+          ],
+          "median_ms": 6.3523251215616865,
+          "effective_tops": 73.02152504655858,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            3.8903518676757813,
+            3.878553581237793,
+            3.8897184371948246,
+            3.8930559158325195,
+            3.9177343368530275
+          ],
+          "median_ms": 3.8903518676757813,
+          "effective_tflops": 119.23252285277796,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            8.490375995635986,
+            8.492767810821533,
+            8.49015188217163,
+            8.494127750396729,
+            8.491767883300781
+          ],
+          "median_ms": 8.491767883300781,
+          "effective_tops": 54.62425190403312,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          6144,
+          1
+        ],
+        "b": [
+          1,
+          6144
+        ],
+        "scale_a": [
+          24,
+          1
+        ],
+        "scale_b": [
+          6144,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        8192,
+        8192,
+        8192
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 20
+          },
+          "round_medians_ms": [
+            11.983359813690186,
+            11.984896183013916,
+            11.981168270111084,
+            11.977391719818115,
+            11.977519989013672
+          ],
+          "median_ms": 11.981168270111084,
+          "effective_tops": 91.7699846115095,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 20
+          },
+          "round_medians_ms": [
+            11.98364782333374,
+            11.972032070159912,
+            11.988272190093994,
+            11.98147201538086,
+            11.98468828201294
+          ],
+          "median_ms": 11.98364782333374,
+          "effective_tops": 91.7509963564772,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            13.911136150360107,
+            13.911200046539307,
+            13.911295890808105,
+            13.912352085113525,
+            13.911871910095215
+          ],
+          "median_ms": 13.911295890808105,
+          "effective_tops": 79.0373259548381,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            15.029008388519287,
+            15.02788782119751,
+            15.029920101165771,
+            15.028783798217773,
+            15.030159950256348
+          ],
+          "median_ms": 15.029008388519287,
+          "effective_tops": 73.15929297211125,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            9.798304080963135,
+            9.76095199584961,
+            9.80620002746582,
+            9.823456287384033,
+            9.717688083648682
+          ],
+          "median_ms": 9.798304080963135,
+          "effective_tflops": 112.21448310756266,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            21.32489585876465,
+            21.32334327697754,
+            21.334768295288086,
+            21.32534408569336,
+            21.325807571411133
+          ],
+          "median_ms": 21.32534408569336,
+          "effective_tops": 51.55891615899576,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          8192,
+          1
+        ],
+        "b": [
+          1,
+          8192
+        ],
+        "scale_a": [
+          32,
+          1
+        ],
+        "scale_b": [
+          8192,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        12288,
+        12288,
+        12288
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 25
+          },
+          "round_medians_ms": [
+            39.97038459777832,
+            39.95908737182617,
+            39.96881675720215,
+            39.962223052978516,
+            39.97539138793945
+          ],
+          "median_ms": 39.96881675720215,
+          "effective_tops": 92.8436727633506,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 25
+          },
+          "round_medians_ms": [
+            39.963247299194336,
+            39.96012878417969,
+            39.95788764953613,
+            39.96646308898926,
+            39.964176177978516
+          ],
+          "median_ms": 39.963247299194336,
+          "effective_tops": 92.85661187545216,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            46.18227195739746,
+            46.18196678161621,
+            46.18204689025879,
+            46.181297302246094,
+            46.182111740112305
+          ],
+          "median_ms": 46.18204689025879,
+          "effective_tops": 80.35269100484008,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            48.931983947753906,
+            48.88377571105957,
+            48.92668914794922,
+            48.87996864318848,
+            48.9323673248291
+          ],
+          "median_ms": 48.92668914794922,
+          "effective_tops": 75.84514317988635,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            32.543039321899414,
+            33.0031681060791,
+            32.58628845214844,
+            32.78579330444336,
+            32.77403259277344
+          ],
+          "median_ms": 32.77403259277344,
+          "effective_tflops": 113.22536319690577,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            68.29801559448242,
+            68.29452896118164,
+            68.29471969604492,
+            68.30803298950195,
+            68.29390335083008
+          ],
+          "median_ms": 68.29471969604492,
+          "effective_tops": 54.335851442976235,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          12288,
+          1
+        ],
+        "b": [
+          1,
+          12288
+        ],
+        "scale_a": [
+          48,
+          1
+        ],
+        "scale_b": [
+          12288,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        16384,
+        16384,
+        16384
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 25
+          },
+          "round_medians_ms": [
+            94.49980545043945,
+            94.51643371582031,
+            94.53100967407227,
+            94.54254531860352,
+            93.53435134887695
+          ],
+          "median_ms": 94.51643371582031,
+          "effective_tops": 93.06416541968717,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 25
+          },
+          "round_medians_ms": [
+            94.49505615234375,
+            94.49219131469727,
+            94.52911758422852,
+            94.51606369018555,
+            93.50118637084961
+          ],
+          "median_ms": 94.49505615234375,
+          "effective_tops": 93.085219273557,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            108.81273651123047,
+            108.80681610107422,
+            108.80995178222656,
+            108.81145858764648,
+            108.93617630004883
+          ],
+          "median_ms": 108.81145858764648,
+          "effective_tops": 80.83792953775028,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            116.74552154541016,
+            116.74477005004883,
+            116.75091171264648,
+            116.76055908203125,
+            117.03275299072266
+          ],
+          "median_ms": 116.75091171264648,
+          "effective_tops": 75.340679513128,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            83.53902435302734,
+            81.37505722045898,
+            81.60028839111328,
+            82.76192092895508,
+            83.87737655639648
+          ],
+          "median_ms": 82.76192092895508,
+          "effective_tflops": 106.28188572083516,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            168.49691009521484,
+            168.4872283935547,
+            168.46454620361328,
+            168.48865509033203,
+            168.4927520751953
+          ],
+          "median_ms": 168.48865509033203,
+          "effective_tops": 52.205847435200546,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          16384,
+          1
+        ],
+        "b": [
+          1,
+          16384
+        ],
+        "scale_a": [
+          64,
+          1
+        ],
+        "scale_b": [
+          16384,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        256,
+        1024,
+        1536
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.013451783956881768,
+            0.013545712417871022,
+            0.013609543878432603,
+            0.01358200281893881,
+            0.013584000031254342
+          ],
+          "median_ms": 0.01358200281893881,
+          "effective_tops": 59.292166165440406,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.013448118108563719,
+            0.01364898821886848,
+            0.01359831063278959,
+            0.013583981328540377,
+            0.01358250479831874
+          ],
+          "median_ms": 0.013583981328540377,
+          "effective_tops": 59.283530249561345,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 128,
+            "block_n": 128,
+            "num_warps": 8,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.015043327203219818,
+            0.014992355165027437,
+            0.014941428388868059,
+            0.01500430502699095,
+            0.01497437140184962
+          ],
+          "median_ms": 0.014992355165027437,
+          "effective_tops": 53.71446708243229,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 23
+          },
+          "round_medians_ms": [
+            0.016470823568456312,
+            0.016525761712165105,
+            0.016468933956351822,
+            0.01652537203254588,
+            0.016504484573807612
+          ],
+          "median_ms": 0.016504484573807612,
+          "effective_tops": 48.793184930961736,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            0.009821333235977961,
+            0.00981450485828829,
+            0.009812212036338813,
+            0.009796314821468564,
+            0.009809540403492256
+          ],
+          "median_ms": 0.009812212036338813,
+          "effective_tflops": 82.07184730798788,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.020406494649608482,
+            0.02043641090393066,
+            0.02042036790114183,
+            0.020405740832965636,
+            0.020412366781661757
+          ],
+          "median_ms": 0.020412366781661757,
+          "effective_tops": 39.45188603623752,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          1536,
+          1
+        ],
+        "b": [
+          1,
+          1536
+        ],
+        "scale_a": [
+          6,
+          1
+        ],
+        "scale_b": [
+          1024,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        256,
+        1536,
+        1024
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.014775529328514548,
+            0.014769760679069668,
+            0.014808067396366396,
+            0.014804224513270743,
+            0.014809617705622538
+          ],
+          "median_ms": 0.014804224513270743,
+          "effective_tops": 54.39706532943421,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 9
+          },
+          "round_medians_ms": [
+            0.01677704534747384,
+            0.016768157335698457,
+            0.01676196699819018,
+            0.016777525199823017,
+            0.016787463260821305
+          ],
+          "median_ms": 0.01677704534747384,
+          "effective_tops": 48.00048824575997,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.014802510945558857,
+            0.014809582078440391,
+            0.014809519262085818,
+            0.014805535423537769,
+            0.014804198635611564
+          ],
+          "median_ms": 0.014805535423537769,
+          "effective_tops": 54.3922489098049,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            0.024662274394543642,
+            0.024662830967746994,
+            0.02466081241665758,
+            0.02466279344485544,
+            0.02466550212221097
+          ],
+          "median_ms": 0.02466279344485544,
+          "effective_tops": 32.65268266551467,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            0.00880319845055482,
+            0.008801020315092492,
+            0.00884008164308509,
+            0.008803751614112752,
+            0.008800014762574101
+          ],
+          "median_ms": 0.00880319845055482,
+          "effective_tflops": 91.47883834758326,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.020392512136121786,
+            0.020378057912687784,
+            0.02039691638512387,
+            0.02038071178399717,
+            0.020407011607205275
+          ],
+          "median_ms": 0.020392512136121786,
+          "effective_tops": 39.49029735152345,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          1024,
+          1
+        ],
+        "b": [
+          1,
+          1024
+        ],
+        "scale_a": [
+          4,
+          1
+        ],
+        "scale_b": [
+          1536,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        256,
+        2048,
+        1536
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.025964026357613357,
+            0.02600090331792084,
+            0.02601832045605902,
+            0.02593520274414823,
+            0.026021583768345367
+          ],
+          "median_ms": 0.02600090331792084,
+          "effective_tops": 61.94449155502619,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.0259728304883267,
+            0.02598917270135023,
+            0.02601902108443411,
+            0.026024794726638323,
+            0.026000587218398347
+          ],
+          "median_ms": 0.026000587218398347,
+          "effective_tops": 61.94524463894838,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.027671024481227442,
+            0.02769991148228182,
+            0.027742056089026905,
+            0.027731319699125026,
+            0.02773216117646303
+          ],
+          "median_ms": 0.027731319699125026,
+          "effective_tops": 58.07919541783718,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 23
+          },
+          "round_medians_ms": [
+            0.033093972786052805,
+            0.03307788942489156,
+            0.03316482053984196,
+            0.03316448199859713,
+            0.03315905717924643
+          ],
+          "median_ms": 0.03315905717924643,
+          "effective_tops": 48.57233205677661,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            0.018098338561899522,
+            0.018105145854641166,
+            0.01812444479519606,
+            0.01811957025082312,
+            0.01818349232930623
+          ],
+          "median_ms": 0.01811957025082312,
+          "effective_tflops": 88.88802072592391,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.03753187030141804,
+            0.037507026091865875,
+            0.037524240058765077,
+            0.03753964168088446,
+            0.037590128807288764
+          ],
+          "median_ms": 0.03753187030141804,
+          "effective_tops": 42.91320211503415,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          1536,
+          1
+        ],
+        "b": [
+          1,
+          1536
+        ],
+        "scale_a": [
+          6,
+          1
+        ],
+        "scale_b": [
+          2048,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        1024,
+        1024,
+        1536
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.0498260217554429,
+            0.04988314566597481,
+            0.0498830497264862,
+            0.0498715059922716,
+            0.0498418949152294
+          ],
+          "median_ms": 0.0498715059922716,
+          "effective_tops": 64.59049928227917,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.04774569168551811,
+            0.04775906489445613,
+            0.04776059801333418,
+            0.04780713502351228,
+            0.04775837026996377
+          ],
+          "median_ms": 0.04775906489445613,
+          "effective_tops": 67.4474150429591,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.04987479987317579,
+            0.049878962245988256,
+            0.04985590039947886,
+            0.04984701669889431,
+            0.04988954703013102
+          ],
+          "median_ms": 0.04987479987317579,
+          "effective_tops": 64.58623353258756,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 23
+          },
+          "round_medians_ms": [
+            0.06492747491969295,
+            0.06490726333232563,
+            0.06490577350963245,
+            0.06491343752085733,
+            0.06492936483905834
+          ],
+          "median_ms": 0.06491343752085733,
+          "effective_tops": 49.6233999465055,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            0.027190695520297313,
+            0.027269400083101712,
+            0.027075096632055845,
+            0.027091959613052448,
+            0.026673056862571022
+          ],
+          "median_ms": 0.027091959613052448,
+          "effective_tflops": 118.89968529438042,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.07005885669163295,
+            0.06998927542503844,
+            0.07002439839499337,
+            0.07005134880120027,
+            0.0700440458072129
+          ],
+          "median_ms": 0.0700440458072129,
+          "effective_tops": 45.98856954759585,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          1536,
+          1
+        ],
+        "b": [
+          1,
+          1536
+        ],
+        "scale_a": [
+          6,
+          1
+        ],
+        "scale_b": [
+          1024,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        1024,
+        1536,
+        1024
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.049173631975727695,
+            0.04918507855347913,
+            0.04921214863405389,
+            0.04919946670532227,
+            0.04921744032676176
+          ],
+          "median_ms": 0.04919946670532227,
+          "effective_tops": 65.47277211953063,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.04920604974031448,
+            0.04921147936866397,
+            0.04919774400675955,
+            0.04920419698489846,
+            0.04916586342805661
+          ],
+          "median_ms": 0.04920419698489846,
+          "effective_tops": 65.46647784920958,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.049198905497498155,
+            0.04918495602781986,
+            0.049157869105802436,
+            0.049178565494597905,
+            0.049195429019357674
+          ],
+          "median_ms": 0.04918495602781986,
+          "effective_tops": 65.49208807217434,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            0.061467094288470435,
+            0.06146804033699682,
+            0.06147120523114576,
+            0.0614612086507298,
+            0.06145545830160884
+          ],
+          "median_ms": 0.061467094288470435,
+          "effective_tops": 52.4056897318508,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            0.03230314393870448,
+            0.03251741435350525,
+            0.0322521042514157,
+            0.032483054299390954,
+            0.0323619936333328
+          ],
+          "median_ms": 0.0323619936333328,
+          "effective_tflops": 99.53730009643606,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.07210283243700806,
+            0.07210320124327037,
+            0.07212511581533096,
+            0.07210830716423063,
+            0.07210393834997106
+          ],
+          "median_ms": 0.07210393834997106,
+          "effective_tops": 44.674750723949785,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          1024,
+          1
+        ],
+        "b": [
+          1,
+          1024
+        ],
+        "scale_a": [
+          4,
+          1
+        ],
+        "scale_b": [
+          1536,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        1024,
+        4096,
+        1536
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.16146419494132686,
+            0.16142894000541874,
+            0.16142035693657109,
+            0.16141112257794638,
+            0.1614265984636012
+          ],
+          "median_ms": 0.1614265984636012,
+          "effective_tops": 79.81895183714296,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.1614566508347426,
+            0.16145248723223926,
+            0.16146158978221864,
+            0.16143324317001717,
+            0.16143765488291173
+          ],
+          "median_ms": 0.16145248723223926,
+          "effective_tops": 79.80615293628694,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.17600928034101215,
+            0.1759987215025235,
+            0.17613157204219274,
+            0.17604128803525654,
+            0.17609271832874845
+          ],
+          "median_ms": 0.17604128803525654,
+          "effective_tops": 73.19249950852146,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 23
+          },
+          "round_medians_ms": [
+            0.21287759145100912,
+            0.2128874050673618,
+            0.21291095979752078,
+            0.2129285156085927,
+            0.2127513167678669
+          ],
+          "median_ms": 0.2128874050673618,
+          "effective_tops": 60.52449126298929,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            0.10450586250850133,
+            0.1060459226985245,
+            0.10633684607113109,
+            0.10655223061056698,
+            0.1094619503415088
+          ],
+          "median_ms": 0.10633684607113109,
+          "effective_tflops": 121.17062301604284,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.25306296959901464,
+            0.2530984634008163,
+            0.25304903128208256,
+            0.2530857477432642,
+            0.2531558917118953
+          ],
+          "median_ms": 0.2530857477432642,
+          "effective_tops": 50.91121093500188,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          1536,
+          1
+        ],
+        "b": [
+          1,
+          1536
+        ],
+        "scale_a": [
+          6,
+          1
+        ],
+        "scale_b": [
+          4096,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        2048,
+        2048,
+        1536
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.16117788330326235,
+            0.16115772433397246,
+            0.16115889510488124,
+            0.16117970536394816,
+            0.16117138591239122
+          ],
+          "median_ms": 0.16117138591239122,
+          "effective_tops": 79.94534398931033,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 19
+          },
+          "round_medians_ms": [
+            0.1611231206878414,
+            0.16117684434099894,
+            0.16116540024920206,
+            0.16119310332507622,
+            0.1612260167191668
+          ],
+          "median_ms": 0.16117684434099894,
+          "effective_tops": 79.9426365535464,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.176391567502703,
+            0.1764469998223441,
+            0.176389285496303,
+            0.17636029209409443,
+            0.176364004611969
+          ],
+          "median_ms": 0.176389285496303,
+          "effective_tops": 73.04809842472014,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 15
+          },
+          "round_medians_ms": [
+            0.21331612781811787,
+            0.21334658386886762,
+            0.21331526643486431,
+            0.21332094746251262,
+            0.2133111338461599
+          ],
+          "median_ms": 0.21331612781811787,
+          "effective_tops": 60.402849141281045,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            0.1092673727303497,
+            0.10986591764718048,
+            0.11177435431460786,
+            0.11050726258705673,
+            0.11193686083328624
+          ],
+          "median_ms": 0.11050726258705673,
+          "effective_tflops": 116.59778358774726,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.2695064022116465,
+            0.26925128779999197,
+            0.2695248224963881,
+            0.2694847028549403,
+            0.26952569778651403
+          ],
+          "median_ms": 0.2695064022116465,
+          "effective_tops": 47.809260864539084,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          1536,
+          1
+        ],
+        "b": [
+          1,
+          1536
+        ],
+        "scale_a": [
+          6,
+          1
+        ],
+        "scale_b": [
+          2048,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        2048,
+        151936,
+        1536
+      ],
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            13.351744174957275,
+            13.338799953460693,
+            13.347935676574707,
+            13.339871883392334,
+            13.347327709197998
+          ],
+          "median_ms": 13.347327709197998,
+          "effective_tops": 71.61723152697186,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 13
+          },
+          "round_medians_ms": [
+            13.964384078979492,
+            13.964240074157715,
+            13.963824272155762,
+            13.96284818649292,
+            13.963520050048828
+          ],
+          "median_ms": 13.963824272155762,
+          "effective_tops": 68.45536295684323,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 3,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            13.34716796875,
+            13.347551822662354,
+            13.34822416305542,
+            13.332096099853516,
+            13.346432209014893
+          ],
+          "median_ms": 13.34716796875,
+          "effective_tops": 71.61808865027137,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 23
+          },
+          "round_medians_ms": [
+            15.303104400634766,
+            15.293759822845459,
+            15.292319774627686,
+            15.30344009399414,
+            15.29633617401123
+          ],
+          "median_ms": 15.29633617401123,
+          "effective_tops": 62.49200121791846,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            7.862407922744751,
+            8.221744060516357,
+            8.327975749969482,
+            8.20587968826294,
+            8.627032279968262
+          ],
+          "median_ms": 8.221744060516357,
+          "effective_tflops": 116.26470634211957,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            19.225152015686035,
+            19.228879928588867,
+            19.224624633789062,
+            19.22761631011963,
+            19.220928192138672
+          ],
+          "median_ms": 19.225152015686035,
+          "effective_tops": 49.721253597166395,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          1536,
+          1
+        ],
+        "b": [
+          1,
+          1536
+        ],
+        "scale_a": [
+          6,
+          1
+        ],
+        "scale_b": [
+          151936,
+          1
+        ]
+      }
+    }
+  ]
+}

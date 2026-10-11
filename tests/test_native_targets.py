@@ -3,6 +3,7 @@
 import hashlib
 import importlib
 import json
+import ctypes
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -30,11 +31,10 @@ def native(request, monkeypatch, tmp_path):
 def write_metadata(native, architecture, *, stale=False):
     if native.__name__.endswith(".cuda"):
         manifest = "build.json"
-        source = Path(native.__file__).parent / "csrc/sm12x/int8_g256_cute.cu"
-        hashes = hashlib.sha256(source.read_bytes()).hexdigest()
+        hashes = native.cuda_source_hash(architecture)
     else:
         manifest = "cutlass_build.json"
-        hashes = native._source_hashes()
+        hashes = native._source_hashes(architecture)
     native._LIBRARY.with_name(manifest).write_text(json.dumps({
         "architecture": architecture,
         "source_sha256": "stale" if stale else hashes,
@@ -46,10 +46,12 @@ def fake_library():
     def symbol():
         return lambda *args: 0
     return SimpleNamespace(grain_cute_g256=symbol(), grain_cuda_error_string=symbol(),
-                           grain_cutlass_g256=symbol(), grain_cutlass_error_string=symbol())
+                           grain_cutlass_g256=symbol(), grain_cutlass_error_string=symbol(),
+                           grain_cutlass_g256_sm110=symbol(),
+                           grain_cutlass_workspace_bytes=symbol())
 
 
-@pytest.mark.parametrize("architecture", ["sm_120", "sm_121"])
+@pytest.mark.parametrize("architecture", ["sm_110", "sm_120", "sm_121"])
 def test_matching_native_target_loads(native, monkeypatch, architecture):
     write_metadata(native, architecture)
     library = fake_library()
@@ -60,8 +62,38 @@ def test_matching_native_target_loads(native, monkeypatch, architecture):
     assert calls == [str(native._LIBRARY)]
 
 
+@pytest.mark.parametrize("native", ["cutlass"], indirect=True)
+def test_thor_cutlass_workspace_abi_preserves_pointer_and_size_width(native, monkeypatch):
+    write_metadata(native, "sm_110")
+    library = fake_library()
+    monkeypatch.setattr(native.ctypes, "CDLL", lambda path: library)
+    native._load_library("sm_110")
+    assert library.grain_cutlass_workspace_bytes.argtypes == [ctypes.c_int] * 4
+    assert library.grain_cutlass_workspace_bytes.restype is ctypes.c_size_t
+    assert library.grain_cutlass_g256_sm110.argtypes == (
+        [ctypes.c_void_p] * 5 + [ctypes.c_int] * 4
+        + [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    )
+    # The existing GB10 ABI remains the same even inside a Thor library.
+    assert library.grain_cutlass_g256.argtypes == (
+        [ctypes.c_void_p] * 5 + [ctypes.c_int] * 4 + [ctypes.c_void_p]
+    )
+
+
+@pytest.mark.parametrize("native", ["cutlass"], indirect=True)
+def test_thor_cutlass_missing_pipeline_symbols_is_unavailable(native, monkeypatch):
+    write_metadata(native, "sm_110")
+    library = fake_library()
+    del library.grain_cutlass_g256_sm110
+    monkeypatch.setattr(native.ctypes, "CDLL", lambda path: library)
+    monkeypatch.setattr(torch.cuda, "get_device_capability", lambda device=None: (11, 0))
+    assert native.is_available(device=torch.device("cuda:2")) is False
+
+
 @pytest.mark.parametrize("built,requested", [("sm_121", "sm_120"),
-                                              ("sm_120", "sm_121")])
+                                              ("sm_120", "sm_121"),
+                                              ("sm_110", "sm_121"),
+                                              ("sm_121", "sm_110")])
 def test_mismatched_build_rejected_before_cdll(native, monkeypatch, built, requested):
     write_metadata(native, built)
     monkeypatch.setattr(native.ctypes, "CDLL",
@@ -86,7 +118,7 @@ def test_target_cache_does_not_reuse_library_for_another_device(native, monkeypa
     assert len(calls) == 1
 
 
-@pytest.mark.parametrize("architecture", ["sm_120", "sm_121"])
+@pytest.mark.parametrize("architecture", ["sm_110", "sm_120", "sm_121"])
 def test_stale_sources_rejected_before_cdll(native, monkeypatch, architecture):
     write_metadata(native, architecture, stale=True)
     monkeypatch.setattr(native.ctypes, "CDLL",
@@ -95,7 +127,7 @@ def test_stale_sources_rejected_before_cdll(native, monkeypatch, architecture):
         native._load_library(architecture)
 
 
-@pytest.mark.parametrize("capability", [(12, 0), (12, 1)])
+@pytest.mark.parametrize("capability", [(11, 0), (12, 0), (12, 1)])
 def test_availability_resolves_requested_device(native, monkeypatch, capability):
     device = torch.device("cuda:3")
     queried = []
@@ -109,7 +141,7 @@ def test_availability_resolves_requested_device(native, monkeypatch, capability)
 
 
 def test_unavailable_target_does_not_load_native_library(native, monkeypatch):
-    monkeypatch.setattr(torch.cuda, "get_device_capability", lambda device=None: (11, 0))
+    monkeypatch.setattr(torch.cuda, "get_device_capability", lambda device=None: (10, 0))
     monkeypatch.setattr(native, "_load_library",
                         lambda *args: pytest.fail("Unsupported architecture reached loader"))
     assert native.is_available(device=torch.device("cuda:1")) is False

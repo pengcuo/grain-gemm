@@ -1,0 +1,28 @@
+========= COMPUTE-SANITIZER
+launch (256, 128, 256) 2
+PASS (256, 128, 256) 2 output guards intact
+launch (256, 128, 256) 3
+PASS (256, 128, 256) 3 output guards intact
+launch (256, 128, 768) 2
+PASS (256, 128, 768) 2 output guards intact
+launch (256, 128, 768) 3
+PASS (256, 128, 768) 3 output guards intact
+launch (256, 384, 512) 2
+PASS (256, 384, 512) 2 output guards intact
+launch (256, 384, 512) 3
+PASS (256, 384, 512) 3 output guards intact
+launch (256, 384, 768) 2
+PASS (256, 384, 768) 2 output guards intact
+launch (256, 384, 768) 3
+PASS (256, 384, 768) 3 output guards intact
+Graph update PASS 2
+Graph update PASS 3
+launch (256, 384, 4352) 2
+PASS (256, 384, 4352) 2 output guards intact
+launch (256, 384, 4352) 3
+PASS (256, 384, 4352) 3 output guards intact
+launch (512, 640, 768) 2
+PASS (512, 640, 768) 2 output guards intact
+launch (512, 640, 768) 3
+PASS (512, 640, 768) 3 output guards intact
+========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)

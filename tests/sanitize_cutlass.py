@@ -29,13 +29,18 @@ def case(m, n, k):
 
 def main():
     assert cutlass.is_available(), "Build the CUTLASS backend first"
-    for m, n, k in ((384, 256, 256), (256, 384, 768),
+    for m, n, k in ((64, 64, 256), (192, 320, 512),
+                    (384, 256, 256), (256, 384, 768),
                     (384, 256, 1280), (384, 256, 4352)):
         # One group checks pipeline startup; 3/5 groups wrap the 2/3-stage
         # pipelines; large K also exercises the partially filled grouped grid.
         a, b, sa, sb, expected = case(m, n, k)
         out = torch.empty((m, n), device="cuda", dtype=torch.bfloat16)
-        for config_id in range(len(cutlass.CONFIGS)):
+        for config_id, config in enumerate(cutlass.configs_for_device(a.device)):
+            if config_id < len(cutlass.CONFIGS) and (m % config["block_m"] or n % config["block_n"]):
+                # Legacy warp kernels require complete tiles; the two Thor
+                # pipeline variants support the public 64-element tails.
+                continue
             cutlass.launch(a, b, sa, sb, out, config_id)
             torch.cuda.synchronize()
             torch.testing.assert_close(out, expected, rtol=0, atol=0)

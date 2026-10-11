@@ -1,0 +1,9 @@
+Processing ./.
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: grain-gemm
+  Building wheel for grain-gemm (pyproject.toml): started
+  Building wheel for grain-gemm (pyproject.toml): finished with status 'done'
+  Created wheel for grain-gemm: filename=grain_gemm-0.0.0-py3-none-any.whl size=112938 sha256=b1a05779bf2c75c29ca49a022d84a29f8a372d81fa35842f2f34730311b4fae0
+  Stored in directory: /root/.cache/pip/wheels/c8/18/55/84266b0acf1e312363a5e60b5ce7ccb84e9b032e2b616427dc
+Successfully built grain-gemm

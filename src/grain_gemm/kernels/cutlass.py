@@ -3,11 +3,10 @@
 
 import ctypes
 from functools import lru_cache
-import hashlib
 import json
 from pathlib import Path
 
-from ._native import SUPPORTED_ARCHITECTURES, architecture_for_device
+from ._native import SUPPORTED_ARCHITECTURES, architecture_for_device, cutlass_source_hash
 
 _ROOT = Path(__file__).parent
 _LIBRARY = _ROOT / "_native" / "libgrain_cutlass.so"
@@ -31,17 +30,24 @@ CONFIGS = tuple(
     )
     for m, n, stages, warps in _TILES
 )
+SM110_CONFIGS = CONFIGS + tuple(
+    dict(block_m=256, block_n=256, block_k=256, num_stages="auto",
+         num_warps=12, cluster_m=2, cluster_n=1, scale_load="async_shared",
+         epilogue=f"tma_bf16_128x{epilogue_n}", operand_load="tma",
+         promotion_warps=8, scale_a_layout="K_major", scale_b_layout="MN_major")
+    for epilogue_n in (32, 16)
+)
 
 
-def _source_hashes():
-    return {
-        path.name: hashlib.sha256(path.read_bytes()).hexdigest()
-        for path in sorted((_ROOT / "csrc" / "sm12x" / "cutlass").iterdir())
-        if path.suffix in (".cu", ".hpp")
-    }
+def configs_for_device(device=None):
+    return SM110_CONFIGS if architecture_for_device(device) == "sm_110" else CONFIGS
 
 
-@lru_cache(maxsize=2)
+def _source_hashes(architecture="sm_121"):
+    return cutlass_source_hash(architecture)
+
+
+@lru_cache(maxsize=3)
 def _load_library(architecture):
     if architecture not in SUPPORTED_ARCHITECTURES:
         raise RuntimeError(f"Unsupported native target: {architecture}")
@@ -59,7 +65,7 @@ def _load_library(architecture):
             f"CUTLASS library targets {metadata.get('architecture')}, but the device requires "
             f"{architecture}; rebuild with tools/build_cutlass.py --arch {architecture}"
         )
-    if metadata.get("source_sha256") != _source_hashes():
+    if metadata.get("source_sha256") != _source_hashes(architecture):
         raise RuntimeError("CUTLASS library is stale; rebuild with tools/build_cutlass.py")
     try:
         library = ctypes.CDLL(str(_LIBRARY))
@@ -69,6 +75,14 @@ def _load_library(architecture):
     library.grain_cutlass_g256.restype = ctypes.c_int
     library.grain_cutlass_error_string.argtypes = [ctypes.c_int]
     library.grain_cutlass_error_string.restype = ctypes.c_char_p
+    if architecture == "sm_110":
+        library.grain_cutlass_workspace_bytes.argtypes = [ctypes.c_int] * 4
+        library.grain_cutlass_workspace_bytes.restype = ctypes.c_size_t
+        library.grain_cutlass_g256_sm110.argtypes = (
+            [ctypes.c_void_p] * 5 + [ctypes.c_int] * 4 +
+            [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+        )
+        library.grain_cutlass_g256_sm110.restype = ctypes.c_int
     return library
 
 
@@ -85,17 +99,28 @@ def launch(a, b, scale_a, scale_b, out, config_id=0):
     """Launch on PyTorch's current stream; the public API validates the layout."""
     import torch
 
-    if isinstance(config_id, bool) or not isinstance(config_id, int) or not 0 <= config_id < len(CONFIGS):
-        raise ValueError(f"config_id must be an integer in [0, {len(CONFIGS) - 1}]")
-    library = _load_library(architecture_for_device(a.device))
+    architecture = architecture_for_device(a.device)
+    configs = SM110_CONFIGS if architecture == "sm_110" else CONFIGS
+    if isinstance(config_id, bool) or not isinstance(config_id, int) or not 0 <= config_id < len(configs):
+        raise ValueError(f"config_id must be an integer in [0, {len(configs) - 1}]")
+    library = _load_library(architecture)
     m, k = a.shape
     n = b.shape[1]
     with torch.cuda.device(a.device):
         stream = torch.cuda.current_stream(a.device).cuda_stream
-        status = library.grain_cutlass_g256(
-            a.data_ptr(), b.data_ptr(), scale_a.data_ptr(), scale_b.data_ptr(),
-            out.data_ptr(), m, n, k, config_id, stream,
-        )
+        args = (a.data_ptr(), b.data_ptr(), scale_a.data_ptr(), scale_b.data_ptr(),
+                out.data_ptr(), m, n, k, config_id, stream)
+        if architecture == "sm_110" and config_id >= len(CONFIGS):
+            size = library.grain_cutlass_workspace_bytes(m, n, k, config_id)
+            # PyTorch owns this stream-local allocation, including during graph
+            # capture. Reinitialize scheduler state for each launch; no handles
+            # or pointer-dependent parameters are cached across calls/streams.
+            workspace = torch.empty(size, device=a.device, dtype=torch.uint8) if size else None
+            status = library.grain_cutlass_g256_sm110(
+                *args, workspace.data_ptr() if workspace is not None else 0, size,
+            )
+        else:
+            status = library.grain_cutlass_g256(*args)
     if status:
         message = library.grain_cutlass_error_string(status).decode("utf-8", errors="replace")
         raise RuntimeError(f"GrainGEMM CUTLASS launch failed ({status}): {message}")

@@ -1,12 +1,11 @@
 """Optional native CuTe INT8 G256 kernels, built explicitly with tools/build_cuda.py."""
 
 import ctypes
-import hashlib
 import json
 from functools import lru_cache
 from pathlib import Path
 
-from ._native import SUPPORTED_ARCHITECTURES, architecture_for_device
+from ._native import SUPPORTED_ARCHITECTURES, architecture_for_device, cuda_source_hash
 
 _LIBRARY = Path(__file__).parent / "_native" / "libgrain_cuda.so"
 _TILES = (
@@ -32,7 +31,32 @@ CONFIGS = tuple(
 )
 
 
-@lru_cache(maxsize=2)
+# Thor-only candidates; GB10 configuration IDs and launch policy stay unchanged.
+SM110_CONFIGS = CONFIGS + tuple(
+    dict(block_m=m, block_n=n, block_k=256, num_stages=stages,
+         num_warps=4, scale_load="shared_prefetch", store_bits=128, mma="tcgen05",
+         operand_load="tma", tmem_buffers=2)
+    for stages in (2, 3)
+    for m, n in ((64, 64), (64, 128), (128, 64), (128, 128), (128, 256))
+    if not (stages == 3 and n == 256)
+) + tuple(
+    dict(block_m=m, block_n=n, block_k=256, num_stages=stages,
+         num_warps=12, scale_load=("async_shared" if cluster_m == 2 else "shared_producer"), store_bits=128,
+         mma="tcgen05_ws", operand_load="tma", tmem_buffers=2,
+         cluster_m=cluster_m, promotion_warps=8,
+         native_n_multiple=(128 if cluster_m == 2 else n))
+    for m, n, stages, cluster_m in (
+        (256, 256, 3, 2), (256, 256, 2, 2),
+        (128, 128, 3, 1), (128, 256, 2, 1),
+    )
+)
+
+
+def configs_for_device(device=None):
+    return SM110_CONFIGS if architecture_for_device(device) == "sm_110" else CONFIGS
+
+
+@lru_cache(maxsize=3)
 def _load_library(architecture):
     if architecture not in SUPPORTED_ARCHITECTURES:
         raise RuntimeError(f"Unsupported native target: {architecture}")
@@ -43,7 +67,6 @@ def _load_library(architecture):
             f"--cutlass-dir /path/to/cutlass --arch {architecture}"
         )
     manifest = _LIBRARY.with_name("build.json")
-    source = Path(__file__).parent / "csrc" / "sm12x" / "int8_g256_cute.cu"
     try:
         info = json.loads(manifest.read_text())
     except (OSError, ValueError) as exc:
@@ -53,7 +76,7 @@ def _load_library(architecture):
             f"Native library targets {info.get('architecture')}, but the device requires "
             f"{architecture}; rebuild with tools/build_cuda.py --arch {architecture}"
         )
-    if info.get("source_sha256") != hashlib.sha256(source.read_bytes()).hexdigest():
+    if info.get("source_sha256") != cuda_source_hash(architecture):
         raise RuntimeError("Native library is stale; rebuild with tools/build_cuda.py")
     try:
         library = ctypes.CDLL(str(_LIBRARY))
@@ -83,9 +106,11 @@ def launch(a, b, scale_a, scale_b, out, config_id=0):
     """
     import torch
 
-    if isinstance(config_id, bool) or not isinstance(config_id, int) or not 0 <= config_id < len(CONFIGS):
-        raise ValueError(f"config_id must be an integer in [0, {len(CONFIGS) - 1}]")
-    library = _load_library(architecture_for_device(a.device))
+    architecture = architecture_for_device(a.device)
+    configs = SM110_CONFIGS if architecture == "sm_110" else CONFIGS
+    if isinstance(config_id, bool) or not isinstance(config_id, int) or not 0 <= config_id < len(configs):
+        raise ValueError(f"config_id must be an integer in [0, {len(configs) - 1}]")
+    library = _load_library(architecture)
     m, k = a.shape
     n = b.shape[1]
     with torch.cuda.device(a.device):

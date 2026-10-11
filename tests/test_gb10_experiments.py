@@ -140,6 +140,10 @@ def isolated_build(request, tmp_path):
     script = tmp_path / "repo" / request.param
     script.parent.mkdir(parents=True)
     shutil.copyfile(ROOT / request.param, script)
+    if request.param in NATIVE_BUILD_SCRIPTS:
+        helper = tmp_path / "repo/src/grain_gemm/kernels/_native.py"
+        helper.parent.mkdir(parents=True)
+        shutil.copyfile(ROOT / "src/grain_gemm/kernels/_native.py", helper)
     headers = tmp_path / "cutlass"
     for relative in ("include/cute/tensor.hpp",
                      "include/cutlass/gemm/device/gemm_universal_adapter.h"):
@@ -161,7 +165,7 @@ def tree_paths(root):
     return {path.relative_to(root) for path in root.rglob("*")}
 
 
-@pytest.mark.parametrize("arch", ["sm_110", "sm_90", "sm_121a"])
+@pytest.mark.parametrize("arch", ["sm_90", "sm_121a"])
 def test_build_rejects_other_architectures_before_side_effects(isolated_build, arch):
     script, headers, nvcc, directory = isolated_build
     before = tree_paths(directory)
@@ -192,13 +196,20 @@ def test_gb10_experiment_builds_still_reject_sm120(isolated_build):
 
 
 @pytest.mark.parametrize("isolated_build", NATIVE_BUILD_SCRIPTS, indirect=True)
-@pytest.mark.parametrize("arch", ["sm_120", "sm_121"])
+@pytest.mark.parametrize("arch", ["sm_110", "sm_120", "sm_121"])
 def test_native_build_records_requested_target_without_gpu(isolated_build, arch):
     script, headers, nvcc, directory = isolated_build
     source = directory / "repo/src/grain_gemm/kernels/csrc"
-    source.mkdir(parents=True)
+    source.mkdir(parents=True, exist_ok=True)
     contents = {
         "sm12x/int8_g256_cute.cu": "// isolated CuTe source\n",
+        "sm110/int8_g256_cute.cu": "// isolated Thor source\n",
+        "sm110/int8_g256_pipeline.cuh": "// isolated Thor 2SM pipeline\n",
+        "sm110/int8_g256_pipeline_1sm.cuh": "// isolated Thor 1SM pipeline\n",
+        "sm110/int8_g256_cutlass.cu": "// isolated Thor CUTLASS source\n",
+        "sm110/include/cutlass/arch/reg_reconfig.h": "// isolated register config\n",
+        "sm110/include/cutlass/gemm/collective/sm100_mma_warpspecialized_blockwise_scaling.hpp": "// isolated Thor collective\n",
+        "sm110/include/cutlass/gemm/kernel/sm100_gemm_tma_warpspecialized_mma_transform.hpp": "// isolated Thor kernel\n",
         "sm12x/cutlass/int8_g256.cu": "// isolated CUTLASS source\n",
         "sm12x/cutlass/collective.hpp": "// isolated collective source\n",
         "sm12x/cutlass/epilogue.hpp": "// isolated epilogue source\n",
@@ -225,7 +236,8 @@ def test_native_build_records_requested_target_without_gpu(isolated_build, arch)
     )
     assert result.returncode == 0, result.stdout + result.stderr
     flags = json.loads((directory / "compiler_args.json").read_text())
-    assert f"-arch={arch}" in flags
+    compiler_arch = "sm_110a" if arch == "sm_110" else arch
+    assert f"-arch={compiler_arch}" in flags
     native = directory / "repo/src/grain_gemm/kernels/_native"
     backend = "cuda" if script.name == "build_cuda.py" else "cutlass"
     manifests = list(native.rglob("build.json" if backend == "cuda" else "cutlass_build.json"))
@@ -233,7 +245,18 @@ def test_native_build_records_requested_target_without_gpu(isolated_build, arch)
     manifest = json.loads(manifests[0].read_text())
     assert manifest["architecture"] == arch
     if backend == "cuda":
-        expected = hashlib.sha256(contents["sm12x/int8_g256_cute.cu"].encode()).hexdigest()
+        if arch == "sm_110":
+            expected = {name: hashlib.sha256(contents[name].encode()).hexdigest()
+                        for name in ("sm110/int8_g256_cute.cu", "sm110/int8_g256_pipeline.cuh",
+                                     "sm110/int8_g256_pipeline_1sm.cuh", "sm12x/int8_g256_cute.cu")}
+        else:
+            expected = hashlib.sha256(contents["sm12x/int8_g256_cute.cu"].encode()).hexdigest()
+    elif arch == "sm_110":
+        expected = {name: hashlib.sha256(content.encode()).hexdigest()
+                    for name, content in contents.items()
+                    if name == "sm110/int8_g256_cutlass.cu"
+                    or name.startswith("sm110/include/")
+                    or name.startswith("sm12x/cutlass/")}
     else:
         expected = {Path(name).name: hashlib.sha256(content.encode()).hexdigest()
                     for name, content in contents.items()

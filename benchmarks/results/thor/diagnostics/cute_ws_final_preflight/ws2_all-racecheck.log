@@ -1,0 +1,35 @@
+========= COMPUTE-SANITIZER
+library /tmp/thor-ws2-race-syncsf/probe.so
+launch 256 256 256 2
+PASS
+launch 256 256 256 3
+PASS
+launch 256 512 512 2
+PASS
+launch 256 512 512 3
+PASS
+launch 256 512 4352 2
+PASS
+launch 256 512 4352 3
+PASS
+launch 1024 1024 768 2
+PASS
+launch 1024 1024 768 3
+PASS
+launch 768 1152 768 2
+PASS
+launch 768 1152 768 3
+PASS
+launch 2816 384 768 2
+PASS
+launch 2816 384 768 3
+PASS
+launch 256 128 768 2
+PASS
+launch 256 128 768 3
+PASS
+launch 256 384 4352 2
+PASS
+launch 256 384 4352 3
+PASS
+========= RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)

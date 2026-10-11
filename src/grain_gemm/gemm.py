@@ -57,6 +57,12 @@ def _dispatch_table():
 
 
 @lru_cache(maxsize=1)
+def _thor_dispatch_table():
+    path = Path(__file__).with_name("kernels") / "configs" / "thor_sm110_g256.json"
+    return json.loads(path.read_text()) if path.exists() else {"square_configs": {}}
+
+
+@lru_cache(maxsize=1)
 def _cutlass_dispatch_table():
     """Measurements for explicit CUTLASS selection, independent of auto policy."""
     path = Path(__file__).with_name("kernels") / "configs" / "gb10_sm121_g256_cutlass.json"
@@ -82,7 +88,8 @@ def get_kernel_config(a, b, *, group_size=256, output_dtype=torch.bfloat16,
     Output defaults to BF16, matching int8_gemm. Pass the same dtype and scale
     tensors for an exact dispatch description. Omitted scales disable selection
     of the native fast path.
-    The measured table is specific to SM121/G256/BF16 and the documented layout;
+    The measured tables are specific to Thor SM110 and GB10 SM121, G256/BF16
+    and the documented layout;
     other architectures and shapes retain a portable Triton implementation in
     auto mode. SM120 native builds are experimental and require explicit selection.
     """
@@ -94,9 +101,10 @@ def get_kernel_config(a, b, *, group_size=256, output_dtype=torch.bfloat16,
     n = b.shape[1]
     aligned = (a.stride() == (k, 1) and b.stride() == (1, k)
                and k % 256 == 0 and min(m, n) >= 64)
-    table = _dispatch_table() if capability == (12, 1) else {"square_configs": {}}
+    table = (_dispatch_table() if capability == (12, 1) else
+             _thor_dispatch_table() if capability == (11, 0) else {"square_configs": {}})
     entry = None
-    if (capability == (12, 1) and group_size == 256
+    if (capability in ((11, 0), (12, 1)) and group_size == 256
             and aligned and output_dtype == torch.bfloat16):
         # Rectangular measurements apply only to the exact M/N/K tuple.
         entry = (table["square_configs"].get(str(m)) if m == n == k else
@@ -111,40 +119,59 @@ def get_kernel_config(a, b, *, group_size=256, output_dtype=torch.bfloat16,
         policy = "portable"
     if entry:
         config = dict(entry["triton"])
-        policy = "sm121_g256_measured"
-    if backend == "cutlass":
+        policy = f"{architecture.replace('_', '')}_g256_measured"
+    wants_cutlass = (backend == "cutlass" or
+                     (backend == "auto" and capability == (11, 0) and entry
+                      and entry["selected"]["backend"] == "cutlass"))
+    if wants_cutlass:
         from .kernels import cutlass
-        if capability not in ((12, 0), (12, 1)) or not _native_compatible(
-                a, b, scale_a, scale_b, group_size, output_dtype):
-            raise ValueError("cutlass requires SM120 or SM121, G256, BF16 output, M/N multiples of 64, "
+        supported = (capability in ((11, 0), (12, 0), (12, 1)) and _native_compatible(
+            a, b, scale_a, scale_b, group_size, output_dtype))
+        if backend == "cutlass" and not supported:
+            raise ValueError("cutlass requires SM110, SM120 or SM121, G256, BF16 output, M/N multiples of 64, "
                              "K a positive multiple of 256, aligned contiguous A and B.T, "
                              "and contiguous FP32 scales")
-        if not cutlass.is_available(device=a.device):
+        available = supported and cutlass.is_available(device=a.device)
+        if backend == "cutlass" and not available:
             raise RuntimeError(f"CUTLASS kernel is not built or does not match the source/device; "
                                f"run tools/build_cutlass.py --cutlass-dir PATH --arch {architecture}")
-        cutlass_entry = (_cutlass_dispatch_table().get("configs", {}).get(f"{m}x{n}x{k}")
-                         if capability == (12, 1) else None)
-        measured = (cutlass_entry["config"] if cutlass_entry else
-                    entry.get("cutlass") if entry else None)
-        config = dict(measured or dict(backend="cutlass", config_id=(
-            7 if capability == (12, 1) and m % 128 == n % 128 == 0 else 0)))
-        policy = "sm121_g256_measured" if measured else f"{architecture.replace('_', '')}_g256_cutlass_explicit"
-        return dict(policy=policy, compute_capability=list(capability), **config)
+        if available:
+            cutlass_entry = (_cutlass_dispatch_table().get("configs", {}).get(f"{m}x{n}x{k}")
+                             if capability == (12, 1) else None)
+            measured = (cutlass_entry["config"] if cutlass_entry else
+                        entry.get("cutlass") if entry else None)
+            selected = dict(measured or dict(backend="cutlass", config_id=(
+                32 if capability == (11, 0) else
+                7 if capability == (12, 1) and m % 128 == n % 128 == 0 else 0)))
+            vector_aligned = (capability != (11, 0) or selected["config_id"] < 32
+                              or scale_b.data_ptr() % 16 == 0)
+            if vector_aligned or backend == "cutlass":
+                # Scalar-offset FP32 scales remain valid. Explicit CUTLASS
+                # uses its legacy collective; auto retains the measured fallback.
+                if not vector_aligned:
+                    selected["config_id"] = 0
+                policy = f"{architecture.replace('_', '')}_g256_measured" if measured else f"{architecture.replace('_', '')}_g256_cutlass_explicit"
+                return dict(policy=policy, compute_capability=list(capability), **selected)
+    auto_selected = entry["selected"] if entry else None
+    if backend == "auto" and wants_cutlass:
+        auto_selected = entry.get("fallback_selected", entry.get("cuda", entry["triton"]))
     wants_native = backend == "cuda" or (backend == "auto" and entry
-                                        and entry["selected"]["backend"] == "cuda")
+                                        and auto_selected["backend"] == "cuda")
     if wants_native:
         from .kernels import cuda
-        supported = (capability in ((12, 0), (12, 1)) and _native_compatible(
+        supported = (capability in ((11, 0), (12, 0), (12, 1)) and _native_compatible(
             a, b, scale_a, scale_b, group_size, output_dtype))
         if backend == "cuda" and not supported:
-            raise ValueError("cuda requires SM120 or SM121, G256, BF16 output, M/N multiples of 64, "
+            raise ValueError("cuda requires SM110, SM120 or SM121, G256, BF16 output, M/N multiples of 64, "
                              "K a positive multiple of 256, aligned contiguous A and B.T, "
                              "and contiguous FP32 scales")
         if supported and cuda.is_available(device=a.device):
             config_id = (entry.get("cuda", entry["selected"]).get("config_id", 7)
-                         if entry else (7 if capability == (12, 1) and m % 128 == n % 128 == 0 else 0))
+                         if entry else ((27 if m % 256 == n % 256 == 0 else
+                                         28 if m % 128 == n % 128 == 0 else 17) if capability == (11, 0) else
+                                        7 if capability == (12, 1) and m % 128 == n % 128 == 0 else 0))
             config = dict(backend="cuda", config_id=config_id)
-            policy = "sm121_g256_measured" if entry else f"{architecture.replace('_', '')}_g256_explicit"
+            policy = f"{architecture.replace('_', '')}_g256_measured" if entry else f"{architecture.replace('_', '')}_g256_explicit"
         elif backend == "cuda":
             raise RuntimeError(f"CUDA kernel is not built or does not match the source/device; "
                                f"run tools/build_cuda.py --cutlass-dir PATH --arch {architecture}")

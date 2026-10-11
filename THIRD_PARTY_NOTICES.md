@@ -31,8 +31,8 @@ the full license is included in [licenses/CUTLASS-LICENSE](licenses/CUTLASS-LICE
 GrainGEMM changes the operands to signed INT8, accumulates each 256-element
 K-group in INT32, applies row/column scales into an FP32 running accumulator,
 and writes BF16 output. It adds launch configurations, tile scheduling, and a
-C ABI launcher. CUTLASS headers are an external build dependency; they are not
-vendored into this repository. The SGLang baseline remains a separate reference
+C ABI launcher. The CUTLASS checkout is an external build dependency. The
+Thor collective's three shadow headers are described below. The SGLang baseline remains a separate reference
 implementation.
 
 ## CUTLASS collective CUDA implementation
@@ -57,3 +57,58 @@ the corresponding source notices and the same CUTLASS dependency. Archived
 GrainGEMM package snapshots may also contain the SGLang baseline described
 above. These archives preserve measurement provenance; they do not include
 the external CUTLASS checkout or precompiled libraries.
+
+## Thor CuTe Tensor Memory implementation
+
+`src/grain_gemm/kernels/csrc/sm110/int8_g256_cute.cu`,
+`sm110/int8_g256_pipeline.cuh`, and `sm110/int8_g256_pipeline_1sm.cuh` adapt
+CuTe primitives from CUTLASS's Blackwell tutorials at the same pinned commit:
+
+- [01_mma_sm100.cu](https://github.com/NVIDIA/cutlass/blob/098de2a652cf8f00fd70b2df54051c7eccbb855a/examples/cute/tutorial/blackwell/01_mma_sm100.cu)
+- [02_mma_tma_sm100.cu](https://github.com/NVIDIA/cutlass/blob/098de2a652cf8f00fd70b2df54051c7eccbb855a/examples/cute/tutorial/blackwell/02_mma_tma_sm100.cu)
+- [04_mma_tma_2sm_sm100.cu](https://github.com/NVIDIA/cutlass/blob/098de2a652cf8f00fd70b2df54051c7eccbb855a/examples/cute/tutorial/blackwell/04_mma_tma_2sm_sm100.cu)
+- [05_mma_tma_epi_sm100.cu](https://github.com/NVIDIA/cutlass/blob/098de2a652cf8f00fd70b2df54051c7eccbb855a/examples/cute/tutorial/blackwell/05_mma_tma_epi_sm100.cu)
+
+The upstream BSD-3-Clause copyright and license notices are retained in each
+source. The complete license is included in
+[licenses/CUTLASS-LICENSE](licenses/CUTLASS-LICENSE).
+GrainGEMM changes the operands to signed INT8, targets SM110a, adds a bounded
+asynchronous group pipeline, per-group FP32 scaling, coalesced BF16 output and
+configuration dispatch. The new Thor-only CuTe IDs 26–29 implement independent
+one-SM and two-SM pipelines with four producer and eight consumer warps per
+CTA, two TMEM buffers, three prefetched register fragments, direct public
+FP32 scale layouts and explicit fused multiply-add promotion. The two-SM
+pipeline supports a final N128 half-tile through zero-filled out-of-range
+operands/scales and masked output stores while preserving barrier participation;
+one-SM candidates require full tiles. Their pipeline
+design also draws on the Thor Cosmos G256 implementation at commit
+`8977529aa23f70f02bfc36559599f00d59792996`, described below. They use CuTe
+primitives directly and do not invoke the separate CUTLASS collective or GEMM
+adapter. The launcher also retains the existing warp-MMA candidates described
+above. CUTLASS headers remain an external build dependency; SM120/GB10 source
+and configurations are unchanged.
+
+## Thor CUTLASS blockwise implementation
+
+`src/grain_gemm/kernels/csrc/sm110/int8_g256_cutlass.cu` and the three
+shadow headers under `sm110/include/cutlass/` adapt the Thor blockwise
+implementation in `nvidia-cosmos/cosmos-int8-gemm`, commit
+`8977529aa23f70f02bfc36559599f00d59792996`, from
+`docs/quantization/tools/cutlass_int8_sm110`. The source headers retain
+NVIDIA's full BSD-3-Clause copyright and license notice. The complete license
+is also included in [licenses/CUTLASS-LICENSE](licenses/CUTLASS-LICENSE).
+The Cosmos patches derive from CUTLASS 4.8.0 at commit `147295a3`; this
+integration is built against the GrainGEMM CUTLASS commit pinned above.
+
+The shadow headers adapt CUTLASS's
+`gemm/collective/sm100_mma_warpspecialized_blockwise_scaling.hpp`,
+`gemm/kernel/sm100_gemm_tma_warpspecialized_mma_transform.hpp`, and
+`arch/reg_reconfig.h`. They add FP32 scale factors and promoted accumulators
+for INT8 MMA, pipelined Tensor Memory loads, two promotion warpgroups,
+vectorized column-scale loads, and SM110 register reallocation. GrainGEMM
+uses the G256 per-column configurations, accepts its existing K-major
+activation-scale and MN-major weight-scale layouts directly, and makes the
+normal promotion's FP32 fused multiply-add explicit. Experimental bias,
+separable scale, and reduced-precision scale schemes are disabled. The C ABI
+accepts caller-owned workspace on each launch, preserving CUDA Graph and
+stream ownership, and retains the original 32 warp-MMA configurations.

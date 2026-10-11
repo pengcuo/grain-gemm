@@ -1,0 +1,585 @@
+{
+  "complete": false,
+  "mode": "comparison",
+  "gpu": "NVIDIA Thor",
+  "compute_capability": [
+    11,
+    0
+  ],
+  "timestamp_utc": "2026-10-11T08:42:53.244952+00:00",
+  "expected_shapes": [
+    [
+      1024,
+      1024,
+      1024
+    ],
+    [
+      2048,
+      2048,
+      2048
+    ],
+    [
+      3072,
+      3072,
+      3072
+    ],
+    [
+      4096,
+      4096,
+      4096
+    ],
+    [
+      6144,
+      6144,
+      6144
+    ],
+    [
+      8192,
+      8192,
+      8192
+    ],
+    [
+      12288,
+      12288,
+      12288
+    ],
+    [
+      16384,
+      16384,
+      16384
+    ],
+    [
+      256,
+      1024,
+      1536
+    ],
+    [
+      256,
+      1536,
+      1024
+    ],
+    [
+      256,
+      2048,
+      1536
+    ],
+    [
+      1024,
+      1024,
+      1536
+    ],
+    [
+      1024,
+      1536,
+      1024
+    ],
+    [
+      1024,
+      4096,
+      1536
+    ],
+    [
+      2048,
+      2048,
+      1536
+    ],
+    [
+      2048,
+      151936,
+      1536
+    ],
+    [
+      512,
+      3072,
+      1536
+    ],
+    [
+      4096,
+      3072,
+      1536
+    ],
+    [
+      1536,
+      1024,
+      4096
+    ]
+  ],
+  "software": {
+    "torch": "2.11.0a0+a6c236b9fd.nv26.03.46836102",
+    "triton": "3.6.0",
+    "cuda": "13.2",
+    "python": "3.12.3"
+  },
+  "seed": 2026,
+  "rounds": 5,
+  "rep_ms": 20,
+  "warmup_ms": 1500,
+  "reuse_fallbacks": false,
+  "fallback_table_sha256": null,
+  "timing": "CUDA graphs; rotating order; median of round medians; repeated inputs; no cache flush",
+  "scope": "Prequantized G256 GEMM including scaling and BF16 conversion; excludes quantization, compilation, warmup and host dispatch",
+  "scale_layout": {
+    "a": "FP32 contiguous [M,K/256]",
+    "b": "FP32 contiguous [K/256,N]"
+  },
+  "source_hashes": {
+    "gemm.py": "c9b73f162cf64e9411306cdd987c7db1798760ea9f3c57fba547237166175783",
+    "__init__.py": "22c5685605c9d04d8168009cbead08dcb1d9000aaf606c4df633bb1f40c03d42",
+    "kernels/cuda.py": "efe42a48481c71a7b9a1ad4e54efcdabcee2d849a5b01467dc9c0f9239357b44",
+    "kernels/__init__.py": "df3df411d10614aabefa0a3893e37899c67b80d984a70f2d82b6f334658f69ab",
+    "kernels/cutlass.py": "47dfaa4800cbd2b3867e25f36b8cf51c2f25d5f47cd4fb06e111872d66f0303d",
+    "kernels/_native.py": "b6331520d0472260b25a4b9406e760baa810a016260a6feb97a279843d7a9e85",
+    "kernels/triton.py": "0e4834f409c64c3cffb4481a985948239c8d737bb53b805270eabe15f029da21",
+    "baselines/__init__.py": "b045e960f98bbc0d0ffc1d9ad4ad3e9ecff31d859fd5761dd0f20423dd14c211",
+    "baselines/sglang.py": "cde6cf5e9cef6bb66a8da2af5cdb7a74bd744eee4ca50686bc39dae661953b81",
+    "kernels/configs/gb10_sm121_g256.json": "a88ae37bff252d6da04eb80ac7d1bb77e05e31f31bfa36a99a60f09674b3c529",
+    "kernels/configs/gb10_sm121_g256_cutlass.json": "5fe34e1093543dc239594c47a762a3a5eab8c58904560d66a706d02b520c9422",
+    "kernels/configs/thor_sm110_g256.json": "128f189245a3575faaa1bbd6994bb65198ff115be23ae4c86be2ea060763568a",
+    "kernels/_native/cutlass_build.json": "c43bf973a30e0a72060308e3f4b31dea1b0b617a8b582d32cb2f14605e42535a",
+    "kernels/_native/build.json": "f5134348907ed9de95a40f96bf41e25b97011ce71ffa64a7d62a32529de09358",
+    "kernels/csrc/sm12x/int8_g256_cute.cu": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148",
+    "kernels/csrc/sm110/int8_g256_cute.cu": "47926db4bda1a083ce63363e9f5e9dbad65b4957eb46c9e12ec5b3eb049968aa",
+    "kernels/csrc/sm110/int8_g256_pipeline.cuh": "2e3f263f046737bbc536b71c9dfbb930ea14ae6548044fc4b79aa0cdd4472433",
+    "kernels/csrc/sm110/int8_g256_cutlass.cu": "80ffe295bdb08c517ba6cf9247506a330bbeff598c0fec0d6af494a9ee878f80",
+    "kernels/csrc/sm110/int8_g256_pipeline_1sm.cuh": "a78b8379b12a18da51eee4f93d0273f19049cab9a02f4945f13d91dfa56c4ad3",
+    "kernels/csrc/sm12x/cutlass/int8_g256.cu": "8d2f5dd34bd931d6be93264585d41edf747b5dc07baa0a94d1bcb4285a8651ac",
+    "kernels/csrc/sm12x/cutlass/kernel.hpp": "e979950bb2e1cb613e47ea335f1d7579a5c575a24faa1833a48728afbe3e028c",
+    "kernels/csrc/sm12x/cutlass/collective.hpp": "482a26e13af8acd2e097deabcc4b29cefe5c3664f5223ec952638937a26ff80c",
+    "kernels/csrc/sm12x/cutlass/epilogue.hpp": "a4a7d9c0b20322880eee6afe5a4f690096a0dac7a0012ee16a5e243dfd11bfcd",
+    "kernels/csrc/sm110/include/cutlass/arch/reg_reconfig.h": "0fb2b25800ea6ca721b3d621aa3fe354eb12161452dd290e48d25b8b4e947c17",
+    "kernels/csrc/sm110/include/cutlass/gemm/kernel/sm100_gemm_tma_warpspecialized_mma_transform.hpp": "f93fab18e5bbb35263dbc80582ab87adbde6d727118de64344c3724ba2fa4327",
+    "kernels/csrc/sm110/include/cutlass/gemm/collective/sm100_mma_warpspecialized_blockwise_scaling.hpp": "13f0637b22af94e802e43c41a2b71a27e93f355cff9974f35401947c4b5e1c51"
+  },
+  "script_sha256": "73cd96a851390656b7db92423a43665b89ac8293a6349a560d7fabfad6acb707",
+  "native_library_sha256": "ffa6c369f539fe6a7a3bd8999d871ace2d0d7dfa92fbfb1fefbd037558572884",
+  "native_build": {
+    "architecture": "sm_110",
+    "cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+    "tested_cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+    "nvcc_version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Mon_Mar_02_09:52:54_PM_PST_2026\nCuda compilation tools, release 13.2, V13.2.51\nBuild cuda_13.2.r13.2/compiler.37434383_0",
+    "source_sha256": {
+      "sm110/int8_g256_cute.cu": "47926db4bda1a083ce63363e9f5e9dbad65b4957eb46c9e12ec5b3eb049968aa",
+      "sm110/int8_g256_pipeline.cuh": "2e3f263f046737bbc536b71c9dfbb930ea14ae6548044fc4b79aa0cdd4472433",
+      "sm110/int8_g256_pipeline_1sm.cuh": "a78b8379b12a18da51eee4f93d0273f19049cab9a02f4945f13d91dfa56c4ad3",
+      "sm12x/int8_g256_cute.cu": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148"
+    },
+    "compiler_architecture": "sm_110a",
+    "compile_definitions": [
+      "NDEBUG"
+    ]
+  },
+  "cutlass_library_sha256": "b66636262264ea6e6795f5447d1469dbf8b851966f870cfbe80a015a34f7bf74",
+  "cutlass_build": {
+    "architecture": "sm_110",
+    "compiler_architecture": "sm_110a",
+    "cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+    "tested_cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+    "nvcc_version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Mon_Mar_02_09:52:54_PM_PST_2026\nCuda compilation tools, release 13.2, V13.2.51\nBuild cuda_13.2.r13.2/compiler.37434383_0",
+    "source_sha256": {
+      "sm110/int8_g256_cutlass.cu": "80ffe295bdb08c517ba6cf9247506a330bbeff598c0fec0d6af494a9ee878f80",
+      "sm110/include/cutlass/arch/reg_reconfig.h": "0fb2b25800ea6ca721b3d621aa3fe354eb12161452dd290e48d25b8b4e947c17",
+      "sm110/include/cutlass/gemm/collective/sm100_mma_warpspecialized_blockwise_scaling.hpp": "13f0637b22af94e802e43c41a2b71a27e93f355cff9974f35401947c4b5e1c51",
+      "sm110/include/cutlass/gemm/kernel/sm100_gemm_tma_warpspecialized_mma_transform.hpp": "f93fab18e5bbb35263dbc80582ab87adbde6d727118de64344c3724ba2fa4327",
+      "sm12x/cutlass/collective.hpp": "482a26e13af8acd2e097deabcc4b29cefe5c3664f5223ec952638937a26ff80c",
+      "sm12x/cutlass/epilogue.hpp": "a4a7d9c0b20322880eee6afe5a4f690096a0dac7a0012ee16a5e243dfd11bfcd",
+      "sm12x/cutlass/int8_g256.cu": "8d2f5dd34bd931d6be93264585d41edf747b5dc07baa0a94d1bcb4285a8651ac",
+      "sm12x/cutlass/kernel.hpp": "e979950bb2e1cb613e47ea335f1d7579a5c575a24faa1833a48728afbe3e028c"
+    },
+    "compile_definitions": [
+      "G128_OPT_PROMOTION",
+      "G128_OPT_PIPE2",
+      "G128_OPT_SBVEC",
+      "NDEBUG"
+    ]
+  },
+  "gpu_properties": {
+    "multiprocessor_count": 20,
+    "shared_memory_per_block_optin": 232448
+  },
+  "cases": [
+    {
+      "shape": [
+        1024,
+        1024,
+        1024
+      ],
+      "reused_fallback_candidates": false,
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 32
+          },
+          "round_medians_ms": [
+            0.0165938914115793,
+            0.01696354952725497,
+            0.016530139218069145,
+            0.016668415540918288,
+            0.016724827211184474
+          ],
+          "median_ms": 0.016668415540918288,
+          "effective_tops": 128.83549985469656,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 27
+          },
+          "round_medians_ms": [
+            0.018537933394412866,
+            0.018526995753890035,
+            0.018241095869508506,
+            0.01829582974138553,
+            0.01804756432906943
+          ],
+          "median_ms": 0.01829582974138553,
+          "effective_tops": 117.37558112176511,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.03571160438129441,
+            0.03580908309248157,
+            0.03568485134937724,
+            0.03552785413018589,
+            0.035514645855909036
+          ],
+          "median_ms": 0.03568485134937724,
+          "effective_tops": 60.17913951706786,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 32
+          },
+          "round_medians_ms": [
+            0.016922000682715214,
+            0.01699487768488822,
+            0.01686677073421411,
+            0.016723064627227197,
+            0.016691581394066818
+          ],
+          "median_ms": 0.01686677073421411,
+          "effective_tops": 127.32037933282906,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            0.017608123821216626,
+            0.017493983052863094,
+            0.017635777122096012,
+            0.01756593178619038,
+            0.017745037646260904
+          ],
+          "median_ms": 0.017608123821216626,
+          "effective_tflops": 121.95982205738605,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.049188478787740075,
+            0.04916355074668417,
+            0.0490439476904931,
+            0.04904230845343206,
+            0.049044895907600625
+          ],
+          "median_ms": 0.049044895907600625,
+          "effective_tops": 43.78607820976532,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          1024,
+          1
+        ],
+        "b": [
+          1,
+          1024
+        ],
+        "scale_a": [
+          4,
+          1
+        ],
+        "scale_b": [
+          1024,
+          1
+        ]
+      }
+    },
+    {
+      "shape": [
+        2048,
+        2048,
+        2048
+      ],
+      "reused_fallback_candidates": false,
+      "results": [
+        {
+          "config": {
+            "requested_backend": "auto",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 27
+          },
+          "round_medians_ms": [
+            0.07981922613323064,
+            0.07979771494865417,
+            0.07973349945885794,
+            0.07979223621425344,
+            0.07968100780198553
+          ],
+          "median_ms": 0.07979223621425344,
+          "effective_tops": 215.3075286406264,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cuda",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cuda",
+            "config_id": 27
+          },
+          "round_medians_ms": [
+            0.07977189603059187,
+            0.07979553779669568,
+            0.0796568150423011,
+            0.07968450663041096,
+            0.0796696357881492
+          ],
+          "median_ms": 0.07968450663041096,
+          "effective_tops": 215.59861396498175,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "triton",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "triton",
+            "block_m": 64,
+            "block_n": 128,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.22487981752915814,
+            0.22485272450880572,
+            0.22470982508225873,
+            0.22484309023076837,
+            0.22481286936792833
+          ],
+          "median_ms": 0.22484309023076837,
+          "effective_tops": 76.40825949495441,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        },
+        {
+          "config": {
+            "requested_backend": "cutlass",
+            "policy": "sm110_g256_measured",
+            "compute_capability": [
+              11,
+              0
+            ],
+            "backend": "cutlass",
+            "config_id": 32
+          },
+          "round_medians_ms": [
+            0.07759895074836032,
+            0.07722251645980344,
+            0.07746604296951612,
+            0.07738642750481362,
+            0.0774151265379871
+          ],
+          "median_ms": 0.0774151265379871,
+          "effective_tops": 221.91876384223116,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0,
+            "graph_replay": {
+              "original_matches_eager": true,
+              "zeroed_activation_gives_zero": true,
+              "restored_activation_matches_eager": true
+            }
+          }
+        },
+        {
+          "config": {
+            "backend": "torch_bf16"
+          },
+          "round_medians_ms": [
+            0.11365748717721585,
+            0.1140597287346335,
+            0.11482439861038692,
+            0.1294827834419582,
+            0.11310655529759511
+          ],
+          "median_ms": 0.1140597287346335,
+          "effective_tflops": 150.62169071057454,
+          "correctness": {
+            "finite": true
+          }
+        },
+        {
+          "config": {
+            "backend": "portable_triton",
+            "block_m": 32,
+            "block_n": 64,
+            "num_warps": 4,
+            "num_stages": 2,
+            "swizzle": 8
+          },
+          "round_medians_ms": [
+            0.3547317130225045,
+            0.3545102902821132,
+            0.3545262813568115,
+            0.3545128617967878,
+            0.35459743227277485
+          ],
+          "median_ms": 0.3545262813568115,
+          "effective_tops": 48.458661846593515,
+          "correctness": {
+            "checked_rows": 32,
+            "checked_columns": 32,
+            "max_abs_error": 0.0
+          }
+        }
+      ],
+      "input_strides": {
+        "a": [
+          2048,
+          1
+        ],
+        "b": [
+          1,
+          2048
+        ],
+        "scale_a": [
+          8,
+          1
+        ],
+        "scale_b": [
+          2048,
+          1
+        ]
+      }
+    }
+  ]
+}

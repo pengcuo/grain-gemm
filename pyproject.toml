@@ -36,6 +36,11 @@ grain_gemm = [
     "kernels/configs/*.json",
     "kernels/csrc/*.md",
     "kernels/csrc/sm12x/*.cu",
+    "kernels/csrc/sm110/*.cu",
+    "kernels/csrc/sm110/*.cuh",
+    "kernels/csrc/sm110/include/cutlass/arch/*.h",
+    "kernels/csrc/sm110/include/cutlass/gemm/collective/*.hpp",
+    "kernels/csrc/sm110/include/cutlass/gemm/kernel/*.hpp",
     "kernels/csrc/sm12x/cutlass/*.cu",
     "kernels/csrc/sm12x/cutlass/*.hpp",
 ]

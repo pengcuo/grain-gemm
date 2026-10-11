@@ -1,0 +1,508 @@
+{
+  "gpu": "NVIDIA Thor",
+  "compute_capability": [
+    11,
+    0
+  ],
+  "group_size": 256,
+  "output_dtype": "bfloat16",
+  "square_configs": {
+    "1024": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "selected": {
+        "backend": "cutlass",
+        "config_id": 32
+      }
+    },
+    "2048": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 128,
+        "num_warps": 4,
+        "num_stages": 2,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "selected": {
+        "backend": "cuda",
+        "config_id": 27
+      }
+    },
+    "4096": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 33
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "selected": {
+        "backend": "cuda",
+        "config_id": 26
+      }
+    },
+    "3072": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 128,
+        "num_warps": 4,
+        "num_stages": 2,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "selected": {
+        "backend": "cuda",
+        "config_id": 26
+      }
+    },
+    "6144": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 33
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "selected": {
+        "backend": "cuda",
+        "config_id": 27
+      }
+    },
+    "8192": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 128,
+        "num_warps": 8,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 33
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "selected": {
+        "backend": "cuda",
+        "config_id": 26
+      }
+    },
+    "12288": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 128,
+        "num_warps": 8,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "selected": {
+        "backend": "cuda",
+        "config_id": 26
+      }
+    },
+    "16384": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 128,
+        "num_warps": 8,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 29
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 29
+      },
+      "selected": {
+        "backend": "cuda",
+        "config_id": 29
+      }
+    }
+  },
+  "rectangular_configs": {
+    "256x1024x1536": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 128,
+        "block_n": 128,
+        "num_warps": 8,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 28
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 28
+      },
+      "selected": {
+        "backend": "cuda",
+        "config_id": 28
+      }
+    },
+    "256x1536x1024": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "selected": {
+        "backend": "cutlass",
+        "config_id": 32
+      }
+    },
+    "256x2048x1536": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 64,
+        "num_warps": 4,
+        "num_stages": 2,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "selected": {
+        "backend": "cutlass",
+        "config_id": 32
+      }
+    },
+    "1024x1024x1536": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 128,
+        "num_warps": 4,
+        "num_stages": 2,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "selected": {
+        "backend": "cutlass",
+        "config_id": 32
+      }
+    },
+    "1024x1536x1024": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 128,
+        "num_warps": 4,
+        "num_stages": 2,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "selected": {
+        "backend": "cutlass",
+        "config_id": 32
+      }
+    },
+    "1024x4096x1536": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 128,
+        "num_warps": 4,
+        "num_stages": 2,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "selected": {
+        "backend": "cutlass",
+        "config_id": 32
+      }
+    },
+    "2048x2048x1536": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 128,
+        "num_warps": 4,
+        "num_stages": 2,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "selected": {
+        "backend": "cuda",
+        "config_id": 27
+      }
+    },
+    "2048x151936x1536": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 128,
+        "num_warps": 4,
+        "num_stages": 3,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "selected": {
+        "backend": "cuda",
+        "config_id": 27
+      }
+    },
+    "512x3072x1536": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 128,
+        "num_warps": 4,
+        "num_stages": 2,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "selected": {
+        "backend": "cutlass",
+        "config_id": 32
+      }
+    },
+    "4096x3072x1536": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 128,
+        "num_warps": 4,
+        "num_stages": 2,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 26
+      },
+      "selected": {
+        "backend": "cutlass",
+        "config_id": 32
+      }
+    },
+    "1536x1024x4096": {
+      "triton": {
+        "backend": "triton",
+        "block_m": 64,
+        "block_n": 128,
+        "num_warps": 4,
+        "num_stages": 2,
+        "swizzle": 8
+      },
+      "cuda": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "cutlass": {
+        "backend": "cutlass",
+        "config_id": 32
+      },
+      "fallback_selected": {
+        "backend": "cuda",
+        "config_id": 27
+      },
+      "selected": {
+        "backend": "cutlass",
+        "config_id": 32
+      }
+    }
+  },
+  "tuning_report_sha256": "e7b2a2d3fa30b29e0d12550e686b790b4d0dad4b167608f0f71904aab9f64c0f"
+}

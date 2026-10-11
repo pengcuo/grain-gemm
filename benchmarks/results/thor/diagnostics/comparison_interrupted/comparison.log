@@ -1,0 +1,5 @@
+1024x1024x1024: auto 16.63us | cuda 18.31us | triton 35.60us | cutlass 16.61us | torch_bf16 18.61us | portable_triton 49.05us
+2048x2048x2048: auto 79.41us | cuda 79.41us | triton 224.52us | cutlass 77.43us | torch_bf16 141.89us | portable_triton 354.03us
+3072x3072x3072: auto 246.87us | cuda 256.16us | triton 725.69us | cutlass 278.23us | torch_bf16 549.15us | portable_triton 1150.82us
+4096x4096x4096: auto 579.47us | cuda 645.59us | triton 1748.87us | cutlass 661.97us | torch_bf16 1256.29us | portable_triton 2585.73us
+6144x6144x6144: auto 2020.06us | cuda 2034.65us | triton 5853.62us | cutlass 2227.82us | torch_bf16 4565.49us | portable_triton 8487.18us

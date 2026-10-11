@@ -78,8 +78,8 @@ def assert_matches_reference(actual, tensors, group_size):
 
 def require_native_cuda():
     """Keep the optional native tests usable without building the CUDA library."""
-    if not torch.cuda.is_available() or torch.cuda.get_device_capability() not in ((12, 0), (12, 1)):
-        pytest.skip("The optional native CUDA kernels require SM120 or SM121")
+    if not torch.cuda.is_available() or torch.cuda.get_device_capability() not in ((11, 0), (12, 0), (12, 1)):
+        pytest.skip("The optional native CUDA kernels require SM110, SM120 or SM121")
     from grain_gemm.kernels import cuda as native_cuda
 
     if not native_cuda.is_available():
@@ -435,14 +435,16 @@ def test_m256_measurements_do_not_match_neighboring_shapes(simulated_sm121, shap
 def test_m256_measurements_are_specific_to_sm121(simulated_sm121, monkeypatch,
                                                 capability):
     monkeypatch.setattr(torch.cuda, "get_device_capability", lambda device=None: capability)
+    import grain_gemm.gemm as implementation
+    monkeypatch.setattr(implementation, "_thor_dispatch_table", lambda: {"square_configs": {}})
     tensors = inputs(256, 1024, 1536, 256, layout="column_major_b")
     config = measured_config(tensors)
     assert config["backend"] == "triton"
     assert config["policy"] == "portable"
-    if capability == (12, 0):
+    if capability in ((11, 0), (12, 0)):
         explicit = measured_config(tensors, backend="cuda")
-        assert explicit["config_id"] == 0
-        assert explicit["policy"] == "sm120_g256_explicit"
+        assert explicit["config_id"] == (27 if capability == (11, 0) else 0)
+        assert explicit["policy"] == ("sm110_g256_explicit" if capability == (11, 0) else "sm120_g256_explicit")
     else:
         with pytest.raises(ValueError, match="SM121"):
             measured_config(tensors, backend="cuda")

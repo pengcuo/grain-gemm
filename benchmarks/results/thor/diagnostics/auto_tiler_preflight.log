@@ -1,0 +1,3 @@
+[1024, 1024, 1024] {'cosmos_probe': 16.57, 'grain_cfg32': 37.9, 'grain_cfg33': 31.06, 'torch_bf16': 17.61}
+[512, 3072, 1536] {'cosmos_probe': 29.46, 'grain_cfg32': 70.49, 'grain_cfg33': 58.24, 'torch_bf16': 40.45}
+[4096, 4096, 4096] {'cosmos_probe': 602.23, 'grain_cfg32': 1366.48, 'grain_cfg33': 1048.76, 'torch_bf16': 1027.76}

@@ -1,0 +1,191 @@
+[
+  {
+    "shape": [
+      1024,
+      1024,
+      1024
+    ],
+    "results": [
+      {
+        "name": "cosmos_probe",
+        "median_us": 16.57180643793362,
+        "round_medians_ms": [
+          0.01657623462344833,
+          0.016569850959029853,
+          0.01657180643793362
+        ],
+        "correctness": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      {
+        "name": "grain_cfg32",
+        "median_us": 37.90406362263267,
+        "round_medians_ms": [
+          0.03790526254939647,
+          0.03768859358732113,
+          0.03790406362263267
+        ],
+        "correctness": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      {
+        "name": "grain_cfg33",
+        "median_us": 31.064627217311486,
+        "round_medians_ms": [
+          0.0310504513402139,
+          0.031064627217311486,
+          0.031091584808451676
+        ],
+        "correctness": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      {
+        "name": "torch_bf16",
+        "median_us": 17.607592643237634,
+        "round_medians_ms": [
+          0.017607592643237635,
+          0.01762587518403024,
+          0.017545668716603666
+        ],
+        "correctness": {
+          "finite": true
+        }
+      }
+    ]
+  },
+  {
+    "shape": [
+      512,
+      3072,
+      1536
+    ],
+    "results": [
+      {
+        "name": "cosmos_probe",
+        "median_us": 29.459384044361535,
+        "round_medians_ms": [
+          0.029459384044361533,
+          0.02935057542821225,
+          0.02949640323703176
+        ],
+        "correctness": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      {
+        "name": "grain_cfg32",
+        "median_us": 70.48537049974715,
+        "round_medians_ms": [
+          0.07047194328860959,
+          0.07048537049974715,
+          0.07050046740837818
+        ],
+        "correctness": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      {
+        "name": "grain_cfg33",
+        "median_us": 58.24369344955836,
+        "round_medians_ms": [
+          0.05822720034369107,
+          0.058243693449558355,
+          0.05825729241676202
+        ],
+        "correctness": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      {
+        "name": "torch_bf16",
+        "median_us": 40.45375188191732,
+        "round_medians_ms": [
+          0.04059153190025916,
+          0.04045375188191732,
+          0.040371228413409496
+        ],
+        "correctness": {
+          "finite": true
+        }
+      }
+    ]
+  },
+  {
+    "shape": [
+      4096,
+      4096,
+      4096
+    ],
+    "results": [
+      {
+        "name": "cosmos_probe",
+        "median_us": 602.2309958934784,
+        "round_medians_ms": [
+          0.5964375138282776,
+          0.6022309958934784,
+          0.6055909991264343
+        ],
+        "correctness": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      {
+        "name": "grain_cfg32",
+        "median_us": 1366.4811679295133,
+        "round_medians_ms": [
+          1.366532530103411,
+          1.3655029024396623,
+          1.3664811679295132
+        ],
+        "correctness": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      {
+        "name": "grain_cfg33",
+        "median_us": 1048.7604141235352,
+        "round_medians_ms": [
+          1.0487604141235352,
+          1.0493810553299752,
+          1.0473970613981547
+        ],
+        "correctness": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      {
+        "name": "torch_bf16",
+        "median_us": 1027.7559757232666,
+        "round_medians_ms": [
+          1.0257342126634388,
+          1.0362661261307564,
+          1.0277559757232666
+        ],
+        "correctness": {
+          "finite": true
+        }
+      }
+    ]
+  }
+]

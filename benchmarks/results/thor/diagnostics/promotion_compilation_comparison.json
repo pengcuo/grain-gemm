@@ -1,0 +1,70 @@
+{
+  "fast_original": {
+    "path": "/workspace/thor-cosmos-comparison/probe_k.so",
+    "assertfail": 0,
+    "ftz": 0,
+    "sass_counts": [
+      {
+        "USETMAXREG": 7,
+        "FMUL": 515,
+        "FFMA": 256,
+        "LDL": 44,
+        "STL": 43
+      }
+    ],
+    "resources": [
+      "REG:168 STACK:144 SHARED:1024 LOCAL:0 CONSTANT[2]:24 CONSTANT[0]:2944 TEXTURE:0 SURFACE:0 SAMPLER:0"
+    ]
+  },
+  "original_production_flags": {
+    "path": "/tmp/thor-promotion-order/original/probe.so",
+    "assertfail": 110,
+    "ftz": 0,
+    "sass_counts": [
+      {
+        "USETMAXREG": 7,
+        "FMUL": 515,
+        "FFMA": 256,
+        "LDL": 251,
+        "STL": 314
+      }
+    ],
+    "resources": [
+      "REG:168 STACK:256 SHARED:1024 LOCAL:0 CONSTANT[2]:24 CONSTANT[0]:2944 TEXTURE:0 SURFACE:0 SAMPLER:0"
+    ]
+  },
+  "scale_first_production_flags": {
+    "path": "/tmp/thor-promotion-order/scale_first/probe.so",
+    "assertfail": 110,
+    "ftz": 0,
+    "sass_counts": [
+      {
+        "USETMAXREG": 7,
+        "FMUL": 515,
+        "FFMA": 256,
+        "LDL": 251,
+        "STL": 314
+      }
+    ],
+    "resources": [
+      "REG:168 STACK:256 SHARED:1024 LOCAL:0 CONSTANT[2]:24 CONSTANT[0]:2944 TEXTURE:0 SURFACE:0 SAMPLER:0"
+    ]
+  },
+  "partial_first_ndebug": {
+    "path": "/tmp/thor-promotion-order/partial_first_ndebug/probe.so",
+    "assertfail": 0,
+    "ftz": 0,
+    "sass_counts": [
+      {
+        "USETMAXREG": 7,
+        "FMUL": 515,
+        "FFMA": 256,
+        "LDL": 44,
+        "STL": 43
+      }
+    ],
+    "resources": [
+      "REG:168 STACK:144 SHARED:1024 LOCAL:0 CONSTANT[2]:24 CONSTANT[0]:2944 TEXTURE:0 SURFACE:0 SAMPLER:0"
+    ]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "wheel": "/tmp/thor-ws-dist/grain_gemm-0.0.0-py3-none-any.whl",
+  "sha256": "b1a05779bf2c75c29ca49a022d84a29f8a372d81fa35842f2f34730311b4fae0",
+  "verified_source_and_dispatch_files": 13,
+  "licenses_present": true,
+  "native_binaries_excluded": true
+}

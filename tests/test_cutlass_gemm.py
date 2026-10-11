@@ -14,8 +14,8 @@ ALL_CONFIGS = range(len(CUTLASS_CONFIGS))
 
 
 def require_cutlass():
-    if not torch.cuda.is_available() or torch.cuda.get_device_capability() not in ((12, 0), (12, 1)):
-        pytest.skip("The optional CUTLASS backend requires SM120 or SM121")
+    if not torch.cuda.is_available() or torch.cuda.get_device_capability() not in ((11, 0), (12, 0), (12, 1)):
+        pytest.skip("The optional CUTLASS backend requires SM110, SM120 or SM121")
     from grain_gemm.kernels import cutlass
 
     if not cutlass.is_available():
@@ -183,7 +183,7 @@ def test_cutlass_missing_build_does_not_silently_fallback(simulated_cutlass, mon
         select_cutlass(tensors)
 
 
-@pytest.mark.parametrize("capability", [(8, 0), (9, 0), (11, 0), (12, 2)])
+@pytest.mark.parametrize("capability", [(8, 0), (9, 0), (12, 2)])
 def test_cutlass_rejects_other_architectures(simulated_cutlass, monkeypatch, capability):
     monkeypatch.setattr(torch.cuda, "get_device_capability", lambda device=None: capability)
     tensors = inputs(128, 128, 512, 256, layout="column_major_b")

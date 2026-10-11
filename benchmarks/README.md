@@ -1,10 +1,13 @@
 # Tests and benchmarks
 
-**Hardware scope: this published batch is GB10-only (SM121, compute capability
+Thor SM110 has separate [validation and measurements](results/thor/README.md),
+reproduced with `bench_thor.py`. The public API and scale layouts are shared.
+
+**Hardware scope: the historical batch below is GB10-only (SM121, compute capability
 12.1).** All measured performance, tuned configurations and backend rankings,
 especially the CuTe/CUTLASS comparisons, apply only to NVIDIA GB10. Thor / Jetson
-T5000 uses SM110 (compute capability 11.0) and requires an independent
-implementation, tuning and validation. See [NVIDIA's compute capability
+T5000 uses SM110 (compute capability 11.0) and uses an independent
+implementation, tuning table and validation. See [NVIDIA's compute capability
 table](https://developer.nvidia.com/cuda/gpus). This experiment boundary does not
 limit GrainGEMM's goal of supporting multiple GPU architectures.
 

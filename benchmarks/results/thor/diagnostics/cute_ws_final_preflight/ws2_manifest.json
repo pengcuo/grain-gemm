@@ -1,0 +1,29 @@
+{
+  "kind": "private 2SM candidate preflight; not the final native API or 19-shape report",
+  "final_header": "src/grain_gemm/kernels/csrc/sm110/int8_g256_pipeline.cuh",
+  "final_header_sha256": "2e3f263f046737bbc536b71c9dfbb930ea14ae6548044fc4b79aa0cdd4472433",
+  "compiled_header_sha256": "fa56e81819063f55659e9e3424d9a95387832973bea8b6aa90299d66e0bca3be",
+  "compiled_snapshot_note": "Reconstructed by reverting the two documented comment-only changes after compilation. Runtime code is identical to final header; lineinfo refers to compiled snapshot.",
+  "probe_so_sha256": "bc9cc426f29406c965e32487aeb8e790f2f1c320a84c7096aeccdb40f5ba3897",
+  "probe_so_archived": false,
+  "probe_fallback": "Private grain_warp_g256 stub returns 1; fallback/API wrappers require final native validation.",
+  "commands": {
+    "build": "/usr/local/cuda/bin/nvcc -O3 -std=c++17 -arch=sm_110a -DNDEBUG -lineinfo --expt-relaxed-constexpr --fmad=true -Xcompiler=-fPIC -shared -I/workspace/cutlass/include -I/workspace/cutlass/tools/util/include --ptxas-options=-v /tmp/thor-ws2-race-syncsf/probe.cu -L/usr/local/cuda/lib64/stubs -lcuda -o /tmp/thor-ws2-race-syncsf/probe.so",
+    "race_smoke_reproduction": "compute-sanitizer --tool racecheck --target-processes application-only --error-exitcode 1 --kernel-name kns=thor_ws2 python /tmp/thor-ws2-race-probe/race_all.py --lib /tmp/thor-ws2-race-syncsf/probe.so",
+    "race_signed_graph_reproduction": "compute-sanitizer --tool racecheck --target-processes application-only --error-exitcode 1 --kernel-name kns=thor_ws2 python /tmp/thor-ws2-race-syncsf/check.py --only-check",
+    "mem_explicit": "compute-sanitizer --tool memcheck --target-processes application-only --report-api-errors explicit --error-exitcode 1 --kernel-name kns=thor_ws2 python /tmp/thor-ws2-race-probe/race_all.py --lib /tmp/thor-ws2-race-syncsf/probe.so",
+    "mem_extended_reproduction": "compute-sanitizer --tool memcheck --target-processes application-only --error-exitcode 1 --kernel-name kns=thor_ws2 python /tmp/thor-ws2-race-probe/race_all.py --lib /tmp/thor-ws2-race-syncsf/probe.so",
+    "performance": "python /tmp/thor-ws2-race-syncsf/bench.py"
+  },
+  "results": {
+    "race_smoke": "0 errors; 8 shapes x P2/P3",
+    "race_signed_graph": "0 errors; signed/int32-dot reference, output guards, N128 tails, nondefault stream Graph operand/scale updates",
+    "mem_explicit": "0 errors",
+    "mem_extended": "1 CUDA API initialization error: Failed to load TileIR compiler at cudaGetDeviceCount before first kernel; no reported kernel memory hazards, all launches PASS",
+    "registers": 168,
+    "stack_bytes": 32,
+    "spill_store_bytes": 48,
+    "spill_load_bytes": 68
+  },
+  "performance_protocol": "Same input/output tensors per shape; CUDA graph, 100ms per sample, 3 rotated orders and medians after 1000ms CUT32 4096^3 warmup. Exclusive GPU; no concurrent CPU compilation. First P2 4096 sample had transient 862.52us, retained in raw JSON; median 608.43us. Final native report must remeasure."
+}

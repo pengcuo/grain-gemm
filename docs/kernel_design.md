@@ -19,6 +19,12 @@ src/grain_gemm/kernels/
 ├── cuda.py
 ├── cutlass.py
 ├── csrc/
+│   ├── sm110/
+│   │   ├── int8_g256_cute.cu
+│   │   ├── int8_g256_pipeline.cuh
+│   │   ├── int8_g256_pipeline_1sm.cuh
+│   │   ├── int8_g256_cutlass.cu
+│   │   └── include/cutlass/
 │   └── sm12x/
 │       ├── int8_g256_cute.cu
 │       └── cutlass/
@@ -27,6 +33,7 @@ src/grain_gemm/kernels/
 │           ├── epilogue.hpp
 │           └── kernel.hpp
 └── configs/
+    ├── thor_sm110_g256.json
     ├── gb10_sm121_g256.json
     └── gb10_sm121_g256_cutlass.json
 ```
@@ -36,9 +43,8 @@ SM120 builds. This source grouping does not imply equal validation or optimal
 launch configurations across GPU models. The `gb10_` tables contain GB10
 measurements only; RTX GPUs need their own validation and tuning data.
 
-Future native H100 and Thor/T5000 implementations can be added under `sm90/`
-and `sm110/`, respectively. Those implementations and directories are not yet
-present. Triton remains the general implementation. Frozen experiment source
+Thor/T5000 uses the native `sm110/` implementation. Future native H100
+implementations can be added under `sm90/`; that implementation is not yet present. Triton remains the general implementation. Frozen experiment source
 snapshots and historical measurements retain their original paths and hashes.
 
 ## Implementations
@@ -96,6 +102,116 @@ Implementations and toolchains can differ slightly in floating-point rounding.
 The complete INT32 group reduction and FP32 cross-group accumulation remain
 the common numerical contract.
 
+## Thor SM110 native implementation
+
+`sm110/int8_g256_cute.cu` supplies the CUDA backend's Thor launcher. IDs 0–16
+retain the shared warp-MMA candidates; IDs 17–25 retain the earlier 128-thread
+`tcgen05` implementation. The independent pipelines in
+`int8_g256_pipeline.cuh` and `int8_g256_pipeline_1sm.cuh` add Thor-only IDs 26–29:
+
+| CuTe config | Output tile | Operand stages | CTA cluster |
+| --- | --- | --- | --- |
+| 26 | 256 × 256 | 3 | 2 × 1, two SMs |
+| 27 | 256 × 256 | 2 | 2 × 1, two SMs |
+| 28 | 128 × 128 | 3 | One SM |
+| 29 | 128 × 256 | 2 | One SM |
+
+Two-SM configs 26/27 require M multiples of 256 and N multiples of 128.
+An N dimension ending in a 128-column half-tile remains on the two-SM path:
+TMA fills the out-of-range weight columns with zero, their shared column
+scales are zero, and the epilogue skips their output stores. All threads
+continue participating in the pipeline and epilogue barriers. One-SM configs
+28/29 require complete tiles of their listed BM/BN sizes.
+
+The new candidates use 384 threads per CTA. Four producer warps issue TMA
+operand transfers, UMMA and scale loads; two consumer warpgroups, eight warps,
+apply FP32 group scaling. UMMA `tcgen05.mma.kind::i8` writes complete INT32
+G256 partial sums to TMEM, resetting the accumulator with `ScaleOut::Zero`
+at each group. Two TMEM buffers allow current-group MMA to overlap with
+previous-group promotion. Three register fragments prefetch TMEM sub-tiles
+two steps ahead, with a load-completion wait every other sub-tile.
+
+Independent full/empty barriers protect operand, accumulator and scale rings.
+Producers release operand stages only after UMMA finishes reading them, and
+all consumers finish TMEM reads before an accumulator buffer is reused.
+Each of the 32 scale producer threads publishes its own completed shared
+stores. In the two-SM path, it waits for its asynchronous scale copies before
+arriving at the full barrier. Every consumer thread releases the scale stage
+after reading it; the barriers include compiler memory clobbers. Entry
+synchronization also protects the TMEM allocator's shared initialization.
+The scale ring reads the existing contiguous FP32 layouts directly. With
+`Q = K/256`, `SA[M,Q]` has stride `(Q,1)` and a contiguous K-group dimension;
+`SB[Q,N]` has stride `(N,1)` and a contiguous N dimension. Their element
+offsets are `m * Q + g` and `g * N + n` respectively. There is no scale
+transpose, packing or hidden input copy.
+
+For every group, the FP32 product `scale_a * scale_b` is rounded before
+`fmaf(float(partial), scale, total)` updates the FP32 running sum. No
+approximate scaling or bias trick is used. BF16 conversion happens once,
+after all groups. Tensor Memory is released after consumers finish.
+Other shapes or pointer alignments incompatible with the chosen tile/TMA path
+fall back to the existing scalar-compatible warp-MMA config 0, retaining the public
+minimum M/N multiple of 64 and K multiple of 256.
+
+The launcher creates fresh pointer-dependent TMA descriptors for each call
+and uses the caller's current PyTorch CUDA stream. It supports CUDA Graph
+capture and input updates without cached tensor pointers or native handles.
+The kernels instantiate CuTe primitives directly: they share pipeline ideas
+with the Thor CUTLASS implementation but do not call its configs 32/33,
+`GemmUniversalAdapter`, or collective.
+
+The SM110 CUDA build uses `-arch=sm_110a`, `-DNDEBUG` and relaxed constexpr
+support. These flags are specific to Thor; SM120/GB10 build flags are unchanged.
+Use `cuda.configs_for_device(device)` to inspect target-specific candidates.
+The original `CONFIGS`, `sm12x` source, GB10 tuning data and automatic policy
+remain unchanged. The SM110 CUDA source hash covers four project files: the
+launcher, both new pipeline headers and the shared warp-MMA source. Changing
+any of them requires rebuilding. The `.cuh` sources are included in packages.
+
+`sm110/int8_g256_cutlass.cu` adds CUTLASS IDs 32/33, adapted from Cosmos's
+Thor per-col G256 pipeline. A two-SM 256×256×256 tile combines TMA/UMMA,
+two promotion warpgroups (eight warps), three buffered TMEM sub-tile reads,
+vector shared scale loads and explicit 48/216/216 register redistribution.
+Config 32 preserves CUTLASS's structured `EpilogueTileAuto` (128×32 here);
+config 33 uses an explicit 128×16 tile.
+The Thor CUTLASS production build uses Cosmos's `-DNDEBUG` option: device
+assertions otherwise extend register live ranges and introduce heavy spills.
+Public layout validation, native compatibility checks and CUDA status checks
+remain active.
+IDs 32/33 use 128×32 / 128×16 epilogue sub-tiles. The shared warp collective
+retains IDs 0–31; GB10 IDs and source remain unchanged.
+
+The Cosmos source's default MN-major activation scales are replaced by
+K-major `SA[M,K/256]`; `SB[K/256,N]` remains MN-major. No transpose or
+packing occurs inside the API. Each completed INT32 group contributes via
+`fmaf(float(partial), scale_a * scale_b, total)`; BF16 conversion occurs once.
+Experimental pre-bias or separable scaling modes are disabled. Four-byte
+weight-scale offsets use the legacy scalar-compatible native fallback.
+
+The current CUTLASS CLC scheduler requires zero scratch bytes. The ABI queries
+scratch requirements for each call and lets PyTorch allocate any nonzero scratch
+on the current stream. Kernel parameters and pointer-dependent descriptors are
+rebuilt per invocation. No native handles or workspaces are cached across
+tensors, streams, devices or graph captures.
+Source checking includes the Thor adapter, three BSD shadow headers and all
+transitive legacy collective sources.
+
+The `thor_sm110_g256.json` table contains only Thor measurements. Exact shape
+matches select measured CUTLASS, CUDA and Triton configurations, independently of
+GB10. Automatic native selection requires at least a 5% advantage in the tuning
+run. Missing CUTLASS builds or unsupported vector scale alignment retain the
+measured CUDA/Triton fallback. Unmeasured shapes retain portable Triton in auto mode; explicit native calls
+use compatible defaults. For an unmeasured Thor shape, explicit CUDA selects
+config 27 if M/N are both multiples of 256, config 28 if both are multiples of
+128, and config 17 otherwise. This default does not prevent two-SM configs
+26/27 from supporting the final N128 half-tile when explicitly selected or
+selected by the measured table. SM120/GB10 defaults and dispatch are unchanged.
+Measurements cover prequantized GEMM and exclude input
+quantization and end-to-end inference. See [Thor results](../benchmarks/results/thor/README.md).
+Earlier measurements are preserved as [CuTe v1](../benchmarks/results/thor/cute_v1/README.md)
+and [CUTLASS v2](../benchmarks/results/thor/cutlass_v2/README.md); these archives
+precede the new CuTe candidates and retain their original source provenance.
+
 ## Build the optional native backends
 
 The alternative `backend="cutlass"` uses CUTLASS 3.x composition:
@@ -147,7 +263,7 @@ SM120. These native paths have not been validated or timed on an SM120 GPU;
 successful compilation alone does not establish correctness or performance.
 The dedicated GB10 experiment scripts still reject other devices and targets.
 
-Both production build scripts accept only `sm_120` and `sm_121`, defaulting to
+Both production build scripts accept `sm_110`, `sm_120` and `sm_121`, defaulting to
 `sm_121`. Building does not require a GPU. Each backend has one installed target;
 building it again replaces that backend's local library. Build for the target
 machine's CPU and system ABI as well: a shared library built on GB10's ARM host
@@ -202,10 +318,10 @@ by explicit `backend="cutlass"` selection. Auto continues to use `selected`.
 Other SM121 shapes use a fixed Triton heuristic. Other SM80+ architectures,
 group sizes and layouts use a conservative Triton configuration. Those paths
 must be measured on their actual target devices before making speed claims;
-H100 and Thor do not inherit the GB10 tuning table. Future specialized kernels
+H100 and Thor do not inherit the GB10 tuning table. Thor has its own measured table. Future specialized kernels
 can be added to the same dispatch layer.
 
-The native path requires SM120 or SM121, G256, BF16 output, positive M/N multiples of 64,
+The native path requires SM110, SM120 or SM121, G256, BF16 output, positive M/N multiples of 64,
 and K a positive multiple of 256. A must be contiguous [M,K], and logical B[K,N]
 must have contiguous [N,K] backing storage; both pointers must be 16-byte aligned.
 FP32 scales must be contiguous with shapes [M,K/256] and [K/256,N]. Individual

@@ -63,13 +63,12 @@ For a fixed K, this conversion-and-scaling work occurs `ceil(K / G)` times. **G2
 
 ## Development status
 
-GrainGEMM includes a custom Triton kernel and optional native CUDA/CuTe and CUTLASS kernels, with measured G256 dispatch tables for **GB10 (SM121)**. The public API selects a backend and launch configuration by architecture, shape, dtype, and layout. A100, H100, and Thor use the portable Triton path pending validation and dedicated tuning on those GPUs. **SM120 native builds are experimental and require explicit backend selection**; RTX 50-series correctness and performance have not yet been validated, and `auto` continues to use Triton on SM120.
+GrainGEMM includes a custom Triton kernel and optional native CUDA/CuTe and CUTLASS kernels, with measured G256 dispatch tables for **GB10 (SM121)**. The public API selects a backend and launch configuration by architecture, shape, dtype, and layout. Thor (SM110) has a native `tcgen05` INT8/Tensor Memory implementation and a separate measured dispatch table; see [Thor validation and performance](benchmarks/results/thor/README.md). A100 and H100 use the portable Triton path pending validation and dedicated tuning on those GPUs. **SM120 native builds are experimental and require explicit backend selection**; RTX 50-series correctness and performance have not yet been validated, and `auto` continues to use Triton on SM120.
 
 Native sources are organized by architecture under
 [`kernels/csrc/sm12x`](src/grain_gemm/kernels/csrc/sm12x), while measured tuning
-tables use GPU-specific names such as `gb10_sm121_g256.json`. Future H100 and
-Thor specializations will live in separate architecture directories; they are
-not implemented yet. See [source organization](docs/kernel_design.md#source-organization).
+tables use GPU-specific names such as `gb10_sm121_g256.json`. Future H100 specializations will live in separate architecture directories. Thor sources
+are under `kernels/csrc/sm110/`. See [source organization](docs/kernel_design.md#source-organization).
 
 ## GrainGEMM API
 
@@ -141,7 +140,7 @@ backend; the transposed weight scales are made contiguous separately. The helper
 above requires `K % G == 0`; the Triton GEMM implementation also supports partial
 final groups with scale shapes `[M, ceil(K/G)]` and `[ceil(K/G), N]`.
 
-`backend="auto"` uses the measured GB10 configuration where applicable. The
+`backend="auto"` uses the measured GB10 or Thor configuration where applicable. The
 optional CuTe backend requires a local CUDA build; otherwise the API uses Triton.
 `backend="triton"` or `backend="cuda"` explicitly selects an implementation.
 `backend="cutlass"` selects the separately built CUTLASS collective implementation;
@@ -154,6 +153,69 @@ contiguous scales, M/N multiples of 64, and K a multiple of 256.
 See [Kernel design and native build](docs/kernel_design.md) for the implementation,
 CUTLASS build instructions, and dispatch behavior. Inputs must already be
 quantized; the API does not perform quantization or provide autograd.
+
+### Thor SM110 native build
+
+Use the same `int8_gemm` and `get_kernel_config` API as GB10. Scale layouts are
+unchanged: contiguous FP32 `scale_a[M,K/256]` and `scale_b[K/256,N]`; A is
+row-major `[M,K]` and logical B `[K,N]` is a view of row-major weights `[N,K]`.
+There is no additional scale packing, input quantization or hidden copy.
+
+For `Q = K/256`, `scale_a` has stride `(Q, 1)`: its K-group dimension is
+contiguous. `scale_b` has stride `(N, 1)`: its N dimension is contiguous.
+The Thor CuTe and CUTLASS paths read these same layouts directly.
+
+```bash
+python tools/build_cuda.py --cutlass-dir /path/to/cutlass --arch sm_110
+python tools/build_cutlass.py --cutlass-dir /path/to/cutlass --arch sm_110
+```
+
+The CUDA build uses `sm_110a` instructions and `-DNDEBUG` while runtime metadata
+identifies SM110. Explicit `backend="cuda"` selects the independent Thor CuTe
+implementation. Its new warp-specialized candidates are:
+
+| CuTe config | Output tile | Operand stages | SMs per tile |
+| --- | --- | --- | --- |
+| 26 | 256 × 256 | 3 | 2 |
+| 27 | 256 × 256 | 2 | 2 |
+| 28 | 128 × 128 | 3 | 1 |
+| 29 | 128 × 256 | 2 | 1 |
+
+Two-SM configs 26/27 accept M multiples of 256 and N multiples of 128,
+including a final 128-column half-tile. One-SM configs 28/29 require complete
+tiles of their listed sizes.
+
+Each new candidate uses 384 threads per CTA: four producer warps feed TMA/UMMA
+and scale loads, while eight consumer warps promote INT32 group results into
+FP32. Two TMEM buffers and three prefetched register fragments overlap
+operand transfers, MMA and scaling. The FP32 scale product feeds
+`fmaf(float(partial), scale_a * scale_b, total)`; BF16 conversion occurs once
+after the final group. Other incompatible tile or TMA alignment cases use the
+existing warp-MMA config 0 fallback. Calls use the current PyTorch CUDA stream, rebuild
+pointer-dependent descriptors per launch, and support CUDA Graph capture
+without caching tensor pointers.
+
+The CuTe candidates apply the pipeline ideas from the Thor CUTLASS path through
+CuTe primitives; they execute their own kernels, independently of CUTLASS
+configs 32/33. `backend="cutlass"` selects the separately built collective,
+including a two-SM
+256×256×256 pipeline with eight warps applying the FP32 group scales. It reads
+the public scale layouts directly. The launcher rebuilds parameters on each
+invocation and supports CUDA Graph capture and concurrent streams. Its CLC
+scheduler requires no scratch workspace; any requested scratch is managed by PyTorch.
+`backend="auto"` uses the Thor table for measured shapes, including CUTLASS
+when its measured advantage justifies selection. It retains measured CUDA or
+Triton fallbacks when CUTLASS is unavailable. GB10 tuning entries are never used on Thor.
+For unmeasured shapes, explicit `backend="cuda"` starts with config 27 when
+M/N are both multiples of 256, config 28 when both are multiples of 128,
+and config 17 otherwise. Unmeasured `backend="auto"` shapes retain Triton.
+Group sizes 32/64/128, FP16/FP32 outputs, K tails and other positive-stride layouts
+retain the public Triton path. Native calls have the same G256/BF16/aligned-layout
+constraints as GB10. See [Thor instructions and measured scope](benchmarks/results/thor/README.md).
+SM120/GB10 sources, configuration IDs and build flags remain unchanged. Earlier
+Thor measurements are retained as [CuTe v1](benchmarks/results/thor/cute_v1/README.md)
+and [CUTLASS v2](benchmarks/results/thor/cutlass_v2/README.md); their timings do
+not measure the new CuTe candidates.
 
 ### Experimental SM120 native build
 
