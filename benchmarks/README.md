@@ -1,11 +1,14 @@
 # Tests and benchmarks
 
 Thor SM110 has separate [validation and measurements](results/thor/README.md),
-reproduced with `bench_thor.py`. The public API and scale layouts are shared.
+reproduced with `bench_thor.py`, and a [square comparison using the GB10
+protocol](#thor-custom-kernel-comparison), reproduced with `sweep_thor.py`.
+The public API and scale layouts are shared.
 
 **Hardware scope: the historical batch below is GB10-only (SM121, compute capability
-12.1).** All measured performance, tuned configurations and backend rankings,
-especially the CuTe/CUTLASS comparisons, apply only to NVIDIA GB10. Thor / Jetson
+12.1).** Measured performance, tuned configurations and backend rankings in
+those historical reports, especially the CuTe/CUTLASS comparisons, apply only to
+NVIDIA GB10. Thor / Jetson
 T5000 uses SM110 (compute capability 11.0) and uses an independent
 implementation, tuning table and validation. See [NVIDIA's compute capability
 table](https://developer.nvidia.com/cuda/gpus). This experiment boundary does not
@@ -69,6 +72,103 @@ The [GrainGEMM tests](../tests/test_int8_gemm.py) and [baseline tests](../tests/
 ```bash
 python -m pytest -q
 ```
+
+## Thor custom-kernel comparison
+
+The Thor SM110 square sweep uses the same parameters and measurement protocol as
+the [GB10 comparison below](#gb10-custom-kernel-comparison): **M = N = K = 1024,
+2048, …, 16384**, all 16 sizes, **G256**, BF16 output, seed **2026**, **five
+rounds**, **100 ms** captured batches and **50 untimed warmup calls per
+implementation**. `compare_thor.py` reuses `compare_backends.py`'s actual
+`run_case` and `export` functions, including its JSON and CSV formats.
+
+![CuTe versus GrainGEMM Triton and PyTorch BF16 on Thor, all 16 square sizes](../docs/assets/thor_cute_g256_vs_triton_bf16.png)
+
+**GPU compute clock reduced to 1.2 GHz (actual supported setting: 1197 MHz).**
+
+| M = N = K | CuTe INT8 TOPS | Triton INT8 TOPS | BF16 TFLOPS | CuTe / Triton | CuTe / BF16 |
+|---:|---:|---:|---:|---:|---:|
+| 1024 | 91.92 | 46.49 | 121.81 | 1.977× | 0.755× |
+| 2048 | 164.77 | 58.83 | 123.18 | 2.801× | 1.338× |
+| 3072 | 186.92 | 61.72 | 114.62 | 3.028× | 1.631× |
+| 4096 | 190.25 | 60.22 | 122.64 | 3.159× | 1.551× |
+| 5120 | 200.98 | 42.37 | 119.31 | 4.744× | 1.685× |
+| 6144 | 209.65 | 60.26 | 118.96 | 3.479× | 1.762× |
+| 7168 | 214.56 | 42.66 | 108.78 | 5.029× | 1.972× |
+| 8192 | 219.51 | 59.97 | 116.01 | 3.660× | 1.892× |
+| 9216 | 220.21 | 42.92 | 115.31 | 5.130× | 1.910× |
+| 10240 | 221.23 | 42.58 | 112.36 | 5.196× | 1.969× |
+| 11264 | 180.86 | 43.25 | 112.68 | 4.182× | 1.605× |
+| 12288 | 223.18 | 61.18 | 117.78 | 3.648× | 1.895× |
+| 13312 | 150.74 | 43.35 | 116.48 | 3.477× | 1.294× |
+| 14336 | 130.17 | 42.84 | 117.13 | 3.039× | 1.111× |
+| 15360 | 132.87 | 43.46 | 112.09 | 3.058× | 1.185× |
+| 16384 | 144.51 | 61.37 | 106.32 | 2.355× | 1.359× |
+
+CuTe is faster than Triton at all 16 sizes and faster than BF16 at **15 of 16
+sizes**; BF16 is faster at 1024. Peak measured CuTe throughput is **223.18 TOPS**
+at 12288. INT8 equivalent TFLOPS has the same numerical value under the
+`2MNK / time` convention; latencies and all round measurements are in the CSV.
+
+All three implementations are measured separately: forced `backend="cuda"`
+CuTe, forced `backend="triton"`, and PyTorch `torch.mm` BF16. CuTe does not fall
+back to another backend. Kernel configurations come from the installed Thor
+dispatch table, with compatible defaults for sizes without measurements; this
+comparison performs no tuning and does not establish a global optimum.
+
+Both INT8 paths use the same prequantized tensors and contiguous FP32 scales;
+BF16 uses the corresponding original BF16 inputs. A is row-major and B is
+column-major. Independent sampled CPU INT32 group-dot checks, full-output
+finiteness checks and CUDA Graph activation zero/restore checks run before
+timing. The implementation order rotates each round, and every size reports
+the median of its round medians. GEMM, group scaling and BF16 conversion are
+included; quantization, compilation, warmup and host dispatch are excluded.
+Inputs are repeated without a cache flush. INT8 throughput is **TOPS** and BF16
+throughput is **TFLOPS**, both calculated as `2MNK / time`.
+
+For this Thor run, the GPU compute clock was **reduced from 1575 MHz to
+1.2 GHz**, using the closest supported setting of **1197 MHz**. GPU clock and temperature
+snapshots are recorded before and after each size in the JSON report. The GB10
+results retain their original default clock policy. The benchmark parameters
+and timing protocol match; hardware, software versions and operating frequency
+are documented separately for each device.
+
+The entry point requires NVIDIA Thor / T5000 with compute capability **11.0**,
+rejects GB10, and requires a matching **SM110 native build**. The benchmark uses
+the existing runtime dispatch table without updating it. The earlier
+[18-shape Thor API comparison](results/thor/README.md) uses a separate timing
+protocol and retains its own report.
+
+- [Per-size CSV](results/thor/gb10_protocol_square_sweep.csv): latencies,
+  throughputs, speedups, configurations and every timing round.
+- [Full comparison JSON](results/thor/gb10_protocol_square_sweep.json): software,
+  source/build hashes, clocks, temperatures, correctness checks, graph replay and
+  quantization error.
+
+Reproduce from the repository root:
+
+Configure the Thor GPU compute clock to 1197 MHz on the host before running this
+comparison to reproduce the reported frequency. The benchmark records the
+current setting and does not change clock or power policy itself.
+
+```bash
+python tools/build_cuda.py --cutlass-dir /path/to/cutlass --arch sm_110
+python benchmarks/sweep_thor.py --requested-gpu-clock-mhz 1200 --output benchmarks/results/thor/gb10_protocol_square_sweep.json
+python benchmarks/plot_thor.py --input benchmarks/results/thor/gb10_protocol_square_sweep.json --output docs/assets/thor_cute_g256_vs_triton_bf16.png --svg docs/assets/thor_cute_g256_vs_triton_bf16.svg
+```
+
+`sweep_thor.py` runs each size after cooling to at most 60 °C; cooling is outside
+warmup and timing. This report retained 11 completed sizes from the initial
+1197 MHz run and measured the final five in separate cooled processes using
+the same code, native library, inputs and timing parameters. All three
+implementations for a size come from the same measurement. Use `--resume`
+with the same command to continue an interrupted report; it validates existing
+cases and source hashes before skipping completed sizes.
+
+Use `--sizes 1024 2048 4096` for a subset. `compare_thor.py` also provides the
+direct comparison entry point without cooling between sizes. `plot_thor.py`
+accepts completed subset reports and renders them without a GPU. The default
+sweep includes 16384.
 
 ## GB10 custom-kernel comparison
 

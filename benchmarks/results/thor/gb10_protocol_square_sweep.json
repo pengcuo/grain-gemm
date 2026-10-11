@@ -1,0 +1,3284 @@
+{
+  "benchmark": "Thor forced GrainGEMM CUDA/CuTe and Triton INT8 versus PyTorch BF16 square GEMM sweep",
+  "forced_backends": {
+    "cute_int8_gemm": "cuda",
+    "triton_int8_gemm": "triton"
+  },
+  "protocol_reference": "benchmarks/compare_backends.py (GB10)",
+  "configuration_policy": "Installed Thor dispatch table; compatible defaults for unmeasured sizes. No offline tuning in this comparison.",
+  "started_at_utc": "2026-10-11T09:51:36.552145+00:00",
+  "expected_sizes": [
+    1024,
+    2048,
+    3072,
+    4096,
+    5120,
+    6144,
+    7168,
+    8192,
+    9216,
+    10240,
+    11264,
+    12288,
+    13312,
+    14336,
+    15360,
+    16384
+  ],
+  "group_size": 256,
+  "seed": 2026,
+  "gpu": "NVIDIA Thor",
+  "compute_capability": [
+    11,
+    0
+  ],
+  "gpu_properties": {
+    "cuda_device_index": 0,
+    "multiprocessor_count": 20,
+    "total_memory_bytes": 131756773376
+  },
+  "software": {
+    "python": "3.12.3",
+    "torch": "2.11.0a0+a6c236b9fd.nv26.03.46836102",
+    "triton": "3.6.0",
+    "cuda": "13.2",
+    "driver": "620.54",
+    "grain_gemm": "0.0.0"
+  },
+  "source": {
+    "native_build": {
+      "architecture": "sm_110",
+      "cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+      "tested_cutlass_commit": "098de2a652cf8f00fd70b2df54051c7eccbb855a",
+      "nvcc_version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Mon_Mar_02_09:52:54_PM_PST_2026\nCuda compilation tools, release 13.2, V13.2.51\nBuild cuda_13.2.r13.2/compiler.37434383_0",
+      "source_sha256": {
+        "sm110/int8_g256_cute.cu": "47926db4bda1a083ce63363e9f5e9dbad65b4957eb46c9e12ec5b3eb049968aa",
+        "sm110/int8_g256_pipeline.cuh": "2e3f263f046737bbc536b71c9dfbb930ea14ae6548044fc4b79aa0cdd4472433",
+        "sm110/int8_g256_pipeline_1sm.cuh": "a78b8379b12a18da51eee4f93d0273f19049cab9a02f4945f13d91dfa56c4ad3",
+        "sm12x/int8_g256_cute.cu": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148"
+      },
+      "compiler_architecture": "sm_110a",
+      "compile_definitions": [
+        "NDEBUG"
+      ]
+    },
+    "native_library_sha256": "ffa6c369f539fe6a7a3bd8999d871ace2d0d7dfa92fbfb1fefbd037558572884",
+    "git_commit": "d37afd27b07454ab9626988fff743dcf252689b2",
+    "git_status_porcelain": "M benchmarks/README.md\n?? benchmarks/compare_thor.py\n?? benchmarks/plot_thor.py",
+    "comparison_script_sha256": "fcdda8e014194a2fd4fbe6c3ff6c72a677d9b219e0c23741911c8cfaf437a864",
+    "device_check_sha256": "fcdda8e014194a2fd4fbe6c3ff6c72a677d9b219e0c23741911c8cfaf437a864",
+    "check_sample_script_sha256": "0e7ea663757e16b37f5bc088459a81d20dd0ea8e30f81729da13f0108a6d49bd",
+    "package_source_sha256": {
+      "grain_gemm/__init__.py": "22c5685605c9d04d8168009cbead08dcb1d9000aaf606c4df633bb1f40c03d42",
+      "grain_gemm/baselines/__init__.py": "b045e960f98bbc0d0ffc1d9ad4ad3e9ecff31d859fd5761dd0f20423dd14c211",
+      "grain_gemm/baselines/sglang.py": "cde6cf5e9cef6bb66a8da2af5cdb7a74bd744eee4ca50686bc39dae661953b81",
+      "grain_gemm/gemm.py": "c9b73f162cf64e9411306cdd987c7db1798760ea9f3c57fba547237166175783",
+      "grain_gemm/kernels/__init__.py": "df3df411d10614aabefa0a3893e37899c67b80d984a70f2d82b6f334658f69ab",
+      "grain_gemm/kernels/_native/build.json": "f5134348907ed9de95a40f96bf41e25b97011ce71ffa64a7d62a32529de09358",
+      "grain_gemm/kernels/_native/cutlass_build.json": "c43bf973a30e0a72060308e3f4b31dea1b0b617a8b582d32cb2f14605e42535a",
+      "grain_gemm/kernels/_native.py": "b6331520d0472260b25a4b9406e760baa810a016260a6feb97a279843d7a9e85",
+      "grain_gemm/kernels/configs/gb10_sm121_g256.json": "a88ae37bff252d6da04eb80ac7d1bb77e05e31f31bfa36a99a60f09674b3c529",
+      "grain_gemm/kernels/configs/gb10_sm121_g256_cutlass.json": "5fe34e1093543dc239594c47a762a3a5eab8c58904560d66a706d02b520c9422",
+      "grain_gemm/kernels/configs/thor_sm110_g256.json": "128f189245a3575faaa1bbd6994bb65198ff115be23ae4c86be2ea060763568a",
+      "grain_gemm/kernels/csrc/sm110/int8_g256_cute.cu": "47926db4bda1a083ce63363e9f5e9dbad65b4957eb46c9e12ec5b3eb049968aa",
+      "grain_gemm/kernels/csrc/sm110/int8_g256_cutlass.cu": "80ffe295bdb08c517ba6cf9247506a330bbeff598c0fec0d6af494a9ee878f80",
+      "grain_gemm/kernels/csrc/sm12x/cutlass/int8_g256.cu": "8d2f5dd34bd931d6be93264585d41edf747b5dc07baa0a94d1bcb4285a8651ac",
+      "grain_gemm/kernels/csrc/sm12x/int8_g256_cute.cu": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148",
+      "grain_gemm/kernels/cuda.py": "efe42a48481c71a7b9a1ad4e54efcdabcee2d849a5b01467dc9c0f9239357b44",
+      "grain_gemm/kernels/cutlass.py": "47dfaa4800cbd2b3867e25f36b8cf51c2f25d5f47cd4fb06e111872d66f0303d",
+      "grain_gemm/kernels/triton.py": "0e4834f409c64c3cffb4481a985948239c8d737bb53b805270eabe15f029da21",
+      "grain_gemm/kernels/csrc/sm110/include/cutlass/arch/reg_reconfig.h": "0fb2b25800ea6ca721b3d621aa3fe354eb12161452dd290e48d25b8b4e947c17",
+      "grain_gemm/kernels/csrc/sm110/include/cutlass/gemm/collective/sm100_mma_warpspecialized_blockwise_scaling.hpp": "13f0637b22af94e802e43c41a2b71a27e93f355cff9974f35401947c4b5e1c51",
+      "grain_gemm/kernels/csrc/sm110/include/cutlass/gemm/kernel/sm100_gemm_tma_warpspecialized_mma_transform.hpp": "f93fab18e5bbb35263dbc80582ab87adbde6d727118de64344c3724ba2fa4327",
+      "grain_gemm/kernels/csrc/sm110/int8_g256_pipeline.cuh": "2e3f263f046737bbc536b71c9dfbb930ea14ae6548044fc4b79aa0cdd4472433",
+      "grain_gemm/kernels/csrc/sm110/int8_g256_pipeline_1sm.cuh": "a78b8379b12a18da51eee4f93d0273f19049cab9a02f4945f13d91dfa56c4ad3",
+      "grain_gemm/kernels/csrc/sm12x/cutlass/collective.hpp": "482a26e13af8acd2e097deabcc4b29cefe5c3664f5223ec952638937a26ff80c",
+      "grain_gemm/kernels/csrc/sm12x/cutlass/epilogue.hpp": "a4a7d9c0b20322880eee6afe5a4f690096a0dac7a0012ee16a5e243dfd11bfcd",
+      "grain_gemm/kernels/csrc/sm12x/cutlass/kernel.hpp": "e979950bb2e1cb613e47ea335f1d7579a5c575a24faa1833a48728afbe3e028c"
+    },
+    "shared_comparison_script_sha256": "f611c0aad7c71ae1e489aefdf437708e9829cacc3ede396c130c3c530539da98",
+    "sweep_runner_script_sha256": "99834e261079474e4387f832b8f273fb20c096ca885631b51cb15b412980e0cc",
+    "sweep_runner_published_script_sha256": "ece3bfd506d8a13884053c02aa08a756b34feef7cb0fce5659dc316f7fc29fab"
+  },
+  "gpu_state_before": {
+    "timestamp_utc": "2026-10-11T09:51:36.607218+00:00",
+    "gpc_devfreq_hz": {
+      "governor": "performance",
+      "min_freq": 1197000000,
+      "max_freq": 1197000000,
+      "cur_freq": 1197000000
+    },
+    "temperature_c": 48.72,
+    "graphics_clock_mhz": 1197,
+    "thermal_slowdown": "Not Active"
+  },
+  "torch_allow_bf16_reduced_precision_reduction": true,
+  "timing": {
+    "method": "triton.testing.do_bench_cudagraph",
+    "statistic": "median of per-round medians, separately for each size",
+    "rounds": 5,
+    "rep_ms": 100,
+    "warmup_calls_per_implementation": 50,
+    "measurement_order": "rotates implementation order each round; exact orders saved per case",
+    "scope": "GPU GEMM execution including group scaling, accumulation, and BF16 output",
+    "correctness_checks_performed_before_timing": true,
+    "includes_input_quantization": false,
+    "includes_compilation_or_autotuning": false,
+    "includes_warmup": false,
+    "includes_host_dispatch": false,
+    "cache_policy": "repeated inputs; no cache flush",
+    "rep_ms_note": "Target duration of each captured batch; graph replay count follows installed Triton."
+  },
+  "quantization": {
+    "input_dtype": "bfloat16",
+    "quantized_dtype": "int8",
+    "scale_dtype": "float32",
+    "method": "per row/column and K-group: max(abs(x)).clamp_min(1e-12)/127; round and clamp to [-127,127]",
+    "performed_before_timing": true
+  },
+  "complete": true,
+  "reports": [
+    {
+      "timestamp_utc": "2026-10-11T09:51:55.064661+00:00",
+      "shape": {
+        "m": 1024,
+        "n": 1024,
+        "k": 1024
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          1024,
+          1
+        ],
+        "b": [
+          1,
+          1024
+        ],
+        "scale_a": [
+          4,
+          1
+        ],
+        "scale_b": [
+          1024,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 27
+        },
+        "triton_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 64,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 2,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010120694525539875,
+            "max_abs_error": 1.625
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010120694525539875,
+            "max_abs_error": 1.625
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            0.023362740597076305,
+            0.0233896732055171,
+            0.023401129110211888,
+            0.02334841113386609,
+            0.02334796739977544
+          ],
+          "median_ms": 0.023362740597076305,
+          "min_ms": 0.02334796739977544,
+          "max_ms": 0.023401129110211888,
+          "effective_tops": 91.91916672090875
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            0.046068706596888644,
+            0.04618941382538501,
+            0.04600759049694268,
+            0.046254241880951244,
+            0.04624919453724848
+          ],
+          "median_ms": 0.04618941382538501,
+          "min_ms": 0.04600759049694268,
+          "max_ms": 0.046254241880951244,
+          "effective_tops": 46.492983351517985
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            0.017629403727395195,
+            0.01758151916705509,
+            0.017773558671735586,
+            0.017606232922995155,
+            0.01774322430308682
+          ],
+          "median_ms": 0.017629403727395195,
+          "min_ms": 0.01758151916705509,
+          "max_ms": 0.017773558671735586,
+          "effective_tflops": 121.81260814073478
+        }
+      },
+      "cute_speedup_over_bf16": 0.754594849612866,
+      "cute_speedup_over_triton": 1.9770546025394518,
+      "triton_speedup_over_bf16": 0.3816762818000158,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T09:51:36.641127+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 48.81,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T09:51:55.099984+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 61.84,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T09:52:12.325749+00:00",
+      "shape": {
+        "m": 2048,
+        "n": 2048,
+        "k": 2048
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          2048,
+          1
+        ],
+        "b": [
+          1,
+          2048
+        ],
+        "scale_a": [
+          8,
+          1
+        ],
+        "scale_b": [
+          2048,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 27
+        },
+        "triton_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 64,
+          "block_n": 128,
+          "num_warps": 4,
+          "num_stages": 2,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010131198912858963,
+            "max_abs_error": 2.5
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010131198912858963,
+            "max_abs_error": 2.5
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            0.10426543470452593,
+            0.10465012865601855,
+            0.10419412639896031,
+            0.10424312302380459,
+            0.10451099817837455
+          ],
+          "median_ms": 0.10426543470452593,
+          "min_ms": 0.10419412639896031,
+          "max_ms": 0.10465012865601855,
+          "effective_tops": 164.77051318766775
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            0.2913825051826343,
+            0.292874486822831,
+            0.2920304013971697,
+            0.2914668077613875,
+            0.29216513897865226
+          ],
+          "median_ms": 0.2920304013971697,
+          "min_ms": 0.2913825051826343,
+          "max_ms": 0.292874486822831,
+          "effective_tops": 58.829043489327965
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            0.13688473898004294,
+            0.13682238890392945,
+            0.14017843882242836,
+            0.13977839206827097,
+            0.13946940321296358
+          ],
+          "median_ms": 0.13946940321296358,
+          "min_ms": 0.13682238890392945,
+          "max_ms": 0.14017843882242836,
+          "effective_tflops": 123.18020145083078
+        }
+      },
+      "cute_speedup_over_bf16": 1.3376379584298566,
+      "cute_speedup_over_triton": 2.8008361757157982,
+      "triton_speedup_over_bf16": 0.47758521902410156,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T09:51:55.134500+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 59.38,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T09:52:12.364280+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 71.47,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T09:52:28.001730+00:00",
+      "shape": {
+        "m": 3072,
+        "n": 3072,
+        "k": 3072
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          3072,
+          1
+        ],
+        "b": [
+          1,
+          3072
+        ],
+        "scale_a": [
+          12,
+          1
+        ],
+        "scale_b": [
+          3072,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 26
+        },
+        "triton_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 64,
+          "block_n": 128,
+          "num_warps": 4,
+          "num_stages": 2,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010118587873876095,
+            "max_abs_error": 3.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010118587873876095,
+            "max_abs_error": 3.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            0.32026870068521596,
+            0.31142535209655764,
+            0.3086916725590544,
+            0.31020344914616765,
+            0.3094411950987819
+          ],
+          "median_ms": 0.31020344914616765,
+          "min_ms": 0.3086916725590544,
+          "max_ms": 0.32026870068521596,
+          "effective_tops": 186.916227577724
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            0.9423867351603958,
+            0.9401488394107459,
+            0.9389637641186984,
+            0.9393817253832547,
+            0.939402274365695
+          ],
+          "median_ms": 0.939402274365695,
+          "min_ms": 0.9389637641186984,
+          "max_ms": 0.9423867351603958,
+          "effective_tops": 61.72228881939929
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            0.5039846334026088,
+            0.5040043055084703,
+            0.5167023937775057,
+            0.5058638506596631,
+            0.5069328454824594
+          ],
+          "median_ms": 0.5058638506596631,
+          "min_ms": 0.5039846334026088,
+          "max_ms": 0.5167023937775057,
+          "effective_tflops": 114.61988916659985
+        }
+      },
+      "cute_speedup_over_bf16": 1.6307486330408287,
+      "cute_speedup_over_triton": 3.0283424538037593,
+      "triton_speedup_over_bf16": 0.5384954502066045,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T09:52:12.399812+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 67.41,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T09:52:28.023463+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 79.75,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T09:52:43.714927+00:00",
+      "shape": {
+        "m": 4096,
+        "n": 4096,
+        "k": 4096
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          4096,
+          1
+        ],
+        "b": [
+          1,
+          4096
+        ],
+        "scale_a": [
+          16,
+          1
+        ],
+        "scale_b": [
+          4096,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 26
+        },
+        "triton_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010121124796569347,
+            "max_abs_error": 4.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010121124796569347,
+            "max_abs_error": 4.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            0.7259188515799386,
+            0.7253361695201684,
+            0.7219051361083985,
+            0.722420946299601,
+            0.7123177119663784
+          ],
+          "median_ms": 0.722420946299601,
+          "min_ms": 0.7123177119663784,
+          "max_ms": 0.7259188515799386,
+          "effective_tops": 190.2477415362782
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            2.2822348128917604,
+            2.2819802927416424,
+            2.2821838024050694,
+            2.28181652690089,
+            2.283294500306595
+          ],
+          "median_ms": 2.2821838024050694,
+          "min_ms": 2.28181652690089,
+          "max_ms": 2.283294500306595,
+          "effective_tops": 60.22256109571918
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            1.1206399826776414,
+            1.1349148750305176,
+            1.152519740415423,
+            1.1192207336425781,
+            1.1200946925841655
+          ],
+          "median_ms": 1.1206399826776414,
+          "min_ms": 1.1192207336425781,
+          "max_ms": 1.152519740415423,
+          "effective_tflops": 122.6432713417964
+        }
+      },
+      "cute_speedup_over_bf16": 1.5512285301496391,
+      "cute_speedup_over_triton": 3.159077562873719,
+      "triton_speedup_over_bf16": 0.4910384437470198,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T09:52:28.045586+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 75.62,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T09:52:43.737567+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 82.69,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T09:52:59.654650+00:00",
+      "shape": {
+        "m": 5120,
+        "n": 5120,
+        "k": 5120
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          5120,
+          1
+        ],
+        "b": [
+          1,
+          5120
+        ],
+        "scale_a": [
+          20,
+          1
+        ],
+        "scale_b": [
+          5120,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_explicit",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 27
+        },
+        "triton_int8_gemm": {
+          "policy": "portable",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 32,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 2,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010119139216840267,
+            "max_abs_error": 4.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010119139216840267,
+            "max_abs_error": 4.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            1.3361083475748698,
+            1.3345286560058596,
+            1.3356065877278647,
+            1.3357036844889323,
+            1.3329107666015625
+          ],
+          "median_ms": 1.3356065877278647,
+          "min_ms": 1.3329107666015625,
+          "max_ms": 1.3361083475748698,
+          "effective_tops": 200.9839263047232
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            6.334890747070313,
+            6.33646723429362,
+            6.334949493408203,
+            6.336596425374349,
+            6.335744984944661
+          ],
+          "median_ms": 6.335744984944661,
+          "min_ms": 6.334890747070313,
+          "max_ms": 6.336596425374349,
+          "effective_tops": 42.36841233949138
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            2.248383331298828,
+            2.249954472417417,
+            2.3432276465676045,
+            2.2370683496648613,
+            2.25426025390625
+          ],
+          "median_ms": 2.249954472417417,
+          "min_ms": 2.2370683496648613,
+          "max_ms": 2.3432276465676045,
+          "effective_tflops": 119.30706122759234
+        }
+      },
+      "cute_speedup_over_bf16": 1.6845937217523328,
+      "cute_speedup_over_triton": 4.743720975293359,
+      "triton_speedup_over_bf16": 0.355120743932068,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T09:52:43.760636+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 78.06,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T09:52:59.676879+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 85.5,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T09:53:15.984281+00:00",
+      "shape": {
+        "m": 6144,
+        "n": 6144,
+        "k": 6144
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          6144,
+          1
+        ],
+        "b": [
+          1,
+          6144
+        ],
+        "scale_a": [
+          24,
+          1
+        ],
+        "scale_b": [
+          6144,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 27
+        },
+        "triton_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010119187645614147,
+            "max_abs_error": 4.5
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010119187645614147,
+            "max_abs_error": 4.5
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            2.2173525492350263,
+            2.207830386691623,
+            2.213563028971354,
+            2.212303331163194,
+            2.2125012715657553
+          ],
+          "median_ms": 2.2125012715657553,
+          "min_ms": 2.207830386691623,
+          "max_ms": 2.2173525492350263,
+          "effective_tops": 209.6525203982077
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            7.6969906733586235,
+            7.699374834696451,
+            7.697335463303786,
+            7.699294726053874,
+            7.697031461275541
+          ],
+          "median_ms": 7.697335463303786,
+          "min_ms": 7.6969906733586235,
+          "max_ms": 7.699374834696451,
+          "effective_tops": 60.26195300690551
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            3.893089904785156,
+            3.893300276536208,
+            4.055107116699219,
+            3.907899122971755,
+            3.8993329268235426
+          ],
+          "median_ms": 3.8993329268235426,
+          "min_ms": 3.893089904785156,
+          "max_ms": 4.055107116699219,
+          "effective_tflops": 118.957902972872
+        }
+      },
+      "cute_speedup_over_bf16": 1.7624093495160076,
+      "cute_speedup_over_triton": 3.479019678870735,
+      "triton_speedup_over_bf16": 0.5065821731965808,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T09:52:59.698943+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 81.12,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T09:53:16.007262+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 88.56,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T09:53:33.079045+00:00",
+      "shape": {
+        "m": 7168,
+        "n": 7168,
+        "k": 7168
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          7168,
+          1
+        ],
+        "b": [
+          1,
+          7168
+        ],
+        "scale_a": [
+          28,
+          1
+        ],
+        "scale_b": [
+          7168,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_explicit",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 27
+        },
+        "triton_int8_gemm": {
+          "policy": "portable",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 32,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 2,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010119795799255371,
+            "max_abs_error": 5.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010119795799255371,
+            "max_abs_error": 5.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            3.4364746941460504,
+            3.431713104248047,
+            3.4330504844928607,
+            3.432929071886786,
+            3.433985085322939
+          ],
+          "median_ms": 3.4330504844928607,
+          "min_ms": 3.431713104248047,
+          "max_ms": 3.4364746941460504,
+          "effective_tops": 214.55754717012573
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            17.266118621826173,
+            17.266432189941405,
+            17.265526580810548,
+            17.2627197265625,
+            17.264332580566403
+          ],
+          "median_ms": 17.265526580810548,
+          "min_ms": 17.2627197265625,
+          "max_ms": 17.266432189941405,
+          "effective_tops": 42.66228937857395
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            6.768429251278148,
+            6.771629109102137,
+            6.792216062545776,
+            6.815729141235352,
+            6.749279975891113
+          ],
+          "median_ms": 6.771629109102137,
+          "min_ms": 6.749279975891113,
+          "max_ms": 6.815729141235352,
+          "effective_tflops": 108.77543341437752
+        }
+      },
+      "cute_speedup_over_bf16": 1.9724816572577901,
+      "cute_speedup_over_triton": 5.029208471823873,
+      "triton_speedup_over_bf16": 0.39220518861141135,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T09:53:16.030244+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 83.88,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T09:53:33.101803+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 92.09,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T09:53:50.192760+00:00",
+      "shape": {
+        "m": 8192,
+        "n": 8192,
+        "k": 8192
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          8192,
+          1
+        ],
+        "b": [
+          1,
+          8192
+        ],
+        "scale_a": [
+          32,
+          1
+        ],
+        "scale_b": [
+          8192,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 26
+        },
+        "triton_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 128,
+          "num_warps": 8,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010117046535015106,
+            "max_abs_error": 5.28125
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010117046535015106,
+            "max_abs_error": 5.28125
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            5.001703262329102,
+            5.008932214034231,
+            5.009728050231933,
+            5.010824504651522,
+            5.00738525390625
+          ],
+          "median_ms": 5.008932214034231,
+          "min_ms": 5.001703262329102,
+          "max_ms": 5.010824504651522,
+          "effective_tops": 219.510183167451
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            18.334092712402345,
+            18.33472671508789,
+            18.33478698730469,
+            18.336419677734376,
+            18.334239959716797
+          ],
+          "median_ms": 18.33472671508789,
+          "min_ms": 18.334092712402345,
+          "max_ms": 18.336419677734376,
+          "effective_tops": 59.96880372758418
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            9.571405029296876,
+            9.46936492919922,
+            9.830918502807616,
+            9.477518081665039,
+            9.465975952148437
+          ],
+          "median_ms": 9.477518081665039,
+          "min_ms": 9.465975952148437,
+          "max_ms": 9.830918502807616,
+          "effective_tflops": 116.0126119836254
+        }
+      },
+      "cute_speedup_over_bf16": 1.8921234460132126,
+      "cute_speedup_over_triton": 3.6604062366260224,
+      "triton_speedup_over_bf16": 0.5169162447273274,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T09:53:33.124905+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 87.09,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T09:53:50.215772+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 94.28,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T09:54:08.538008+00:00",
+      "shape": {
+        "m": 9216,
+        "n": 9216,
+        "k": 9216
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          9216,
+          1
+        ],
+        "b": [
+          1,
+          9216
+        ],
+        "scale_a": [
+          36,
+          1
+        ],
+        "scale_b": [
+          9216,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_explicit",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 27
+        },
+        "triton_int8_gemm": {
+          "policy": "portable",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 32,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 2,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010116253048181534,
+            "max_abs_error": 6.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010116253048181534,
+            "max_abs_error": 6.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            7.106957844325475,
+            7.10768917628697,
+            7.109172821044922,
+            7.12434064424955,
+            7.111905318040114
+          ],
+          "median_ms": 7.109172821044922,
+          "min_ms": 7.106957844325475,
+          "max_ms": 7.12434064424955,
+          "effective_tops": 220.2106516186643
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            36.476999282836914,
+            36.46687126159668,
+            36.46623992919922,
+            36.47220039367676,
+            36.47412872314453
+          ],
+          "median_ms": 36.47220039367676,
+          "min_ms": 36.46623992919922,
+          "max_ms": 36.476999282836914,
+          "effective_tops": 42.92352977045542
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            13.597346169607981,
+            13.570763179234095,
+            14.160566602434432,
+            13.564111982073102,
+            13.575998033796038
+          ],
+          "median_ms": 13.575998033796038,
+          "min_ms": 13.564111982073102,
+          "max_ms": 14.160566602434432,
+          "effective_tflops": 115.31495330912773
+        }
+      },
+      "cute_speedup_over_bf16": 1.9096452394022134,
+      "cute_speedup_over_triton": 5.130301557124897,
+      "triton_speedup_over_bf16": 0.3722286532553087,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T09:53:50.239306+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 89.0,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T09:54:08.560053+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 97.12,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T09:54:27.720916+00:00",
+      "shape": {
+        "m": 10240,
+        "n": 10240,
+        "k": 10240
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          10240,
+          1
+        ],
+        "b": [
+          1,
+          10240
+        ],
+        "scale_a": [
+          40,
+          1
+        ],
+        "scale_b": [
+          10240,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_explicit",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 27
+        },
+        "triton_int8_gemm": {
+          "policy": "portable",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 32,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 2,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010118919424712658,
+            "max_abs_error": 6.25
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010118919424712658,
+            "max_abs_error": 6.25
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            9.65835189819336,
+            9.70681266784668,
+            9.745547103881837,
+            9.653849792480468,
+            9.77099380493164
+          ],
+          "median_ms": 9.70681266784668,
+          "min_ms": 9.653849792480468,
+          "max_ms": 9.77099380493164,
+          "effective_tops": 221.23468552282148
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            50.435760498046875,
+            50.4473762512207,
+            50.43966484069824,
+            50.43788719177246,
+            50.442928314208984
+          ],
+          "median_ms": 50.43966484069824,
+          "min_ms": 50.435760498046875,
+          "max_ms": 50.4473762512207,
+          "effective_tops": 42.57529574754946
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            19.113216400146484,
+            19.066565704345702,
+            19.724410247802734,
+            19.078434753417966,
+            19.152915191650393
+          ],
+          "median_ms": 19.113216400146484,
+          "min_ms": 19.066565704345702,
+          "max_ms": 19.724410247802734,
+          "effective_tflops": 112.35595323367666
+        }
+      },
+      "cute_speedup_over_bf16": 1.9690517427474452,
+      "cute_speedup_over_triton": 5.196315883150506,
+      "triton_speedup_over_bf16": 0.378932264132029,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T09:54:08.582855+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 92.16,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T09:54:27.743355+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 99.12,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T09:54:48.960253+00:00",
+      "shape": {
+        "m": 11264,
+        "n": 11264,
+        "k": 11264
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          11264,
+          1
+        ],
+        "b": [
+          1,
+          11264
+        ],
+        "scale_a": [
+          44,
+          1
+        ],
+        "scale_b": [
+          11264,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_explicit",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 27
+        },
+        "triton_int8_gemm": {
+          "policy": "portable",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 32,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 2,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010115880519151688,
+            "max_abs_error": 6.09375
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010115880519151688,
+            "max_abs_error": 6.09375
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            15.803864161173502,
+            15.816970825195312,
+            15.78921127319336,
+            15.81831169128418,
+            15.798551559448242
+          ],
+          "median_ms": 15.803864161173502,
+          "min_ms": 15.78921127319336,
+          "max_ms": 15.81831169128418,
+          "effective_tops": 180.8608772093976
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            66.09078598022461,
+            66.09255981445312,
+            66.09564971923828,
+            66.08352279663086,
+            66.07707214355469
+          ],
+          "median_ms": 66.09078598022461,
+          "min_ms": 66.07707214355469,
+          "max_ms": 66.09564971923828,
+          "effective_tops": 43.24809719078311
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            25.365792592366535,
+            25.440757751464844,
+            25.339946746826172,
+            25.362607320149742,
+            25.566202799479164
+          ],
+          "median_ms": 25.365792592366535,
+          "min_ms": 25.339946746826172,
+          "max_ms": 25.566202799479164,
+          "effective_tflops": 112.68328104000045
+        }
+      },
+      "cute_speedup_over_bf16": 1.605037371473017,
+      "cute_speedup_over_triton": 4.1819383731856306,
+      "triton_speedup_over_bf16": 0.38380225346323427,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T09:54:27.766041+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 93.94,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T09:54:48.982944+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 97.34,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T10:02:33.230570+00:00",
+      "shape": {
+        "m": 12288,
+        "n": 12288,
+        "k": 12288
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          12288,
+          1
+        ],
+        "b": [
+          1,
+          12288
+        ],
+        "scale_a": [
+          48,
+          1
+        ],
+        "scale_b": [
+          12288,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 26
+        },
+        "triton_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 128,
+          "num_warps": 8,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010118314996361732,
+            "max_abs_error": 6.5
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010118314996361732,
+            "max_abs_error": 6.5
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            16.627066930135094,
+            16.786907196044922,
+            16.603008270263672,
+            16.62689971923828,
+            16.576688385009767
+          ],
+          "median_ms": 16.62689971923828,
+          "min_ms": 16.576688385009767,
+          "max_ms": 16.786907196044922,
+          "effective_tops": 223.18362451241168
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            60.655616760253906,
+            60.65318489074707,
+            60.64761543273926,
+            60.65603256225586,
+            60.65056037902832
+          ],
+          "median_ms": 60.65318489074707,
+          "min_ms": 60.64761543273926,
+          "max_ms": 60.65603256225586,
+          "effective_tops": 61.181482067730755
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            31.401588439941406,
+            31.505690256754555,
+            31.549786885579426,
+            31.463141123453777,
+            31.5182622273763
+          ],
+          "median_ms": 31.505690256754555,
+          "min_ms": 31.401588439941406,
+          "max_ms": 31.549786885579426,
+          "effective_tflops": 117.783540481181
+        }
+      },
+      "cute_speedup_over_bf16": 1.8948625894640272,
+      "cute_speedup_over_triton": 3.6478950324435915,
+      "triton_speedup_over_bf16": 0.5194399983035499,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T10:02:08.235930+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 52.62,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T10:02:33.253329+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 84.16,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T10:03:18.816231+00:00",
+      "shape": {
+        "m": 13312,
+        "n": 13312,
+        "k": 13312
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          13312,
+          1
+        ],
+        "b": [
+          1,
+          13312
+        ],
+        "scale_a": [
+          52,
+          1
+        ],
+        "scale_b": [
+          13312,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_explicit",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 27
+        },
+        "triton_int8_gemm": {
+          "policy": "portable",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 32,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 2,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010117932222783566,
+            "max_abs_error": 6.5
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010117932222783566,
+            "max_abs_error": 6.5
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            31.208367665608723,
+            31.299025217692055,
+            31.320799509684242,
+            31.34296544392904,
+            31.296207427978516
+          ],
+          "median_ms": 31.299025217692055,
+          "min_ms": 31.208367665608723,
+          "max_ms": 31.34296544392904,
+          "effective_tops": 150.74020810044576
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            108.83115005493164,
+            108.81805038452148,
+            108.84292602539062,
+            108.83940887451172,
+            108.84001541137695
+          ],
+          "median_ms": 108.83940887451172,
+          "min_ms": 108.81805038452148,
+          "max_ms": 108.84292602539062,
+          "effective_tops": 43.34846746637263
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            40.51511192321777,
+            40.50391960144043,
+            40.48720932006836,
+            40.47083854675293,
+            40.59123992919922
+          ],
+          "median_ms": 40.50391960144043,
+          "min_ms": 40.47083854675293,
+          "max_ms": 40.59123992919922,
+          "effective_tflops": 116.48308660202393
+        }
+      },
+      "cute_speedup_over_bf16": 1.2940952416161902,
+      "cute_speedup_over_triton": 3.4774057056891747,
+      "triton_speedup_over_bf16": 0.3721438771147694,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T10:02:46.016043+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 58.84,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T10:03:18.839029+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 80.41,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T10:04:35.438166+00:00",
+      "shape": {
+        "m": 14336,
+        "n": 14336,
+        "k": 14336
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          14336,
+          1
+        ],
+        "b": [
+          1,
+          14336
+        ],
+        "scale_a": [
+          56,
+          1
+        ],
+        "scale_b": [
+          14336,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_explicit",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 27
+        },
+        "triton_int8_gemm": {
+          "policy": "portable",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 32,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 2,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0009765625
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0009765625
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010119092650711536,
+            "max_abs_error": 7.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010119092650711536,
+            "max_abs_error": 7.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            45.287384033203125,
+            45.25961685180664,
+            45.22340774536133,
+            45.269256591796875,
+            45.28596878051758
+          ],
+          "median_ms": 45.269256591796875,
+          "min_ms": 45.22340774536133,
+          "max_ms": 45.287384033203125,
+          "effective_tops": 130.1699116300443
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            137.56451416015625,
+            137.5804443359375,
+            137.5642547607422,
+            137.57179260253906,
+            137.5524139404297
+          ],
+          "median_ms": 137.56451416015625,
+          "min_ms": 137.5524139404297,
+          "max_ms": 137.5804443359375,
+          "effective_tops": 42.83586625582502
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            50.25371170043945,
+            50.31500816345215,
+            49.957536697387695,
+            50.42099189758301,
+            50.31025505065918
+          ],
+          "median_ms": 50.31025505065918,
+          "min_ms": 49.957536697387695,
+          "max_ms": 50.42099189758301,
+          "effective_tflops": 117.12711700981114
+        }
+      },
+      "cute_speedup_over_bf16": 1.1113558922409115,
+      "cute_speedup_over_triton": 3.038806565802628,
+      "triton_speedup_over_bf16": 0.36572116986570136,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T10:03:58.444021+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 59.88,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T10:04:35.460420+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 81.78,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T10:06:33.167120+00:00",
+      "shape": {
+        "m": 15360,
+        "n": 15360,
+        "k": 15360
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          15360,
+          1
+        ],
+        "b": [
+          1,
+          15360
+        ],
+        "scale_a": [
+          60,
+          1
+        ],
+        "scale_b": [
+          15360,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_explicit",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 27
+        },
+        "triton_int8_gemm": {
+          "policy": "portable",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 32,
+          "block_n": 64,
+          "num_warps": 4,
+          "num_stages": 2,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010120809078216553,
+            "max_abs_error": 8.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010120809078216553,
+            "max_abs_error": 8.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            54.56390571594238,
+            54.646623611450195,
+            54.545616149902344,
+            54.540687561035156,
+            54.54750442504883
+          ],
+          "median_ms": 54.54750442504883,
+          "min_ms": 54.540687561035156,
+          "max_ms": 54.646623611450195,
+          "effective_tops": 132.87055729485854
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            166.78457641601562,
+            166.77041625976562,
+            166.78484344482422,
+            166.77533721923828,
+            166.80577087402344
+          ],
+          "median_ms": 166.78457641601562,
+          "min_ms": 166.77041625976562,
+          "max_ms": 166.80577087402344,
+          "effective_tops": 43.45580069659264
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            64.6566390991211,
+            64.2558708190918,
+            64.6618881225586,
+            65.87276840209961,
+            65.0097885131836
+          ],
+          "median_ms": 64.6618881225586,
+          "min_ms": 64.2558708190918,
+          "max_ms": 65.87276840209961,
+          "effective_tflops": 112.08700399009034
+        }
+      },
+      "cute_speedup_over_bf16": 1.1854233993675636,
+      "cute_speedup_over_triton": 3.057602326155663,
+      "triton_speedup_over_bf16": 0.38769704916401,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T10:05:51.206179+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 59.78,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T10:06:33.190560+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 83.34,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "timestamp_utc": "2026-10-11T10:08:40.236985+00:00",
+      "shape": {
+        "m": 16384,
+        "n": 16384,
+        "k": 16384
+      },
+      "group_size": 256,
+      "seed": 2026,
+      "output_dtype": "bfloat16 for all implementations",
+      "layout": {
+        "a": "row-major",
+        "b": "column-major",
+        "scales": "row-major"
+      },
+      "input_strides": {
+        "a": [
+          16384,
+          1
+        ],
+        "b": [
+          1,
+          16384
+        ],
+        "scale_a": [
+          64,
+          1
+        ],
+        "scale_b": [
+          16384,
+          1
+        ]
+      },
+      "kernel_configs": {
+        "cute_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "cuda",
+          "config_id": 29
+        },
+        "triton_int8_gemm": {
+          "policy": "sm110_g256_measured",
+          "compute_capability": [
+            11,
+            0
+          ],
+          "backend": "triton",
+          "block_m": 128,
+          "block_n": 128,
+          "num_warps": 8,
+          "num_stages": 3,
+          "swizzle": 8
+        }
+      },
+      "graph_replay_checks": {
+        "cute_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        },
+        "triton_int8_gemm": {
+          "original_matches_eager": true,
+          "zeroed_activation_gives_zero": true,
+          "restored_activation_matches_eager": true
+        }
+      },
+      "measurement_order": [
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ],
+        [
+          "torch_mm_bf16",
+          "cute_int8_gemm",
+          "triton_int8_gemm"
+        ],
+        [
+          "cute_int8_gemm",
+          "triton_int8_gemm",
+          "torch_mm_bf16"
+        ],
+        [
+          "triton_int8_gemm",
+          "torch_mm_bf16",
+          "cute_int8_gemm"
+        ]
+      ],
+      "sampled_correctness": {
+        "cute_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        },
+        "triton_int8_gemm": {
+          "checked_rows": 32,
+          "checked_columns": 32,
+          "max_abs_error": 0.0
+        }
+      },
+      "quantization_difference": {
+        "reference": "torch.mm on the original BF16 inputs",
+        "note": "Synthetic-input quantization difference, not model accuracy or kernel correctness.",
+        "results": {
+          "cute_int8_gemm": {
+            "relative_rms_error": 0.010120286606252193,
+            "max_abs_error": 8.0
+          },
+          "triton_int8_gemm": {
+            "relative_rms_error": 0.010120286606252193,
+            "max_abs_error": 8.0
+          }
+        }
+      },
+      "results": {
+        "cute_int8_gemm": {
+          "round_medians_ms": [
+            60.86851119995117,
+            60.85928153991699,
+            60.863887786865234,
+            60.8812141418457,
+            60.90121650695801
+          ],
+          "median_ms": 60.86851119995117,
+          "min_ms": 60.85928153991699,
+          "max_ms": 60.90121650695801,
+          "effective_tops": 144.5097448385604
+        },
+        "triton_int8_gemm": {
+          "round_medians_ms": [
+            143.4244613647461,
+            143.10091400146484,
+            143.33975982666016,
+            143.30401611328125,
+            143.33460998535156
+          ],
+          "median_ms": 143.33460998535156,
+          "min_ms": 143.10091400146484,
+          "max_ms": 143.4244613647461,
+          "effective_tops": 61.36754425959605
+        },
+        "torch_mm_bf16": {
+          "round_medians_ms": [
+            82.51264190673828,
+            85.85782623291016,
+            85.10079956054688,
+            82.73211288452148,
+            80.86105728149414
+          ],
+          "median_ms": 82.73211288452148,
+          "min_ms": 80.86105728149414,
+          "max_ms": 85.85782623291016,
+          "effective_tflops": 106.3201786528249
+        }
+      },
+      "cute_speedup_over_bf16": 1.359193961763728,
+      "cute_speedup_over_triton": 2.3548236544590653,
+      "triton_speedup_over_bf16": 0.5771956465572167,
+      "gpu_state_before": {
+        "timestamp_utc": "2026-10-11T10:07:57.953686+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 59.91,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "timestamp_utc": "2026-10-11T10:08:40.259994+00:00",
+        "gpc_devfreq_hz": {
+          "governor": "performance",
+          "min_freq": 1197000000,
+          "max_freq": 1197000000,
+          "cur_freq": 1197000000
+        },
+        "temperature_c": 86.53,
+        "graphics_clock_mhz": 1197,
+        "thermal_slowdown": "Not Active"
+      }
+    }
+  ],
+  "updated_at_utc": "2026-10-11T10:08:40.814357+00:00",
+  "measurement_segments": [
+    {
+      "kind": "resumed_existing",
+      "sizes": [
+        1024,
+        2048,
+        3072,
+        4096,
+        5120,
+        6144,
+        7168,
+        8192,
+        9216,
+        10240,
+        11264
+      ],
+      "started_at_utc": "2026-10-11T09:51:36.552145+00:00",
+      "completed_at_utc": "2026-10-11T09:54:48.982944+00:00"
+    },
+    {
+      "kind": "isolated_case",
+      "sizes": [
+        12288
+      ],
+      "started_at_utc": "2026-10-11T10:02:08.146305+00:00",
+      "completed_at_utc": "2026-10-11T10:02:33.275115+00:00"
+    },
+    {
+      "kind": "isolated_case",
+      "sizes": [
+        13312
+      ],
+      "started_at_utc": "2026-10-11T10:02:45.932145+00:00",
+      "completed_at_utc": "2026-10-11T10:03:18.861331+00:00"
+    },
+    {
+      "kind": "isolated_case",
+      "sizes": [
+        14336
+      ],
+      "started_at_utc": "2026-10-11T10:03:58.354171+00:00",
+      "completed_at_utc": "2026-10-11T10:04:35.482057+00:00"
+    },
+    {
+      "kind": "isolated_case",
+      "sizes": [
+        15360
+      ],
+      "started_at_utc": "2026-10-11T10:05:51.120984+00:00",
+      "completed_at_utc": "2026-10-11T10:06:33.212337+00:00"
+    },
+    {
+      "kind": "isolated_case",
+      "sizes": [
+        16384
+      ],
+      "started_at_utc": "2026-10-11T10:07:57.867349+00:00",
+      "completed_at_utc": "2026-10-11T10:08:40.281641+00:00"
+    }
+  ],
+  "frequency_setting": {
+    "requested_hz": 1200000000,
+    "applied_hz": 1197000000,
+    "note": "GPU clock reduced to 1.2 GHz; actual supported setting 1197 MHz"
+  },
+  "gpu_state_after": {
+    "timestamp_utc": "2026-10-11T10:08:40.814277+00:00",
+    "gpc_devfreq_hz": {
+      "governor": "performance",
+      "min_freq": 1197000000,
+      "max_freq": 1197000000,
+      "cur_freq": 1197000000
+    },
+    "temperature_c": 72.44,
+    "graphics_clock_mhz": 1197,
+    "thermal_slowdown": "Not Active"
+  },
+  "completed_at_utc": "2026-10-11T10:08:40.788760+00:00",
+  "metadata_corrections": [
+    {
+      "field": "measurement_segments[0].sizes",
+      "reason": "Corrected a mutable-list alias in the resume segment metadata: the existing segment contains only the first 11 sizes, while the final five sizes have their own isolated-case segments. All case measurements, correctness checks and GPU snapshots are unchanged.",
+      "source_note": "sweep_runner_script_sha256 records the runner actually executed; sweep_runner_published_script_sha256 records the published one-line list-copy fix."
+    }
+  ]
+}
