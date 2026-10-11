@@ -212,10 +212,7 @@ and config 17 otherwise. Unmeasured `backend="auto"` shapes retain Triton.
 Group sizes 32/64/128, FP16/FP32 outputs, K tails and other positive-stride layouts
 retain the public Triton path. Native calls have the same G256/BF16/aligned-layout
 constraints as GB10. See [Thor instructions and measured scope](benchmarks/results/thor/README.md).
-SM120/GB10 sources, configuration IDs and build flags remain unchanged. Earlier
-Thor measurements are retained as [CuTe v1](benchmarks/results/thor/cute_v1/README.md)
-and [CUTLASS v2](benchmarks/results/thor/cutlass_v2/README.md); their timings do
-not measure the new CuTe candidates.
+SM120/GB10 sources, configuration IDs and build flags remain unchanged.
 
 ### Experimental SM120 native build
 

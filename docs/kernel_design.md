@@ -44,8 +44,7 @@ launch configurations across GPU models. The `gb10_` tables contain GB10
 measurements only; RTX GPUs need their own validation and tuning data.
 
 Thor/T5000 uses the native `sm110/` implementation. Future native H100
-implementations can be added under `sm90/`; that implementation is not yet present. Triton remains the general implementation. Frozen experiment source
-snapshots and historical measurements retain their original paths and hashes.
+implementations can be added under `sm90/`; that implementation is not yet present. Triton remains the general implementation.
 
 ## Implementations
 
@@ -208,9 +207,6 @@ config 27 if M/N are both multiples of 256, config 28 if both are multiples of
 selected by the measured table. SM120/GB10 defaults and dispatch are unchanged.
 Measurements cover prequantized GEMM and exclude input
 quantization and end-to-end inference. See [Thor results](../benchmarks/results/thor/README.md).
-Earlier measurements are preserved as [CuTe v1](../benchmarks/results/thor/cute_v1/README.md)
-and [CUTLASS v2](../benchmarks/results/thor/cutlass_v2/README.md); these archives
-precede the new CuTe candidates and retain their original source provenance.
 
 ## Build the optional native backends
 

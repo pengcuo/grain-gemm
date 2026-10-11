@@ -22,3 +22,10 @@ experiments/**/*.so
 experiments/**/*.cubin
 experiments/**/*.ptx
 experiments/**/rebuild_manifest.json
+
+# Local Thor logs, diagnostics and intermediate report archives
+benchmarks/results/thor/**/*.log
+benchmarks/results/thor/diagnostics/
+benchmarks/results/thor/cute_v1/
+benchmarks/results/thor/cutlass_v2/
+benchmarks/results/thor/wheel_validation.json

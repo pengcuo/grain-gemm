@@ -5,6 +5,5 @@
 benchmarks/results/cutlass/optimized/resource-usage.txt -text -whitespace
 benchmarks/results/cutlass/residual-gap/*-resource.txt -text -whitespace
 
-# Preserve Thor tool output and vendored header bytes for recorded source hashes.
-benchmarks/results/thor/**/*.log -text -whitespace
+# Preserve vendored Thor header bytes for recorded source hashes.
 src/grain_gemm/kernels/csrc/sm110/include/cutlass/** -text whitespace=-blank-at-eol
