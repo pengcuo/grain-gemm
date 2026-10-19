@@ -6,7 +6,7 @@
     2048
   ],
   "seed": 2026,
-  "timestamp_utc": "2026-10-19T15:12:39.544786+00:00",
+  "timestamp_utc": "2026-10-19T15:27:13.195866+00:00",
   "gpu": "NVIDIA Thor",
   "compute_capability": [
     11,
@@ -36,8 +36,8 @@
   "throughput": "6*T*top_k*H*I divided by full FFN latency; effective INT8 TOPS/floating-point TFLOPS exclude non-GEMM operation counts.",
   "cpu_correctness": "Independent per-token/per-slot CPU INT32 group dots, FP32 group scale products, GEMM output rounding, FP32 SwiGLU and re-quantization.",
   "source": {
-    "git_commit": "41db55080f0f6e7ed952955fe84bda50cd8f732f",
-    "git_status_porcelain": "M README.md\n M src/grain_gemm/__init__.py\n M src/grain_gemm/kernels/csrc/sm110/int8_g256_cutlass.cu\n M src/grain_gemm/kernels/cutlass.py\n M tests/test_native_targets.py\n?? benchmarks/bench_moe_ffn.py\n?? benchmarks/results/thor/moe_ffn.csv\n?? benchmarks/results/thor/moe_ffn.json\n?? docs/moe_ffn.md\n?? src/grain_gemm/kernels/moe.py\n?? src/grain_gemm/moe.py\n?? tests/test_moe_ffn.py",
+    "git_commit": "8dba0e10b269dd622fcdecb5c007703083f0904d",
+    "git_status_porcelain": "M docs/moe_ffn.md\n M src/grain_gemm/kernels/moe.py\n M src/grain_gemm/moe.py\n M tests/test_moe_ffn.py",
     "native_file_sha256": {
       "build.json": "f5134348907ed9de95a40f96bf41e25b97011ce71ffa64a7d62a32529de09358",
       "cutlass_build.json": "1b45c3ecb1725e7486b3b40b6464d672da7a3123a8182edd45a7f7b25ef4c895",
@@ -72,9 +72,9 @@
     "kernels/csrc/sm12x/int8_g256_cute.cu": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148",
     "kernels/cuda.py": "efe42a48481c71a7b9a1ad4e54efcdabcee2d849a5b01467dc9c0f9239357b44",
     "kernels/cutlass.py": "b79803e07bdffc6d249b0478f5d511f80754cea3653a486e871bf0866d0b705c",
-    "kernels/moe.py": "980434bdf7e00f2e02fda3a5acacc85d932bff28d5e2e4775e2756784e23afb8",
+    "kernels/moe.py": "5d2ce005455c4c8aac0db6601ab2f29fadb6e3b6f9b3bcf29ddc4abe7e8311e0",
     "kernels/triton.py": "0e4834f409c64c3cffb4481a985948239c8d737bb53b805270eabe15f029da21",
-    "moe.py": "83303b71ff5a6728ab83cb674304baec595d94eaff949d68116fca4a44c63553"
+    "moe.py": "d127696becc448694bd217273029fa6588524ec9765063c20c32f45cfacc9f2f"
   },
   "cases": [
     {
@@ -128,47 +128,47 @@
       "results": {
         "int8_moe_ffn": {
           "round_medians_ms": [
-            0.9849920272827148,
-            1.287071943283081,
-            1.2812479734420776,
-            1.3051199913024902,
-            1.3023680448532104
+            0.9887040257453918,
+            1.0003520250320435,
+            0.9741759896278381,
+            0.9389439821243286,
+            0.9899200201034546
           ],
-          "median_ms": 1.287071943283081,
-          "min_ms": 0.9849920272827148,
-          "max_ms": 1.3051199913024902,
-          "effective_tops": 3.7541321860181953
+          "median_ms": 0.9887040257453918,
+          "min_ms": 0.9389439821243286,
+          "max_ms": 1.0003520250320435,
+          "effective_tops": 4.8870421098540975
         },
         "float_eager_experts": {
           "round_medians_ms": [
-            5.111775875091553,
-            4.517759799957275,
-            4.870175838470459,
-            4.932511806488037,
-            5.589600086212158
+            4.456960201263428,
+            4.58131217956543,
+            5.319839954376221,
+            4.499743938446045,
+            4.501632213592529
           ],
-          "median_ms": 4.932511806488037,
-          "min_ms": 4.517759799957275,
-          "max_ms": 5.589600086212158,
-          "effective_tflops": 0.9795897906710299
+          "median_ms": 4.501632213592529,
+          "min_ms": 4.456960201263428,
+          "max_ms": 5.319839954376221,
+          "effective_tflops": 1.0733525038785765
         }
       },
-      "speedup_over_eager_float": 3.832351277820661,
+      "speedup_over_eager_float": 4.553063501687184,
       "warmup": {
         "int8_moe_ffn": {
-          "calls": 64,
-          "elapsed_ms": 200.0400349497795
+          "calls": 76,
+          "elapsed_ms": 200.50208596512675
         },
         "float_eager_experts": {
-          "calls": 41,
-          "elapsed_ms": 203.8550399011001
+          "calls": 40,
+          "elapsed_ms": 205.23002208210528
         }
       },
       "gpu_state_before": {
         "min_freq_hz": 1197000000,
         "max_freq_hz": 1197000000,
         "cur_freq_hz": 1197000000,
-        "temperature_c": 50.25,
+        "temperature_c": 49.56,
         "graphics_clock_mhz": 1197.0,
         "sw_thermal_slowdown": "Not Active"
       },
@@ -176,7 +176,7 @@
         "min_freq_hz": 1197000000,
         "max_freq_hz": 1197000000,
         "cur_freq_hz": 1197000000,
-        "temperature_c": 50.78,
+        "temperature_c": 50.16,
         "graphics_clock_mhz": 1197.0,
         "sw_thermal_slowdown": "Not Active"
       }
@@ -232,47 +232,47 @@
       "results": {
         "int8_moe_ffn": {
           "round_medians_ms": [
-            1.3289599418640137,
-            1.5836479663848877,
-            1.6327680349349976,
-            1.6504319906234741,
-            1.610751986503601
+            1.460960030555725,
+            1.5924160480499268,
+            1.6053760051727295,
+            1.5850239992141724,
+            1.5726399421691895
           ],
-          "median_ms": 1.610751986503601,
-          "min_ms": 1.3289599418640137,
-          "max_ms": 1.6504319906234741,
-          "effective_tops": 11.998962592592022
+          "median_ms": 1.5850239992141724,
+          "min_ms": 1.460960030555725,
+          "max_ms": 1.6053760051727295,
+          "effective_tops": 12.193728827817225
         },
         "float_eager_experts": {
           "round_medians_ms": [
-            4.519807815551758,
-            4.621920108795166,
-            5.199456214904785,
-            5.974016189575195,
-            5.127359867095947
+            4.817567825317383,
+            5.45414400100708,
+            5.076096057891846,
+            5.065375804901123,
+            5.090400218963623
           ],
-          "median_ms": 5.127359867095947,
-          "min_ms": 4.519807815551758,
-          "max_ms": 5.974016189575195,
-          "effective_tflops": 3.769455106131783
+          "median_ms": 5.076096057891846,
+          "min_ms": 4.817567825317383,
+          "max_ms": 5.45414400100708,
+          "effective_tflops": 3.8075230672500013
         }
       },
-      "speedup_over_eager_float": 3.18320878077929,
+      "speedup_over_eager_float": 3.202535772586716,
       "warmup": {
         "int8_moe_ffn": {
-          "calls": 123,
-          "elapsed_ms": 201.1752889957279
+          "calls": 124,
+          "elapsed_ms": 200.1861670287326
         },
         "float_eager_experts": {
-          "calls": 38,
-          "elapsed_ms": 202.29216595180333
+          "calls": 39,
+          "elapsed_ms": 202.09403906483203
         }
       },
       "gpu_state_before": {
         "min_freq_hz": 1197000000,
         "max_freq_hz": 1197000000,
         "cur_freq_hz": 1197000000,
-        "temperature_c": 50.69,
+        "temperature_c": 49.78,
         "graphics_clock_mhz": 1197.0,
         "sw_thermal_slowdown": "Not Active"
       },
@@ -280,7 +280,7 @@
         "min_freq_hz": 1197000000,
         "max_freq_hz": 1197000000,
         "cur_freq_hz": 1197000000,
-        "temperature_c": 51.38,
+        "temperature_c": 50.5,
         "graphics_clock_mhz": 1197.0,
         "sw_thermal_slowdown": "Not Active"
       }
@@ -336,47 +336,47 @@
       "results": {
         "int8_moe_ffn": {
           "round_medians_ms": [
-            2.666719913482666,
-            2.662303924560547,
-            2.6607038974761963,
-            2.707200050354004,
-            2.691391944885254
+            2.5438079833984375,
+            2.5575039386749268,
+            2.651103973388672,
+            2.8705921173095703,
+            2.882751941680908
           ],
-          "median_ms": 2.666719913482666,
-          "min_ms": 2.6607038974761963,
-          "max_ms": 2.707200050354004,
-          "effective_tops": 28.990450379558588
+          "median_ms": 2.651103973388672,
+          "min_ms": 2.5438079833984375,
+          "max_ms": 2.882751941680908,
+          "effective_tops": 29.161214386164648
         },
         "float_eager_experts": {
           "round_medians_ms": [
-            6.12716817855835,
-            6.178080081939697,
-            6.16867208480835,
-            6.458911895751953,
-            6.50383996963501
+            6.087647914886475,
+            6.214623928070068,
+            6.366176128387451,
+            6.647776126861572,
+            6.6939520835876465
           ],
-          "median_ms": 6.178080081939697,
-          "min_ms": 6.12716817855835,
-          "max_ms": 6.50383996963501,
-          "effective_tflops": 12.513501007213813
+          "median_ms": 6.366176128387451,
+          "min_ms": 6.087647914886475,
+          "max_ms": 6.6939520835876465,
+          "effective_tflops": 12.143775127940488
         }
       },
-      "speedup_over_eager_float": 2.3167337712160734,
+      "speedup_over_eager_float": 2.4013302353623387,
       "warmup": {
         "int8_moe_ffn": {
-          "calls": 62,
-          "elapsed_ms": 202.62040698435158
+          "calls": 65,
+          "elapsed_ms": 201.29940495826304
         },
         "float_eager_experts": {
-          "calls": 30,
-          "elapsed_ms": 204.46767401881516
+          "calls": 29,
+          "elapsed_ms": 201.08021807391196
         }
       },
       "gpu_state_before": {
         "min_freq_hz": 1197000000,
         "max_freq_hz": 1197000000,
         "cur_freq_hz": 1197000000,
-        "temperature_c": 51.0,
+        "temperature_c": 50.12,
         "graphics_clock_mhz": 1197.0,
         "sw_thermal_slowdown": "Not Active"
       },
@@ -384,7 +384,7 @@
         "min_freq_hz": 1197000000,
         "max_freq_hz": 1197000000,
         "cur_freq_hz": 1197000000,
-        "temperature_c": 51.97,
+        "temperature_c": 51.16,
         "graphics_clock_mhz": 1197.0,
         "sw_thermal_slowdown": "Not Active"
       }
@@ -394,17 +394,17 @@
     "min_freq_hz": 1197000000,
     "max_freq_hz": 1197000000,
     "cur_freq_hz": 1197000000,
-    "temperature_c": 50.66,
+    "temperature_c": 49.94,
     "graphics_clock_mhz": 1197.0,
     "sw_thermal_slowdown": "Not Active"
   },
   "frequency_note": "GPU clock reduced to 1.2 GHz; actual supported locked setting is 1197 MHz.",
-  "updated_at_utc": "2026-10-19T15:12:45.466317+00:00",
+  "updated_at_utc": "2026-10-19T15:27:20.938951+00:00",
   "gpu_state_after": {
     "min_freq_hz": 1197000000,
     "max_freq_hz": 1197000000,
     "cur_freq_hz": 1197000000,
-    "temperature_c": 51.97,
+    "temperature_c": 51.16,
     "graphics_clock_mhz": 1197.0,
     "sw_thermal_slowdown": "Not Active"
   }

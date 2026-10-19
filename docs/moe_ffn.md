@@ -87,8 +87,9 @@ There is no bias or shared-expert branch in this first API.
   group boundaries are derived internally, so `num_tokens_per_expert` is not
   a public argument.
 - Inputs, scales and scores are expected to be finite; valid expert ids are
-  in `[0,E)`. Eager execution checks expert-id values with a device-to-host
-  synchronization. Graph replay requires callers to keep ids in range.
+  in `[0,E)`. Eager execution reads one small GPU statistics record to check
+  expert ids and determine native capacity. Per-expert counts stay on the GPU.
+  Graph replay requires callers to keep ids in range.
 
 Synthetic quantization error relative to a BF16 FFN is separate from kernel
 correctness. This API provides no autograd; use inference/no-grad mode when its
@@ -148,6 +149,24 @@ required, and the matching optional library must be built:
 python tools/build_cutlass.py --cutlass-dir /path/to/cutlass --arch sm_110
 ```
 
+The Thor native implementation adapts the G256 mainloop from
+[`nvidia-cosmos/cosmos-int8-gemm`, commit `8977529`](https://github.com/nvidia-cosmos/cosmos-int8-gemm/blob/8977529aa23f70f02bfc36559599f00d59792996/docs/quantization/tools/cutlass_int8_sm110/blockwise_gemm.cuh#L79).
+Cosmos configs 20/21 correspond to GrainGEMM configs 32/33: a 2SM
+256x256x256 tile, TMA operands, INT32 TMEM partials, eight promotion warps,
+three fragment buffers and vector scale loads. Config 32 retains the original
+automatic epilogue tile; config 33 uses an explicit 128x16 tile. Both projections
+use one batched launch over experts rather than one launch per expert.
+The build enables `G128_OPT_PROMOTION`, `G128_OPT_PIPE2`, `G128_OPT_SBVEC` and
+`NDEBUG`, as in the Cosmos production path. The activation-scale layout is
+specialized to K-major so it directly consumes GrainGEMM's `[E,M,K/256]` scales;
+weight scales remain `[E,K/256,N]`, with N contiguous.
+
+Cosmos supplies the equal-capacity batched GEMM. This function additionally
+implements ragged routing, padding without token dropping, dynamic activation
+quantization, fused SwiGLU/intermediate quantization and FP32 weighted
+combination. Native execution does not generate the ragged GEMM's tile metadata;
+if auto falls back to Triton for skewed routing, it generates those tiles then.
+
 `backend="cuda"` uses the existing CuTe GEMMs with a fixed expert loop. On
 other supported native architectures, explicit CUTLASS also uses its existing
 per-expert GEMMs. These explicit paths provide native comparisons without
@@ -156,10 +175,10 @@ They require BF16 and the corresponding architecture-specific build; they do
 not silently execute Triton when explicitly requested.
 
 `backend="auto"` uses Triton unless a matching Thor CUTLASS build is available
-for BF16 and the workload has at least 128 assignments per expert on average.
-It retains ragged Triton execution if equal-capacity padding would exceed twice
-the number of valid assignments. This is a conservative heuristic, not an
-offline-tuned optimal dispatcher.
+for BF16 and the nominal dimensions satisfy `T*R >= E*128`. This first threshold
+includes masked slots. It retains ragged Triton execution if equal-capacity
+padding would exceed twice the number of valid, unmasked assignments. This is
+a conservative heuristic, not an offline-tuned optimal dispatcher.
 
 Captured auto execution always selects Triton. Explicit native capture reserves
 the worst-case capacity `round_up(T*R,64)` per expert to accommodate any valid

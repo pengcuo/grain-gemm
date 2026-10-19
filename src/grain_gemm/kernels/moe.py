@@ -8,7 +8,7 @@ No helper launches one GEMM per expert or reads routing counts on the host.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from math import prod
 
 import torch
@@ -24,33 +24,43 @@ class Routes:
     ``order[slot]`` is the original flattened [token, top-k] assignment.
     ``inverse[assignment]`` is its sorted slot, or -1 for an invalid/masked row.
     The final offset is the number of valid assignments, kept on the device.
+    ``statistics`` contains the unmasked-invalid-id count, largest expert count,
+    and total valid assignment count, in that order. Tile metadata is optional
+    for native execution and can be added with ``prepare_ragged_tiles``.
     """
 
     order: torch.Tensor
     counts: torch.Tensor
     offsets: torch.Tensor
-    tile_offsets: torch.Tensor
+    tile_offsets: torch.Tensor | None
     inverse: torch.Tensor
     effective_ids: torch.Tensor
-    tile_experts: torch.Tensor
-    tile_starts: torch.Tensor
+    tile_experts: torch.Tensor | None
+    tile_starts: torch.Tensor | None
     tokens: int
     top_k: int
     experts: int
     block_m: int
     max_tiles: int
+    statistics: torch.Tensor
 
 
 @triton.jit
-def _routing_keys(IDS, MASK, KEYS, S: tl.constexpr, R: tl.constexpr,
+def _routing_keys(IDS, MASK, KEYS, INVALID_COUNTS, S: tl.constexpr, R: tl.constexpr,
                   E: tl.constexpr, HAS_MASK: tl.constexpr, BLOCK: tl.constexpr):
     assignments = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
     ids = tl.load(IDS + assignments, assignments < S, other=E)
-    valid = (assignments < S) & (ids >= 0) & (ids < E)
+    enabled = assignments < S
     if HAS_MASK:
-        enabled = tl.load(MASK + assignments // R, assignments < S, other=False)
-        valid = valid & enabled
+        enabled = enabled & tl.load(
+            MASK + assignments // R, assignments < S, other=False)
+    # Keep INT64 ids at their original width until after the range check:
+    # narrowing an invalid id first could wrap it into a valid expert index.
+    in_range = (ids >= 0) & (ids < E)
+    valid = enabled & in_range
     tl.store(KEYS + assignments, tl.where(valid, ids, E), assignments < S)
+    invalid_count = tl.sum((enabled & ~in_range).to(tl.int32), axis=0)
+    tl.store(INVALID_COUNTS + tl.program_id(0), invalid_count)
 
 
 @triton.jit
@@ -66,15 +76,36 @@ def _routing_histogram_inverse(KEYS, ORDER, COUNTS, INVERSE,
 
 
 @triton.jit
-def _routing_prefix(COUNTS, OFFSETS, TILE_OFFSETS, E: tl.constexpr,
-                    BM: tl.constexpr, BLOCK: tl.constexpr):
+def _routing_prefix(COUNTS, OFFSETS, TILE_OFFSETS, INVALID_COUNTS, STATISTICS,
+                    E: tl.constexpr, BM: tl.constexpr, BLOCK: tl.constexpr,
+                    KEY_BLOCKS: tl.constexpr, INVALID_BLOCK: tl.constexpr,
+                    INCLUDE_TILES: tl.constexpr):
     experts = tl.arange(0, BLOCK)
     counts = tl.load(COUNTS + experts, experts < E, other=0)
     prefix = tl.cumsum(counts)
-    tile_prefix = tl.cumsum(tl.cdiv(counts, BM))
     tl.store(OFFSETS, 0)
-    tl.store(TILE_OFFSETS, 0)
     tl.store(OFFSETS + experts + 1, prefix, experts < E)
+    if INCLUDE_TILES:
+        tile_prefix = tl.cumsum(tl.cdiv(counts, BM))
+        tl.store(TILE_OFFSETS, 0)
+        tl.store(TILE_OFFSETS + experts + 1, tile_prefix, experts < E)
+    invalid_count = tl.full((), 0, tl.int32)
+    if KEY_BLOCKS > 0:
+        blocks = tl.arange(0, INVALID_BLOCK)
+        invalid = tl.load(INVALID_COUNTS + blocks, blocks < KEY_BLOCKS, other=0)
+        invalid_count = tl.sum(invalid, axis=0)
+    tl.store(STATISTICS, invalid_count)
+    tl.store(STATISTICS + 1, tl.max(counts, axis=0))
+    tl.store(STATISTICS + 2, tl.sum(counts, axis=0))
+
+
+@triton.jit
+def _routing_tile_prefix(COUNTS, TILE_OFFSETS, E: tl.constexpr,
+                         BM: tl.constexpr, BLOCK: tl.constexpr):
+    experts = tl.arange(0, BLOCK)
+    counts = tl.load(COUNTS + experts, experts < E, other=0)
+    tile_prefix = tl.cumsum(tl.cdiv(counts, BM))
+    tl.store(TILE_OFFSETS, 0)
     tl.store(TILE_OFFSETS + experts + 1, tile_prefix, experts < E)
 
 
@@ -105,46 +136,76 @@ def _routing_tiles(OFFSETS, TILE_OFFSETS, TILE_EXPERTS, TILE_STARTS,
     tl.store(TILE_STARTS + tiles, tl.where(active, starts, 0), tiles < MAX_TILES)
 
 
-def prepare_routes(topk_ids, num_experts, token_mask=None, block_m=32):
+def prepare_routes(topk_ids, num_experts, token_mask=None, block_m=32,
+                   include_tiles=True):
     """Sort assignments and construct fixed-size, GPU-resident expert metadata.
 
     Invalid ids are guarded as well as masked tokens, so neither can generate
     an out-of-bounds expert access.  The public API may reject invalid ids using
     its own validation policy.  Sorting is stable to preserve token order inside
     an expert; all allocations depend only on tensor shapes, never GPU values.
+    ``include_tiles=False`` omits all three ragged tile tensors and their work.
+    Statistics and the metadata needed for native packing are always generated.
     """
     tokens, top_k = topk_ids.shape
     slots = tokens * top_k
     effective_ids = torch.empty((slots,), dtype=topk_ids.dtype, device=topk_ids.device)
+    key_blocks = triton.cdiv(slots, 1024)
+    invalid_counts = torch.empty((key_blocks,), dtype=torch.int32, device=topk_ids.device)
     if slots:
-        _routing_keys[(triton.cdiv(slots, 1024),)](
-            topk_ids, token_mask, effective_ids, slots, top_k, num_experts,
+        _routing_keys[(key_blocks,)](
+            topk_ids, token_mask, effective_ids, invalid_counts,
+            slots, top_k, num_experts,
             token_mask is not None, 1024,
         )
     order = torch.argsort(effective_ids, stable=True)
     counts = torch.zeros((num_experts,), dtype=torch.int32, device=topk_ids.device)
     inverse = torch.empty((slots,), dtype=torch.int32, device=topk_ids.device)
     offsets = torch.empty((num_experts + 1,), dtype=torch.int32, device=topk_ids.device)
-    tile_offsets = torch.empty_like(offsets)
+    tile_offsets = torch.empty_like(offsets) if include_tiles else None
+    statistics = torch.empty((3,), dtype=torch.int32, device=topk_ids.device)
     if slots:
         _routing_histogram_inverse[(triton.cdiv(slots, 1024),)](
             effective_ids, order, counts, inverse, slots, num_experts, 1024,
         )
     _routing_prefix[(1,)](
-        counts, offsets, tile_offsets, num_experts, block_m,
-        triton.next_power_of_2(num_experts),
+        counts, offsets, tile_offsets, invalid_counts, statistics,
+        num_experts, block_m, triton.next_power_of_2(num_experts),
+        key_blocks, triton.next_power_of_2(max(1, key_blocks)), include_tiles,
     )
     # sum(ceil(count_e / BM)) <= ceil(S / BM) + E - 1 for S > 0.
     max_tiles = triton.cdiv(slots, block_m) + num_experts
-    tile_experts = torch.empty((max_tiles,), dtype=torch.int32, device=topk_ids.device)
+    routes = Routes(order, counts, offsets, tile_offsets, inverse, effective_ids,
+                    None, None, tokens, top_k, num_experts,
+                    block_m, max_tiles, statistics)
+    return prepare_ragged_tiles(routes) if include_tiles else routes
+
+
+def prepare_ragged_tiles(routes):
+    """Return immutable routing metadata with ragged GEMM tile tensors added.
+
+    Native execution can defer this work until an eager auto decision selects
+    the ragged path. No routing values are copied to the host, and the original
+    ``Routes`` object and its statistics remain unchanged.
+    """
+    if routes.tile_experts is not None and routes.tile_starts is not None:
+        return routes
+    tile_offsets = routes.tile_offsets
+    if tile_offsets is None:
+        tile_offsets = torch.empty_like(routes.offsets)
+        _routing_tile_prefix[(1,)](
+            routes.counts, tile_offsets, routes.experts, routes.block_m,
+            triton.next_power_of_2(routes.experts),
+        )
+    tile_experts = torch.empty((routes.max_tiles,), dtype=torch.int32,
+                               device=routes.counts.device)
     tile_starts = torch.empty_like(tile_experts)
-    _routing_tiles[(triton.cdiv(max_tiles, 128),)](
-        offsets, tile_offsets, tile_experts, tile_starts, num_experts,
-        max_tiles, block_m, (num_experts + 1).bit_length(), 128,
+    _routing_tiles[(triton.cdiv(routes.max_tiles, 128),)](
+        routes.offsets, tile_offsets, tile_experts, tile_starts, routes.experts,
+        routes.max_tiles, routes.block_m, (routes.experts + 1).bit_length(), 128,
     )
-    return Routes(order, counts, offsets, tile_offsets, inverse, effective_ids,
-                  tile_experts, tile_starts, tokens, top_k, num_experts,
-                  block_m, max_tiles)
+    return replace(routes, tile_offsets=tile_offsets,
+                   tile_experts=tile_experts, tile_starts=tile_starts)
 
 
 @triton.jit

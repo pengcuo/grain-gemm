@@ -127,6 +127,142 @@ def require_backend(backend, dtype):
         pytest.skip(f"Build the optional {backend} backend")
 
 
+def routing_fixture_cpu():
+    ids = torch.tensor([
+        [0, 2, 2],
+        [2**40, 1, -(2**40)],
+        [2**63 - 1, -(2**63), 4],
+        [2, 0, 1],
+    ], dtype=torch.int64)
+    mask = torch.tensor([True, True, False, True])
+    return ids, mask
+
+
+@cuda
+@pytest.mark.parametrize("include_tiles", [False, True])
+@pytest.mark.parametrize("kind", ["mixed", "empty", "all_masked", "multi_block"])
+def test_route_statistics_match_independent_counts(kind, include_tiles):
+    from grain_gemm.kernels import moe as kernels
+
+    ids, mask = routing_fixture_cpu()
+    if kind == "empty":
+        ids, mask = ids[:0], mask[:0]
+    elif kind == "all_masked":
+        mask.zero_()
+    elif kind == "multi_block":
+        # Invalid IDs straddle the 1024-assignment kernel boundary. The middle
+        # one is masked, so the prefix reduction must sum 1+1 invalid routes.
+        ids = (torch.arange(1031) % 5).reshape(-1, 1)
+        ids[0, 0], ids[1024, 0], ids[1030, 0] = 2**40, -(2**40), 2**63 - 1
+        mask = torch.ones(1031, dtype=torch.bool)
+        mask[1024] = False
+    experts = 5
+    counts = [0] * experts
+    keys, invalid = [], 0
+    for token, choices in enumerate(ids.tolist()):
+        for expert in choices:
+            valid = bool(mask[token]) and 0 <= expert < experts
+            keys.append(expert if valid else experts)
+            if valid:
+                counts[expert] += 1
+            elif mask[token]:
+                invalid += 1
+    total = sum(counts)
+    offsets = [sum(counts[:expert]) for expert in range(experts + 1)]
+    valid_order = sorted(
+        (assignment for assignment, expert in enumerate(keys) if expert < experts),
+        key=keys.__getitem__,
+    )
+    inverse = [-1] * ids.numel()
+    for slot, assignment in enumerate(valid_order):
+        inverse[assignment] = slot
+    routes = kernels.prepare_routes(ids.cuda(), experts, mask.cuda(), include_tiles=include_tiles)
+    assert routes.statistics.dtype == torch.int32 and routes.statistics.shape == (3,)
+    assert routes.statistics.cpu().tolist() == [invalid, max(counts), total]
+    assert routes.counts.cpu().tolist() == counts
+    assert routes.offsets.cpu().tolist() == offsets
+    assert routes.effective_ids.cpu().tolist() == keys
+    assert routes.order[:total].cpu().tolist() == valid_order
+    assert routes.inverse.cpu().tolist() == inverse
+    if not include_tiles:
+        assert routes.tile_offsets is routes.tile_experts is routes.tile_starts is None
+        return
+    assert routes.tile_offsets is not None
+    assert routes.tile_experts is not None
+    assert routes.tile_starts is not None
+    tile_counts = [(count + routes.block_m - 1) // routes.block_m for count in counts]
+    assert routes.tile_offsets.cpu().tolist() == [
+        sum(tile_counts[:expert]) for expert in range(experts + 1)
+    ]
+    expected_experts, expected_starts = [], []
+    for expert, count in enumerate(tile_counts):
+        for tile in range(count):
+            expected_experts.append(expert)
+            expected_starts.append(offsets[expert] + tile * routes.block_m)
+    active_tiles = sum(tile_counts)
+    assert routes.tile_experts[:active_tiles].cpu().tolist() == expected_experts
+    assert routes.tile_starts[:active_tiles].cpu().tolist() == expected_starts
+    assert (routes.tile_experts[active_tiles:] < 0).all().item()
+
+
+@cuda
+def test_routes_without_tiles_support_pack_combine_and_late_tile_preparation():
+    from grain_gemm.kernels import moe as kernels
+
+    ids, mask = routing_fixture_cpu()
+    experts, capacity, k, output_width = 5, 64, 256, 16
+    routes = kernels.prepare_routes(ids.cuda(), experts, mask.cuda(), include_tiles=False)
+    assert routes.tile_offsets is routes.tile_experts is routes.tile_starts is None
+    q = (torch.arange(ids.shape[0] * k).reshape(ids.shape[0], k) % 17 - 8).to(torch.int8)
+    sa = torch.arange(1, ids.shape[0] + 1, dtype=torch.float32).reshape(-1, 1)
+    scores = torch.tensor([
+        [0.25, 1.5, -0.5], [2.0, 0.5, 1.0],
+        [0.125, 3.0, 0.25], [1.5, -0.25, 0.75],
+    ])
+    expected_q = torch.zeros((experts, capacity, k), dtype=torch.int8)
+    expected_sa = torch.zeros((experts, capacity, 1), dtype=torch.float32)
+    expected_output = torch.zeros((ids.shape[0], output_width), dtype=torch.float32)
+    counts = [0] * experts
+    for token, choices in enumerate(ids.tolist()):
+        if not mask[token]:
+            continue
+        for slot, expert in enumerate(choices):
+            if not 0 <= expert < experts:
+                continue
+            local_row = counts[expert]
+            expected_q[expert, local_row] = q[token]
+            expected_sa[expert, local_row] = sa[token]
+            counts[expert] += 1
+            expected_output[token] += (
+                q[token, :output_width].float() + expert * 16
+            ) * scores[token, slot]
+    packed_q, packed_sa = kernels.pack_inputs(q.cuda(), sa.cuda(), routes, capacity)
+    torch.testing.assert_close(packed_q.cpu(), expected_q, rtol=0, atol=0)
+    torch.testing.assert_close(packed_sa.cpu(), expected_sa, rtol=0, atol=0)
+    # Padding receives nonzero artificial outputs too: combine must rely on
+    # routing validity, including masked and INT64 out-of-range assignments.
+    expert_bias = torch.arange(experts, device="cuda")[:, None, None] * 16
+    expert_output = (packed_q[:, :, :output_width].float() + expert_bias).bfloat16().contiguous()
+    actual = kernels.combine(
+        expert_output, scores.cuda(), routes, output_dtype=torch.bfloat16,
+        packed_capacity=capacity,
+    )
+    torch.testing.assert_close(actual.cpu(), expected_output.bfloat16(), rtol=0, atol=0)
+    completed = kernels.prepare_ragged_tiles(routes)
+    assert completed is not routes
+    assert routes.tile_offsets is routes.tile_experts is routes.tile_starts is None
+    assert completed.tile_offsets is not None
+    assert completed.tile_experts is not None
+    assert completed.tile_starts is not None
+    assert completed.counts is routes.counts and completed.statistics is routes.statistics
+    assert kernels.prepare_ragged_tiles(completed) is completed
+    torch.testing.assert_close(
+        kernels.combine(expert_output, scores.cuda(), completed,
+                        output_dtype=torch.bfloat16, packed_capacity=capacity),
+        actual, rtol=0, atol=0,
+    )
+
+
 @cuda
 @pytest.mark.parametrize("backend", ["auto", "triton", "cuda", "cutlass"])
 @pytest.mark.parametrize("dtype", [torch.bfloat16, torch.float16])
@@ -145,30 +281,47 @@ def test_ragged_routes_empty_experts_extrema_and_nonunit_scores(backend, dtype):
 
 
 @cuda
-def test_thor_auto_selects_native_for_balanced_routing(monkeypatch):
+@pytest.mark.parametrize("backend", ["auto", "cuda", "cutlass"])
+def test_thor_auto_selects_native_for_balanced_routing(monkeypatch, backend):
     if torch.cuda.get_device_capability() != (11, 0):
         pytest.skip("Thor automatic native dispatch requires SM110")
-    require_backend("cutlass", torch.bfloat16)
+    selected = "cutlass" if backend == "auto" else backend
+    require_backend(selected, torch.bfloat16)
     import grain_gemm.moe as implementation
+    from grain_gemm.kernels import moe as kernels
 
     case = make_case(tokens=256, h=256, experts=2)
     case["topk_ids"] = (torch.arange(256, device="cuda") % 2).reshape(256, 1)
     case["topk_weights"] = torch.ones((256, 1), device="cuda")
-    calls = []
+    calls, route_calls = [], []
     native_gemm = implementation._native_gemm
+    prepare_routes = kernels.prepare_routes
 
     def tracked_native(a, weight, sa, sb, out, backend):
         calls.append((backend, tuple(a.shape), tuple(weight.shape)))
         return native_gemm(a, weight, sa, sb, out, backend)
 
-    monkeypatch.setattr(implementation, "_native_gemm", tracked_native)
-    actual = moe_ffn(**case, backend="auto")
+    def tracked_routes(*args, **kwargs):
+        route_calls.append(kwargs.get("include_tiles", True))
+        routes = prepare_routes(*args, **kwargs)
+        assert routes.tile_offsets is routes.tile_experts is routes.tile_starts is None
+        return routes
+
+    def unexpected_tiles(*args, **kwargs):
+        pytest.fail("Native expert GEMMs prepared unused ragged tile metadata")
+
+    with monkeypatch.context() as native_patch:
+        native_patch.setattr(implementation, "_native_gemm", tracked_native)
+        native_patch.setattr(kernels, "prepare_routes", tracked_routes)
+        native_patch.setattr(kernels, "prepare_ragged_tiles", unexpected_tiles)
+        actual = moe_ffn(**case, backend=backend)
     # 128 routes per expert satisfies the native threshold without padding
     # amplification. Both FFN projections must use the batched native path.
     assert calls == [
-        ("cutlass", (2, 128, 256), (2, 512, 256)),
-        ("cutlass", (2, 128, 256), (2, 256, 256)),
+        (selected, (2, 128, 256), (2, 512, 256)),
+        (selected, (2, 128, 256), (2, 256, 256)),
     ]
+    assert route_calls == [False]
     expected = moe_ffn(**case, backend="triton")
     torch.testing.assert_close(actual, expected, rtol=0.015, atol=0.025)
     indices = [0, 127, 128, 255]
@@ -188,8 +341,10 @@ def test_thor_auto_falls_back_to_ragged_for_skewed_routing(monkeypatch):
     case = make_case(tokens=256, h=256, experts=3)
     case["topk_ids"] = torch.zeros((256, 2), device="cuda", dtype=torch.int64)
     case["topk_weights"] = torch.tensor([0.25, 1.5], device="cuda").repeat(256, 1)
-    availability_calls, ragged_calls = [], []
+    availability_calls, ragged_calls, route_calls, tile_calls = [], [], [], []
     ragged_gemm = kernels.ragged_gemm
+    prepare_routes = kernels.prepare_routes
+    prepare_tiles = kernels.prepare_ragged_tiles
 
     def available(backend, device):
         availability_calls.append(backend)
@@ -200,16 +355,38 @@ def test_thor_auto_falls_back_to_ragged_for_skewed_routing(monkeypatch):
 
     def tracked_ragged(*args, **kwargs):
         ragged_calls.append(kwargs["source_is_token"])
+        routes = args[4]
+        assert routes.tile_offsets is not None
+        assert routes.tile_experts is not None
+        assert routes.tile_starts is not None
         return ragged_gemm(*args, **kwargs)
 
-    monkeypatch.setattr(implementation, "_native_available", available)
-    monkeypatch.setattr(implementation, "_native_gemm", unexpected_native)
-    monkeypatch.setattr(kernels, "ragged_gemm", tracked_ragged)
-    actual = moe_ffn(**case, backend="auto")
+    def tracked_routes(*args, **kwargs):
+        route_calls.append(kwargs.get("include_tiles", True))
+        routes = prepare_routes(*args, **kwargs)
+        assert routes.tile_offsets is routes.tile_experts is routes.tile_starts is None
+        return routes
+
+    def tracked_tiles(routes):
+        assert routes.tile_offsets is routes.tile_experts is routes.tile_starts is None
+        tile_calls.append(routes)
+        result = prepare_tiles(routes)
+        assert result is not routes
+        return result
+
+    with monkeypatch.context() as routing_patch:
+        routing_patch.setattr(implementation, "_native_available", available)
+        routing_patch.setattr(implementation, "_native_gemm", unexpected_native)
+        routing_patch.setattr(kernels, "ragged_gemm", tracked_ragged)
+        routing_patch.setattr(kernels, "prepare_routes", tracked_routes)
+        routing_patch.setattr(kernels, "prepare_ragged_tiles", tracked_tiles)
+        actual = moe_ffn(**case, backend="auto")
     # 512 assignments first qualify for native (512 >= 3*128). Routing them
     # all to expert 0 would pad to 3*512 rows, exceeding 2*512 valid rows.
     assert availability_calls == ["cutlass"]
     assert ragged_calls == [True, False]
+    assert route_calls == [False]
+    assert len(tile_calls) == 1
     expected = moe_ffn(**case, backend="triton")
     torch.testing.assert_close(actual, expected, rtol=0, atol=0)
     indices = [0, 127, 128, 255]
@@ -426,12 +603,23 @@ def test_mismatched_shape(field):
 
 
 @cuda
-@pytest.mark.parametrize("bad_id", [-1, 5])
+@pytest.mark.parametrize("bad_id", [-1, 5, 2**40, -(2**40), 2**63 - 1, -(2**63)])
 def test_out_of_range_expert_id_is_rejected_eagerly(bad_id):
     case = make_case(tokens=2, h=256)
     case["topk_ids"][0, 0] = bad_id
-    with pytest.raises((ValueError, RuntimeError)):
+    with pytest.raises(ValueError, match="topk_ids"):
         moe_ffn(**case)
+
+
+@cuda
+@pytest.mark.parametrize("bad_id", [2**40, -(2**40), 2**63 - 1, -(2**63)])
+def test_masked_int64_out_of_range_expert_ids_are_ignored(bad_id):
+    case = make_case(tokens=2, h=256)
+    case["topk_ids"][0].fill_(bad_id)
+    case["token_mask"] = torch.tensor([False, True], device="cuda")
+    actual = moe_ffn(**case)
+    assert torch.count_nonzero(actual[0]).item() == 0
+    assert_reference(actual, case)
 
 
 @cuda

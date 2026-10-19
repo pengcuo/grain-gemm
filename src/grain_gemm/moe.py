@@ -162,23 +162,9 @@ def moe_ffn(hidden_states, w_gate_up, w_down, topk_weights, topk_ids, *,
         capturing = torch.cuda.is_current_stream_capturing()
         if tokens == 0:
             return torch.zeros_like(hidden_states)
-        if not capturing and tokens:
-            invalid = (topk_ids < 0) | (topk_ids >= experts)
-            if token_mask is not None:
-                invalid = invalid & token_mask[:, None]
-            if invalid.any().item():
-                raise ValueError("unmasked topk_ids must be in [0, E)")
 
         selected = backend
-        if backend in ("cuda", "cutlass"):
-            if hidden_states.dtype != torch.bfloat16:
-                raise ValueError(f"backend='{backend}' requires BF16 hidden_states")
-            if not _native_available(backend, hidden_states.device):
-                raise RuntimeError(f"MoE backend='{backend}' needs a matching native build; "
-                                   f"run tools/build_{backend}.py --cutlass-dir PATH --arch sm_XXX")
-            if any(t.data_ptr() % 16 for t in (w_gate_up, w_down, scale_gate_up, scale_down)):
-                raise ValueError(f"backend='{backend}' requires 16-byte-aligned weights and scales")
-        elif backend == "auto":
+        if backend == "auto":
             selected = "triton"
             if (not capturing and hidden_states.dtype == torch.bfloat16
                     and torch.cuda.get_device_capability(hidden_states.device) == (11, 0)
@@ -188,26 +174,44 @@ def moe_ffn(hidden_states, w_gate_up, w_down, topk_weights, topk_ids, *,
                     and _native_available("cutlass", hidden_states.device)):
                 selected = "cutlass"
 
-        routes = kernels.prepare_routes(topk_ids, experts, token_mask)
-        qx, sx = kernels.quantize_rows(hidden_states, group_size)
-        w1_linear = w_gate_up.transpose(-2, -1)
-        w2_linear = w_down.transpose(-2, -1)
+        routes = kernels.prepare_routes(
+            topk_ids, experts, token_mask, include_tiles=selected == "triton",
+        )
+        if not capturing:
+            # The routing kernels validate ids and reduce the native capacity
+            # statistics together. One small read replaces a separate Torch
+            # predicate/reduction and a second expert-count synchronization.
+            invalid, maximum, total = routes.statistics.cpu().tolist()
+            if invalid:
+                raise ValueError("unmasked topk_ids must be in [0, E)")
+
+        if backend in ("cuda", "cutlass"):
+            if hidden_states.dtype != torch.bfloat16:
+                raise ValueError(f"backend='{backend}' requires BF16 hidden_states")
+            if not _native_available(backend, hidden_states.device):
+                raise RuntimeError(f"MoE backend='{backend}' needs a matching native build; "
+                                   f"run tools/build_{backend}.py --cutlass-dir PATH --arch sm_XXX")
+            if any(t.data_ptr() % 16 for t in (w_gate_up, w_down, scale_gate_up, scale_down)):
+                raise ValueError(f"backend='{backend}' requires 16-byte-aligned weights and scales")
 
         capacity = None
         if selected in ("cuda", "cutlass"):
             if capturing:
                 capacity = ((tokens * top_k + 63) // 64) * 64
             else:
-                counts = routes.counts.cpu().tolist()
-                maximum = max(counts)
                 if maximum == 0:
                     return torch.zeros_like(hidden_states)
                 capacity = ((maximum + 63) // 64) * 64
                 # A heavily skewed route would otherwise compute E copies of
                 # the busiest expert's capacity. Auto retains ragged execution.
-                if backend == "auto" and experts * capacity > 2 * sum(counts):
+                if backend == "auto" and experts * capacity > 2 * total:
                     selected = "triton"
                     capacity = None
+                    routes = kernels.prepare_ragged_tiles(routes)
+
+        qx, sx = kernels.quantize_rows(hidden_states, group_size)
+        w1_linear = w_gate_up.transpose(-2, -1)
+        w2_linear = w_down.transpose(-2, -1)
 
         if selected == "triton":
             gate_up = kernels.ragged_gemm(
