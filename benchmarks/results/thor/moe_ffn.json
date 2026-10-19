@@ -1,0 +1,411 @@
+{
+  "complete": true,
+  "expected_tokens": [
+    128,
+    512,
+    2048
+  ],
+  "seed": 2026,
+  "timestamp_utc": "2026-10-19T15:12:39.544786+00:00",
+  "gpu": "NVIDIA Thor",
+  "compute_capability": [
+    11,
+    0
+  ],
+  "dtype": "bfloat16",
+  "group_size": 256,
+  "activation": "swiglu",
+  "backend": "auto",
+  "experts": 32,
+  "hidden": 1536,
+  "intermediate": 1024,
+  "top_k": 4,
+  "rounds": 5,
+  "repetitions": 5,
+  "warmup": 2,
+  "warmup_ms": 200,
+  "software": {
+    "torch": "2.11.0a0+a6c236b9fd.nv26.03.46836102",
+    "triton": "3.6.0",
+    "cuda": "13.2",
+    "python": "3.12.3"
+  },
+  "timing": "Eager full-call CUDA events; rotating implementation order; median of round medians. Includes host dispatch gaps; CUDA Graphs are not used.",
+  "scope": "Includes token routing, activation quantization, both expert GEMMs, SwiGLU, and FP32 weighted combination. Excludes weight quantization, input generation, compilation, warmup, correctness checks, and cooling.",
+  "floating_point_baseline": "Readable per-expert PyTorch loop with the same BF16/FP16 dtype as hidden_states, dynamic torch.where routing, two Linear operations, SwiGLU and FP32 index_add. Not a tuned fused MoE backend.",
+  "throughput": "6*T*top_k*H*I divided by full FFN latency; effective INT8 TOPS/floating-point TFLOPS exclude non-GEMM operation counts.",
+  "cpu_correctness": "Independent per-token/per-slot CPU INT32 group dots, FP32 group scale products, GEMM output rounding, FP32 SwiGLU and re-quantization.",
+  "source": {
+    "git_commit": "41db55080f0f6e7ed952955fe84bda50cd8f732f",
+    "git_status_porcelain": "M README.md\n M src/grain_gemm/__init__.py\n M src/grain_gemm/kernels/csrc/sm110/int8_g256_cutlass.cu\n M src/grain_gemm/kernels/cutlass.py\n M tests/test_native_targets.py\n?? benchmarks/bench_moe_ffn.py\n?? benchmarks/results/thor/moe_ffn.csv\n?? benchmarks/results/thor/moe_ffn.json\n?? docs/moe_ffn.md\n?? src/grain_gemm/kernels/moe.py\n?? src/grain_gemm/moe.py\n?? tests/test_moe_ffn.py",
+    "native_file_sha256": {
+      "build.json": "f5134348907ed9de95a40f96bf41e25b97011ce71ffa64a7d62a32529de09358",
+      "cutlass_build.json": "1b45c3ecb1725e7486b3b40b6464d672da7a3123a8182edd45a7f7b25ef4c895",
+      "libgrain_cuda.so": "ffa6c369f539fe6a7a3bd8999d871ace2d0d7dfa92fbfb1fefbd037558572884",
+      "libgrain_cutlass.so": "042fca65e18b40740b7f67b77abd665fd708500fc3ddb3de29c17c4a8a78e85f"
+    }
+  },
+  "script_sha256": "d03722a842ca63a6c62b88a5130ca65719bb94be06b273874677faa5794d9a01",
+  "source_sha256": {
+    "__init__.py": "e2d29e4f57861cf6c5f935e7d02819a1c1f3e8298f36a2a5d13f373f0a6090b5",
+    "baselines/__init__.py": "b045e960f98bbc0d0ffc1d9ad4ad3e9ecff31d859fd5761dd0f20423dd14c211",
+    "baselines/sglang.py": "cde6cf5e9cef6bb66a8da2af5cdb7a74bd744eee4ca50686bc39dae661953b81",
+    "gemm.py": "c9b73f162cf64e9411306cdd987c7db1798760ea9f3c57fba547237166175783",
+    "kernels/__init__.py": "df3df411d10614aabefa0a3893e37899c67b80d984a70f2d82b6f334658f69ab",
+    "kernels/_native/build.json": "f5134348907ed9de95a40f96bf41e25b97011ce71ffa64a7d62a32529de09358",
+    "kernels/_native/cutlass_build.json": "1b45c3ecb1725e7486b3b40b6464d672da7a3123a8182edd45a7f7b25ef4c895",
+    "kernels/_native.py": "b6331520d0472260b25a4b9406e760baa810a016260a6feb97a279843d7a9e85",
+    "kernels/configs/gb10_sm121_g256.json": "a88ae37bff252d6da04eb80ac7d1bb77e05e31f31bfa36a99a60f09674b3c529",
+    "kernels/configs/gb10_sm121_g256_cutlass.json": "5fe34e1093543dc239594c47a762a3a5eab8c58904560d66a706d02b520c9422",
+    "kernels/configs/thor_sm110_g256.json": "128f189245a3575faaa1bbd6994bb65198ff115be23ae4c86be2ea060763568a",
+    "kernels/csrc/sm110/include/cutlass/arch/reg_reconfig.h": "0fb2b25800ea6ca721b3d621aa3fe354eb12161452dd290e48d25b8b4e947c17",
+    "kernels/csrc/sm110/include/cutlass/gemm/collective/sm100_mma_warpspecialized_blockwise_scaling.hpp": "13f0637b22af94e802e43c41a2b71a27e93f355cff9974f35401947c4b5e1c51",
+    "kernels/csrc/sm110/include/cutlass/gemm/kernel/sm100_gemm_tma_warpspecialized_mma_transform.hpp": "f93fab18e5bbb35263dbc80582ab87adbde6d727118de64344c3724ba2fa4327",
+    "kernels/csrc/sm110/int8_g256_cute.cu": "47926db4bda1a083ce63363e9f5e9dbad65b4957eb46c9e12ec5b3eb049968aa",
+    "kernels/csrc/sm110/int8_g256_cutlass.cu": "0eb71ee3e7b5798f35f3e1d83ea3c41c53d3521183a4d524bf399c83200cee79",
+    "kernels/csrc/sm110/int8_g256_pipeline.cuh": "2e3f263f046737bbc536b71c9dfbb930ea14ae6548044fc4b79aa0cdd4472433",
+    "kernels/csrc/sm110/int8_g256_pipeline_1sm.cuh": "a78b8379b12a18da51eee4f93d0273f19049cab9a02f4945f13d91dfa56c4ad3",
+    "kernels/csrc/sm12x/cutlass/collective.hpp": "482a26e13af8acd2e097deabcc4b29cefe5c3664f5223ec952638937a26ff80c",
+    "kernels/csrc/sm12x/cutlass/epilogue.hpp": "a4a7d9c0b20322880eee6afe5a4f690096a0dac7a0012ee16a5e243dfd11bfcd",
+    "kernels/csrc/sm12x/cutlass/int8_g256.cu": "8d2f5dd34bd931d6be93264585d41edf747b5dc07baa0a94d1bcb4285a8651ac",
+    "kernels/csrc/sm12x/cutlass/kernel.hpp": "e979950bb2e1cb613e47ea335f1d7579a5c575a24faa1833a48728afbe3e028c",
+    "kernels/csrc/sm12x/int8_g256_cute.cu": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148",
+    "kernels/cuda.py": "efe42a48481c71a7b9a1ad4e54efcdabcee2d849a5b01467dc9c0f9239357b44",
+    "kernels/cutlass.py": "b79803e07bdffc6d249b0478f5d511f80754cea3653a486e871bf0866d0b705c",
+    "kernels/moe.py": "980434bdf7e00f2e02fda3a5acacc85d932bff28d5e2e4775e2756784e23afb8",
+    "kernels/triton.py": "0e4834f409c64c3cffb4481a985948239c8d737bb53b805270eabe15f029da21",
+    "moe.py": "83303b71ff5a6728ab83cb674304baec595d94eaff949d68116fca4a44c63553"
+  },
+  "cases": [
+    {
+      "tokens": 128,
+      "experts": 32,
+      "hidden": 1536,
+      "intermediate": 1024,
+      "top_k": 4,
+      "route_counts": [
+        15,
+        18,
+        13,
+        19,
+        11,
+        22,
+        13,
+        9,
+        19,
+        16,
+        11,
+        15,
+        14,
+        11,
+        19,
+        17,
+        17,
+        16,
+        18,
+        18,
+        15,
+        17,
+        21,
+        21,
+        19,
+        15,
+        11,
+        22,
+        16,
+        16,
+        12,
+        16
+      ],
+      "checks": {
+        "independent_cpu_tokens": 2,
+        "independent_cpu_routes": 8,
+        "int8_matches_cpu_reference": true,
+        "int8_vs_unquantized_float_max_abs": 0.041015625,
+        "int8_vs_unquantized_float_rmse": 0.007741688750684261,
+        "comparison_is_quantization_error_not_exact_equality": true
+      },
+      "results": {
+        "int8_moe_ffn": {
+          "round_medians_ms": [
+            0.9849920272827148,
+            1.287071943283081,
+            1.2812479734420776,
+            1.3051199913024902,
+            1.3023680448532104
+          ],
+          "median_ms": 1.287071943283081,
+          "min_ms": 0.9849920272827148,
+          "max_ms": 1.3051199913024902,
+          "effective_tops": 3.7541321860181953
+        },
+        "float_eager_experts": {
+          "round_medians_ms": [
+            5.111775875091553,
+            4.517759799957275,
+            4.870175838470459,
+            4.932511806488037,
+            5.589600086212158
+          ],
+          "median_ms": 4.932511806488037,
+          "min_ms": 4.517759799957275,
+          "max_ms": 5.589600086212158,
+          "effective_tflops": 0.9795897906710299
+        }
+      },
+      "speedup_over_eager_float": 3.832351277820661,
+      "warmup": {
+        "int8_moe_ffn": {
+          "calls": 64,
+          "elapsed_ms": 200.0400349497795
+        },
+        "float_eager_experts": {
+          "calls": 41,
+          "elapsed_ms": 203.8550399011001
+        }
+      },
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 50.25,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 50.78,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "tokens": 512,
+      "experts": 32,
+      "hidden": 1536,
+      "intermediate": 1024,
+      "top_k": 4,
+      "route_counts": [
+        70,
+        73,
+        63,
+        72,
+        69,
+        75,
+        57,
+        58,
+        63,
+        76,
+        55,
+        68,
+        65,
+        67,
+        61,
+        68,
+        62,
+        56,
+        56,
+        71,
+        51,
+        55,
+        64,
+        62,
+        57,
+        81,
+        55,
+        68,
+        58,
+        74,
+        56,
+        62
+      ],
+      "checks": {
+        "independent_cpu_tokens": 2,
+        "independent_cpu_routes": 8,
+        "int8_matches_cpu_reference": true,
+        "int8_vs_unquantized_float_max_abs": 0.046875,
+        "int8_vs_unquantized_float_rmse": 0.007708094082772732,
+        "comparison_is_quantization_error_not_exact_equality": true
+      },
+      "results": {
+        "int8_moe_ffn": {
+          "round_medians_ms": [
+            1.3289599418640137,
+            1.5836479663848877,
+            1.6327680349349976,
+            1.6504319906234741,
+            1.610751986503601
+          ],
+          "median_ms": 1.610751986503601,
+          "min_ms": 1.3289599418640137,
+          "max_ms": 1.6504319906234741,
+          "effective_tops": 11.998962592592022
+        },
+        "float_eager_experts": {
+          "round_medians_ms": [
+            4.519807815551758,
+            4.621920108795166,
+            5.199456214904785,
+            5.974016189575195,
+            5.127359867095947
+          ],
+          "median_ms": 5.127359867095947,
+          "min_ms": 4.519807815551758,
+          "max_ms": 5.974016189575195,
+          "effective_tflops": 3.769455106131783
+        }
+      },
+      "speedup_over_eager_float": 3.18320878077929,
+      "warmup": {
+        "int8_moe_ffn": {
+          "calls": 123,
+          "elapsed_ms": 201.1752889957279
+        },
+        "float_eager_experts": {
+          "calls": 38,
+          "elapsed_ms": 202.29216595180333
+        }
+      },
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 50.69,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 51.38,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "tokens": 2048,
+      "experts": 32,
+      "hidden": 1536,
+      "intermediate": 1024,
+      "top_k": 4,
+      "route_counts": [
+        243,
+        276,
+        249,
+        246,
+        237,
+        262,
+        235,
+        266,
+        256,
+        267,
+        277,
+        241,
+        246,
+        272,
+        235,
+        237,
+        253,
+        253,
+        261,
+        271,
+        271,
+        257,
+        252,
+        247,
+        268,
+        256,
+        256,
+        277,
+        256,
+        269,
+        253,
+        247
+      ],
+      "checks": {
+        "independent_cpu_tokens": 2,
+        "independent_cpu_routes": 8,
+        "int8_matches_cpu_reference": true,
+        "int8_vs_unquantized_float_max_abs": 0.0498046875,
+        "int8_vs_unquantized_float_rmse": 0.007743866182863712,
+        "comparison_is_quantization_error_not_exact_equality": true
+      },
+      "results": {
+        "int8_moe_ffn": {
+          "round_medians_ms": [
+            2.666719913482666,
+            2.662303924560547,
+            2.6607038974761963,
+            2.707200050354004,
+            2.691391944885254
+          ],
+          "median_ms": 2.666719913482666,
+          "min_ms": 2.6607038974761963,
+          "max_ms": 2.707200050354004,
+          "effective_tops": 28.990450379558588
+        },
+        "float_eager_experts": {
+          "round_medians_ms": [
+            6.12716817855835,
+            6.178080081939697,
+            6.16867208480835,
+            6.458911895751953,
+            6.50383996963501
+          ],
+          "median_ms": 6.178080081939697,
+          "min_ms": 6.12716817855835,
+          "max_ms": 6.50383996963501,
+          "effective_tflops": 12.513501007213813
+        }
+      },
+      "speedup_over_eager_float": 2.3167337712160734,
+      "warmup": {
+        "int8_moe_ffn": {
+          "calls": 62,
+          "elapsed_ms": 202.62040698435158
+        },
+        "float_eager_experts": {
+          "calls": 30,
+          "elapsed_ms": 204.46767401881516
+        }
+      },
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 51.0,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 51.97,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      }
+    }
+  ],
+  "gpu_state_before": {
+    "min_freq_hz": 1197000000,
+    "max_freq_hz": 1197000000,
+    "cur_freq_hz": 1197000000,
+    "temperature_c": 50.66,
+    "graphics_clock_mhz": 1197.0,
+    "sw_thermal_slowdown": "Not Active"
+  },
+  "frequency_note": "GPU clock reduced to 1.2 GHz; actual supported locked setting is 1197 MHz.",
+  "updated_at_utc": "2026-10-19T15:12:45.466317+00:00",
+  "gpu_state_after": {
+    "min_freq_hz": 1197000000,
+    "max_freq_hz": 1197000000,
+    "cur_freq_hz": 1197000000,
+    "temperature_c": 51.97,
+    "graphics_clock_mhz": 1197.0,
+    "sw_thermal_slowdown": "Not Active"
+  }
+}

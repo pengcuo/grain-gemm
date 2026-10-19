@@ -102,20 +102,22 @@ template <int EpilogueN> struct BlockwiseG256 {
 
   static typename Gemm::Arguments arguments(void const *a, void const *b,
                                             void const *sa, void const *sb,
-                                            void *c, int M, int N, int K) {
+                                            void *c, int M, int N, int K,
+                                            int L = 1) {
     auto stride_a = cutlass::make_cute_packed_stride(typename Kernel::StrideA{},
-                                                     make_shape(M, K, 1));
+                                                     make_shape(M, K, L));
     auto stride_b = cutlass::make_cute_packed_stride(typename Kernel::StrideB{},
-                                                     make_shape(N, K, 1));
+                                                     make_shape(N, K, L));
     auto stride_d = cutlass::make_cute_packed_stride(typename Kernel::StrideD{},
-                                                     make_shape(M, N, 1));
+                                                     make_shape(M, N, L));
     auto layout_sa =
-        ScaleConfig::tile_atom_to_shape_SFA(make_shape(M, N, K, 1));
+        ScaleConfig::tile_atom_to_shape_SFA(make_shape(M, N, K, L));
     auto layout_sb =
-        ScaleConfig::tile_atom_to_shape_SFB(make_shape(M, N, K, 1));
+        ScaleConfig::tile_atom_to_shape_SFB(make_shape(M, N, K, L));
     typename Gemm::Arguments args{
-        cutlass::gemm::GemmUniversalMode::kGemm,
-        {M, N, K, 1},
+        L == 1 ? cutlass::gemm::GemmUniversalMode::kGemm
+               : cutlass::gemm::GemmUniversalMode::kBatched,
+        {M, N, K, L},
         {static_cast<int8_t const *>(a), stride_a,
          static_cast<int8_t const *>(b), stride_b,
          static_cast<float const *>(sa), layout_sa,
@@ -131,9 +133,9 @@ template <int EpilogueN> struct BlockwiseG256 {
     return args;
   }
 
-  static size_t workspace_bytes(int M, int N, int K) {
+  static size_t workspace_bytes(int M, int N, int K, int L = 1) {
     return Gemm::get_workspace_size(
-        arguments(nullptr, nullptr, nullptr, nullptr, nullptr, M, N, K));
+        arguments(nullptr, nullptr, nullptr, nullptr, nullptr, M, N, K, L));
   }
 
   static int launch(void const *a, void const *b, void const *sa,
@@ -154,6 +156,37 @@ template <int EpilogueN> struct BlockwiseG256 {
     if ((required && !workspace) || bytes < required)
       return grain_cutlass_g256(a, b, sa, sb, c, M, N, K, 0, stream);
     auto status = gemm.initialize(args, workspace, stream);
+    if (status != cutlass::Status::kSuccess)
+      return -1000 - int(status);
+    status = gemm.run(stream);
+    if (status != cutlass::Status::kSuccess)
+      return -1000 - int(status);
+    return int(cudaGetLastError());
+  }
+
+  static int launch_batched(void const *a, void const *b, void const *sa,
+                            void const *sb, void *c, int M, int N, int K,
+                            int L, cudaStream_t stream, void *workspace,
+                            size_t bytes) {
+    // The single-GEMM fallback does not cover other experts. Reject unsupported
+    // batched arguments rather than returning an incomplete result.
+    if (reinterpret_cast<uintptr_t>(a) % 16 ||
+        reinterpret_cast<uintptr_t>(b) % 16 ||
+        reinterpret_cast<uintptr_t>(sa) % alignof(float) ||
+        reinterpret_cast<uintptr_t>(sb) % 16 ||
+        reinterpret_cast<uintptr_t>(c) % 16)
+      return int(cudaErrorInvalidValue);
+    auto args = arguments(a, b, sa, sb, c, M, N, K, L);
+    Gemm gemm;
+    auto status = gemm.can_implement(args);
+    if (status != cutlass::Status::kSuccess)
+      return -1000 - int(status);
+    size_t required = Gemm::get_workspace_size(args);
+    if ((required && !workspace) || bytes < required)
+      return int(cudaErrorInvalidValue);
+    // Scheduler state is initialized per invocation on the caller's stream.
+    // Workspace is supplied by PyTorch, so capture never calls cudaMalloc.
+    status = gemm.initialize(args, workspace, stream);
     if (status != cutlass::Status::kSuccess)
       return -1000 - int(status);
     status = gemm.run(stream);
@@ -200,6 +233,43 @@ extern "C" int grain_cutlass_g256_sm110(void const *a, void const *b,
   case 33:
     return grain_cutlass_sm110::BlockwiseG256<16>::launch(
         a, b, sa, sb, c, M, N, K, st, workspace, bytes);
+  default:
+    return int(cudaErrorInvalidValue);
+  }
+}
+
+extern "C" size_t grain_cutlass_batched_workspace_bytes(int M, int N, int K,
+                                                        int L, int config) {
+  if (L <= 0 || !grain_cutlass_sm110::valid_shape(M, N, K))
+    return 0;
+  switch (config) {
+  case 32:
+    return grain_cutlass_sm110::BlockwiseG256<32>::workspace_bytes(M, N, K, L);
+  case 33:
+    return grain_cutlass_sm110::BlockwiseG256<16>::workspace_bytes(M, N, K, L);
+  default:
+    return 0;
+  }
+}
+
+// A[L,M,K], B[L,N,K], SA[L,M,K/256], SB[L,K/256,N], D[L,M,N].
+// All arrays are contiguous. The batch dimension selects the same expert in
+// both operands and both scale tensors; no routing is performed here.
+extern "C" int grain_cutlass_g256_batched_sm110(
+    void const *a, void const *b, void const *sa, void const *sb, void *c,
+    int M, int N, int K, int L, int config, void *stream, void *workspace,
+    size_t bytes) {
+  if (!a || !b || !sa || !sb || !c || L <= 0 ||
+      !grain_cutlass_sm110::valid_shape(M, N, K))
+    return int(cudaErrorInvalidValue);
+  auto st = static_cast<cudaStream_t>(stream);
+  switch (config) {
+  case 32:
+    return grain_cutlass_sm110::BlockwiseG256<32>::launch_batched(
+        a, b, sa, sb, c, M, N, K, L, st, workspace, bytes);
+  case 33:
+    return grain_cutlass_sm110::BlockwiseG256<16>::launch_batched(
+        a, b, sa, sb, c, M, N, K, L, st, workspace, bytes);
   default:
     return int(cudaErrorInvalidValue);
   }

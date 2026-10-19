@@ -4,6 +4,10 @@ INT8 activation × INT8 weight (W8A8) GEMM with scales grouped along the reducti
 
 Python package: `grain_gemm`.
 
+The inference-only [`moe_ffn` API](docs/moe_ffn.md) composes routing, dynamic
+activation quantization, both expert projections, SwiGLU and weighted combination
+into one call. It uses the same logical weight views and scale layouts as GEMM.
+
 ## Operation
 
 For `A[M, K] @ B[K, N]`:

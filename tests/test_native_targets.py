@@ -48,7 +48,9 @@ def fake_library():
     return SimpleNamespace(grain_cute_g256=symbol(), grain_cuda_error_string=symbol(),
                            grain_cutlass_g256=symbol(), grain_cutlass_error_string=symbol(),
                            grain_cutlass_g256_sm110=symbol(),
-                           grain_cutlass_workspace_bytes=symbol())
+                           grain_cutlass_workspace_bytes=symbol(),
+                           grain_cutlass_batched_workspace_bytes=symbol(),
+                           grain_cutlass_g256_batched_sm110=symbol())
 
 
 @pytest.mark.parametrize("architecture", ["sm_110", "sm_120", "sm_121"])
@@ -74,6 +76,18 @@ def test_thor_cutlass_workspace_abi_preserves_pointer_and_size_width(native, mon
         [ctypes.c_void_p] * 5 + [ctypes.c_int] * 4
         + [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
     )
+    assert library.grain_cutlass_batched_workspace_bytes.argtypes == [ctypes.c_int] * 5
+    assert library.grain_cutlass_batched_workspace_bytes.restype is ctypes.c_size_t
+    assert library.grain_cutlass_g256_batched_sm110.argtypes == (
+        [ctypes.c_void_p] * 5 + [ctypes.c_int] * 5
+        + [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+    )
+    assert library.grain_cutlass_g256_batched_sm110.restype is ctypes.c_int
+    # The fourth shape argument is batch L; the last is a byte count. ctypes
+    # must not truncate workspace addresses or size_t on a 64-bit host.
+    assert library.grain_cutlass_g256_batched_sm110.argtypes[8] is ctypes.c_int
+    assert library.grain_cutlass_g256_batched_sm110.argtypes[-2] is ctypes.c_void_p
+    assert library.grain_cutlass_g256_batched_sm110.argtypes[-1] is ctypes.c_size_t
     # The existing GB10 ABI remains the same even inside a Thor library.
     assert library.grain_cutlass_g256.argtypes == (
         [ctypes.c_void_p] * 5 + [ctypes.c_int] * 4 + [ctypes.c_void_p]
@@ -81,10 +95,25 @@ def test_thor_cutlass_workspace_abi_preserves_pointer_and_size_width(native, mon
 
 
 @pytest.mark.parametrize("native", ["cutlass"], indirect=True)
-def test_thor_cutlass_missing_pipeline_symbols_is_unavailable(native, monkeypatch):
+@pytest.mark.parametrize("architecture", ["sm_120", "sm_121"])
+def test_sm12x_cutlass_loads_without_thor_batched_symbols(native, monkeypatch, architecture):
+    write_metadata(native, architecture)
+    library = fake_library()
+    del library.grain_cutlass_batched_workspace_bytes
+    del library.grain_cutlass_g256_batched_sm110
+    monkeypatch.setattr(native.ctypes, "CDLL", lambda path: library)
+    assert native._load_library(architecture) is library
+    assert library.grain_cutlass_g256.argtypes == (
+        [ctypes.c_void_p] * 5 + [ctypes.c_int] * 4 + [ctypes.c_void_p]
+    )
+
+
+@pytest.mark.parametrize("native", ["cutlass"], indirect=True)
+@pytest.mark.parametrize("missing_symbol", ["grain_cutlass_g256_sm110", "grain_cutlass_batched_workspace_bytes", "grain_cutlass_g256_batched_sm110"])
+def test_thor_cutlass_missing_pipeline_symbols_is_unavailable(native, monkeypatch, missing_symbol):
     write_metadata(native, "sm_110")
     library = fake_library()
-    del library.grain_cutlass_g256_sm110
+    delattr(library, missing_symbol)
     monkeypatch.setattr(native.ctypes, "CDLL", lambda path: library)
     monkeypatch.setattr(torch.cuda, "get_device_capability", lambda device=None: (11, 0))
     assert native.is_available(device=torch.device("cuda:2")) is False

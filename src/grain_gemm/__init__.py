@@ -1,7 +1,7 @@
 """GrainGEMM: INT8 GEMM with K-group scaling."""
 
 __version__ = "0.0.0"
-__all__ = ["int8_gemm", "get_kernel_config", "__version__"]
+__all__ = ["int8_gemm", "get_kernel_config", "moe_ffn", "__version__"]
 
 
 def __getattr__(name):
@@ -10,4 +10,8 @@ def __getattr__(name):
         from .gemm import int8_gemm, get_kernel_config
         globals().update(int8_gemm=int8_gemm, get_kernel_config=get_kernel_config)
         return globals()[name]
+    if name == "moe_ffn":
+        from .moe import moe_ffn
+        globals()[name] = moe_ffn
+        return moe_ffn
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
