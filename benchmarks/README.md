@@ -5,6 +5,11 @@ reproduced with `bench_thor.py`, and a [square comparison using the GB10
 protocol](#thor-custom-kernel-comparison), reproduced with `sweep_thor.py`.
 The public API and scale layouts are shared.
 
+A fresh [standalone Thor BF16 GEMM measurement at 1.2 GHz
+(1197 MHz)](results/thor/bf16_gemm_1197mhz.md) reaches **130.32 TFLOPS** on
+the tested square shapes. It measures GPU GEMM execution separately from
+[full Cosmos MoE FFN latency](results/thor/moe_ffn_cosmos.md).
+
 **Hardware scope: the historical batch below is GB10-only (SM121, compute capability
 12.1).** Measured performance, tuned configurations and backend rankings in
 those historical reports, especially the CuTe/CUTLASS comparisons, apply only to

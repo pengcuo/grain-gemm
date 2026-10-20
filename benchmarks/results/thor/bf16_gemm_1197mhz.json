@@ -1,0 +1,665 @@
+{
+  "complete": true,
+  "timestamp_utc": "2026-10-20T02:42:08.600127+00:00",
+  "gpu": "NVIDIA Thor",
+  "compute_capability": [
+    11,
+    0
+  ],
+  "multiprocessor_count": 20,
+  "dtype": "bfloat16",
+  "expected_sizes": [
+    1024,
+    2048,
+    4096,
+    8192
+  ],
+  "seed": 2026,
+  "software": {
+    "torch": "2.11.0a0+a6c236b9fd.nv26.03.46836102",
+    "cuda": "13.2",
+    "triton": "3.6.0",
+    "python": "3.12.3"
+  },
+  "blas_preference": "_BlasBackend.Cublas",
+  "allow_bf16_reduced_precision_reduction": true,
+  "float32_matmul_precision": "high",
+  "timing": {
+    "method": "triton.testing.do_bench_cudagraph",
+    "rounds": 3,
+    "rep_ms": 10,
+    "warmup_ms": 200,
+    "statistic": "median of round medians; methods rotate order each round",
+    "scope": "BF16 GEMM only; excludes host dispatch, input generation, layout preparation, correctness checks and warmup",
+    "rep_note": "Installed Triton estimates calls per captured batch and replays the batch ten times",
+    "cache_policy": "repeated inputs and weights, no explicit L2 flush"
+  },
+  "throughput": "2*M*N*K/(median_seconds*1e12), dense FLOPs; one FMA counts as two",
+  "script_sha256": {
+    "/workspace/grain-gemm/benchmarks/bench_bf16_gemm.py": "d3041c185f1ce199863da89f3be3d223171e412f4b5833a6ef8fca01bc3e3f16",
+    "/workspace/grain-gemm/benchmarks/bench_moe_ffn.py": "d03722a842ca63a6c62b88a5130ca65719bb94be06b273874677faa5794d9a01",
+    "/usr/local/lib/python3.12/dist-packages/triton/testing.py": "15e46e471ac9ecd221e9837e07eb626e88f0047c079612be44c28168a5427002"
+  },
+  "gpu_state_before": {
+    "min_freq_hz": 1197000000,
+    "max_freq_hz": 1197000000,
+    "cur_freq_hz": 1197000000,
+    "temperature_c": 49.62,
+    "graphics_clock_mhz": 1197.0,
+    "sw_thermal_slowdown": "Not Active"
+  },
+  "cases": [
+    {
+      "size": 1024,
+      "results": {
+        "nt_default": {
+          "layout": "NT, B column-major",
+          "api": "torch.mm",
+          "round_medians_ms": [
+            0.017358548873293717,
+            0.017364946940473018,
+            0.01755952947279986
+          ],
+          "median_ms": 0.017364946940473018,
+          "min_ms": 0.017358548873293717,
+          "max_ms": 0.01755952947279986,
+          "tflops": 123.66773450915613
+        },
+        "nt_out": {
+          "layout": "NT, B column-major",
+          "api": "torch.mm(out=C)",
+          "round_medians_ms": [
+            0.01753421158319967,
+            0.01745273862566267,
+            0.01756996145615211
+          ],
+          "median_ms": 0.01753421158319967,
+          "min_ms": 0.01745273862566267,
+          "max_ms": 0.01756996145615211,
+          "tflops": 122.47392121454736
+        },
+        "nn_default": {
+          "layout": "NN, B row-major",
+          "api": "torch.mm",
+          "round_medians_ms": [
+            0.017367940340469134,
+            0.01753660759392002,
+            0.017377719635954754
+          ],
+          "median_ms": 0.017377719635954754,
+          "min_ms": 0.017367940340469134,
+          "max_ms": 0.01753660759392002,
+          "tflops": 123.57683821511456
+        },
+        "nn_out": {
+          "layout": "NN, B row-major",
+          "api": "torch.mm(out=C)",
+          "round_medians_ms": [
+            0.01745790432369898,
+            0.01749351709738545,
+            0.017378834315708705
+          ],
+          "median_ms": 0.01745790432369898,
+          "min_ms": 0.017378834315708705,
+          "max_ms": 0.01749351709738545,
+          "tflops": 123.0092460230067
+        }
+      },
+      "checks": {
+        "nt_default": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.0625,
+          "relative_l2": 0.00021864482550881803,
+          "all_outputs_finite": true
+        },
+        "nt_out": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.0625,
+          "relative_l2": 0.00021864482550881803,
+          "all_outputs_finite": true
+        },
+        "nn_default": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.0625,
+          "relative_l2": 0.00021864482550881803,
+          "all_outputs_finite": true
+        },
+        "nn_out": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.0625,
+          "relative_l2": 0.00021864482550881803,
+          "all_outputs_finite": true
+        }
+      },
+      "warmup": {
+        "nt_default": {
+          "calls": 3921,
+          "elapsed_ms": 200.0515339896083
+        },
+        "nt_out": {
+          "calls": 4145,
+          "elapsed_ms": 200.02818095963448
+        },
+        "nn_default": {
+          "calls": 4114,
+          "elapsed_ms": 200.02082898281515
+        },
+        "nn_out": {
+          "calls": 4173,
+          "elapsed_ms": 200.0229679979384
+        }
+      },
+      "measurement_orders": [
+        [
+          "nt_default",
+          "nt_out",
+          "nn_default",
+          "nn_out"
+        ],
+        [
+          "nt_out",
+          "nn_default",
+          "nn_out",
+          "nt_default"
+        ],
+        [
+          "nn_default",
+          "nn_out",
+          "nt_default",
+          "nt_out"
+        ]
+      ],
+      "a_stride": [
+        1024,
+        1
+      ],
+      "b_nt_stride": [
+        1,
+        1024
+      ],
+      "b_nn_stride": [
+        1024,
+        1
+      ],
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 49.62,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 60.41,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "size": 2048,
+      "results": {
+        "nt_default": {
+          "layout": "NT, B column-major",
+          "api": "torch.mm",
+          "round_medians_ms": [
+            0.13340444275827118,
+            0.13201715528350516,
+            0.13292040487732548
+          ],
+          "median_ms": 0.13292040487732548,
+          "min_ms": 0.13201715528350516,
+          "max_ms": 0.13340444275827118,
+          "tflops": 129.2492992317891
+        },
+        "nt_out": {
+          "layout": "NT, B column-major",
+          "api": "torch.mm(out=C)",
+          "round_medians_ms": [
+            0.1368505064263401,
+            0.13298987855716626,
+            0.13216928199485495
+          ],
+          "median_ms": 0.13298987855716626,
+          "min_ms": 0.13216928199485495,
+          "max_ms": 0.1368505064263401,
+          "tflops": 129.1817796240423
+        },
+        "nn_default": {
+          "layout": "NN, B row-major",
+          "api": "torch.mm",
+          "round_medians_ms": [
+            0.13271461214338032,
+            0.13259645344055804,
+            0.13234226974015384
+          ],
+          "median_ms": 0.13259645344055804,
+          "min_ms": 0.13234226974015384,
+          "max_ms": 0.13271461214338032,
+          "tflops": 129.56507310884905
+        },
+        "nn_out": {
+          "layout": "NN, B row-major",
+          "api": "torch.mm(out=C)",
+          "round_medians_ms": [
+            0.1323566264416798,
+            0.13183308236392927,
+            0.1309615770975749
+          ],
+          "median_ms": 0.13183308236392927,
+          "min_ms": 0.1309615770975749,
+          "max_ms": 0.1323566264416798,
+          "tflops": 130.31531142216977
+        }
+      },
+      "checks": {
+        "nt_default": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.0,
+          "relative_l2": 0.0,
+          "all_outputs_finite": true
+        },
+        "nt_out": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.0,
+          "relative_l2": 0.0,
+          "all_outputs_finite": true
+        },
+        "nn_default": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.0,
+          "relative_l2": 0.0,
+          "all_outputs_finite": true
+        },
+        "nn_out": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.0,
+          "relative_l2": 0.0,
+          "all_outputs_finite": true
+        }
+      },
+      "warmup": {
+        "nt_default": {
+          "calls": 1482,
+          "elapsed_ms": 200.0483749434352
+        },
+        "nt_out": {
+          "calls": 1502,
+          "elapsed_ms": 200.0090329675004
+        },
+        "nn_default": {
+          "calls": 1478,
+          "elapsed_ms": 200.093514053151
+        },
+        "nn_out": {
+          "calls": 1381,
+          "elapsed_ms": 200.07614500354975
+        }
+      },
+      "measurement_orders": [
+        [
+          "nt_default",
+          "nt_out",
+          "nn_default",
+          "nn_out"
+        ],
+        [
+          "nt_out",
+          "nn_default",
+          "nn_out",
+          "nt_default"
+        ],
+        [
+          "nn_default",
+          "nn_out",
+          "nt_default",
+          "nt_out"
+        ]
+      ],
+      "a_stride": [
+        2048,
+        1
+      ],
+      "b_nt_stride": [
+        1,
+        2048
+      ],
+      "b_nn_stride": [
+        2048,
+        1
+      ],
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 57.19,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 65.22,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "size": 4096,
+      "results": {
+        "nt_default": {
+          "layout": "NT, B column-major",
+          "api": "torch.mm",
+          "round_medians_ms": [
+            1.10835599899292,
+            1.0730639696121216,
+            1.0578880310058594
+          ],
+          "median_ms": 1.0730639696121216,
+          "min_ms": 1.0578880310058594,
+          "max_ms": 1.10835599899292,
+          "tflops": 128.08085758548
+        },
+        "nt_out": {
+          "layout": "NT, B column-major",
+          "api": "torch.mm(out=C)",
+          "round_medians_ms": [
+            1.1169137954711914,
+            1.107793755001492,
+            1.1007004313998752
+          ],
+          "median_ms": 1.107793755001492,
+          "min_ms": 1.1007004313998752,
+          "max_ms": 1.1169137954711914,
+          "tflops": 124.06547053681025
+        },
+        "nn_default": {
+          "layout": "NN, B row-major",
+          "api": "torch.mm",
+          "round_medians_ms": [
+            1.0922347174750433,
+            1.0688515769110785,
+            1.0591946707831488
+          ],
+          "median_ms": 1.0688515769110785,
+          "min_ms": 1.0591946707831488,
+          "max_ms": 1.0922347174750433,
+          "tflops": 128.58563007334556
+        },
+        "nn_out": {
+          "layout": "NN, B row-major",
+          "api": "torch.mm(out=C)",
+          "round_medians_ms": [
+            1.0801039934158325,
+            1.0795875655280218,
+            1.0865240097045898
+          ],
+          "median_ms": 1.0801039934158325,
+          "min_ms": 1.0795875655280218,
+          "max_ms": 1.0865240097045898,
+          "tflops": 127.24603770545171
+        }
+      },
+      "checks": {
+        "nt_default": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.0,
+          "relative_l2": 0.0,
+          "all_outputs_finite": true
+        },
+        "nt_out": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.0,
+          "relative_l2": 0.0,
+          "all_outputs_finite": true
+        },
+        "nn_default": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.0,
+          "relative_l2": 0.0,
+          "all_outputs_finite": true
+        },
+        "nn_out": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.0,
+          "relative_l2": 0.0,
+          "all_outputs_finite": true
+        }
+      },
+      "warmup": {
+        "nt_default": {
+          "calls": 113,
+          "elapsed_ms": 200.73487795889378
+        },
+        "nt_out": {
+          "calls": 159,
+          "elapsed_ms": 200.9262590436265
+        },
+        "nn_default": {
+          "calls": 168,
+          "elapsed_ms": 200.10478398762643
+        },
+        "nn_out": {
+          "calls": 184,
+          "elapsed_ms": 200.2962650731206
+        }
+      },
+      "measurement_orders": [
+        [
+          "nt_default",
+          "nt_out",
+          "nn_default",
+          "nn_out"
+        ],
+        [
+          "nt_out",
+          "nn_default",
+          "nn_out",
+          "nt_default"
+        ],
+        [
+          "nn_default",
+          "nn_out",
+          "nt_default",
+          "nt_out"
+        ]
+      ],
+      "a_stride": [
+        4096,
+        1
+      ],
+      "b_nt_stride": [
+        1,
+        4096
+      ],
+      "b_nn_stride": [
+        4096,
+        1
+      ],
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 59.97,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 71.75,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "size": 8192,
+      "results": {
+        "nt_default": {
+          "layout": "NT, B column-major",
+          "api": "torch.mm",
+          "round_medians_ms": [
+            9.40015983581543,
+            9.40230417251587,
+            9.421375751495361
+          ],
+          "median_ms": 9.40230417251587,
+          "min_ms": 9.40015983581543,
+          "max_ms": 9.421375751495361,
+          "tflops": 116.94065705617271
+        },
+        "nt_out": {
+          "layout": "NT, B column-major",
+          "api": "torch.mm(out=C)",
+          "round_medians_ms": [
+            9.433583736419678,
+            9.382080078125,
+            9.31601619720459
+          ],
+          "median_ms": 9.382080078125,
+          "min_ms": 9.31601619720459,
+          "max_ms": 9.433583736419678,
+          "tflops": 117.19273536575233
+        },
+        "nn_default": {
+          "layout": "NN, B row-major",
+          "api": "torch.mm",
+          "round_medians_ms": [
+            9.37056016921997,
+            9.333439826965332,
+            9.375648021697998
+          ],
+          "median_ms": 9.37056016921997,
+          "min_ms": 9.333439826965332,
+          "max_ms": 9.375648021697998,
+          "tflops": 117.3368088908527
+        },
+        "nn_out": {
+          "layout": "NN, B row-major",
+          "api": "torch.mm(out=C)",
+          "round_medians_ms": [
+            9.353856086730957,
+            9.348960399627686,
+            9.374000072479248
+          ],
+          "median_ms": 9.353856086730957,
+          "min_ms": 9.348960399627686,
+          "max_ms": 9.374000072479248,
+          "tflops": 117.54634854129598
+        }
+      },
+      "checks": {
+        "nt_default": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.03125,
+          "relative_l2": 4.512380837695673e-05,
+          "all_outputs_finite": true
+        },
+        "nt_out": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.03125,
+          "relative_l2": 4.512380837695673e-05,
+          "all_outputs_finite": true
+        },
+        "nn_default": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.03125,
+          "relative_l2": 4.512380837695673e-05,
+          "all_outputs_finite": true
+        },
+        "nn_out": {
+          "independent_cpu_fp64_samples": 64,
+          "max_abs": 0.03125,
+          "relative_l2": 4.512380837695673e-05,
+          "all_outputs_finite": true
+        }
+      },
+      "warmup": {
+        "nt_default": {
+          "calls": 14,
+          "elapsed_ms": 207.53810601308942
+        },
+        "nt_out": {
+          "calls": 16,
+          "elapsed_ms": 209.48250393848866
+        },
+        "nn_default": {
+          "calls": 21,
+          "elapsed_ms": 207.6989960623905
+        },
+        "nn_out": {
+          "calls": 21,
+          "elapsed_ms": 205.6718380190432
+        }
+      },
+      "measurement_orders": [
+        [
+          "nt_default",
+          "nt_out",
+          "nn_default",
+          "nn_out"
+        ],
+        [
+          "nt_out",
+          "nn_default",
+          "nn_out",
+          "nt_default"
+        ],
+        [
+          "nn_default",
+          "nn_out",
+          "nt_default",
+          "nt_out"
+        ]
+      ],
+      "a_stride": [
+        8192,
+        1
+      ],
+      "b_nt_stride": [
+        1,
+        8192
+      ],
+      "b_nn_stride": [
+        8192,
+        1
+      ],
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 54.47,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 72.06,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      }
+    }
+  ],
+  "frequency_note": "GPU frequency reduced to 1.2 GHz; actual supported locked setting is 1197 MHz.",
+  "updated_at_utc": "2026-10-20T02:42:22.354902+00:00",
+  "gpu_state_after": {
+    "min_freq_hz": 1197000000,
+    "max_freq_hz": 1197000000,
+    "cur_freq_hz": 1197000000,
+    "temperature_c": 72.06,
+    "graphics_clock_mhz": 1197.0,
+    "sw_thermal_slowdown": "Not Active"
+  },
+  "best_observed": {
+    "size": 2048,
+    "method": "nn_out",
+    "median_ms": 0.13183308236392927,
+    "tflops": 130.31531142216977
+  }
+}
