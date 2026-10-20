@@ -4,9 +4,11 @@ GPU frequency was **reduced to 1.2 GHz**; the actual supported locked setting
 was **1197 MHz**. The primary floating-point comparison is the original Cosmos
 Framework grouped-MM expert FFN with its default compilation options.
 
-For these three shapes, INT8 auto is **1.06x–1.81x faster than compiled Cosmos
-BF16**. This comparison replaces the per-expert-loop baseline as the relevant
-Cosmos comparison; it does not establish a speedup for every MoE workload.
+Across these five token counts, the compiled BF16 / INT8 latency ratio ranges
+from **0.90x to 1.81x**. INT8 is faster on four shapes; at **4096 tokens,
+compiled Cosmos BF16 is faster**, taking 3.873 ms versus INT8's 4.296 ms.
+This comparison replaces the per-expert-loop baseline as the relevant Cosmos
+comparison; it does not establish a speedup for every MoE workload.
 
 NVIDIA Thor SM110, E=32 experts, H=1536, I=1024, top-k=4, G=256 and SwiGLU.
 The BF16 input tensors and original weight values are shared across methods.
@@ -17,10 +19,25 @@ INT8 weights and scales are prepared once outside timing.
 | 128 | 1.153 | 4.19 | 2.365 | 2.091 | 2.31 | 1.81x |
 | 512 | 1.321 | 14.63 | 2.295 | 1.887 | 10.24 | 1.43x |
 | 2048 | 2.550 | 30.31 | 3.815 | 2.701 | 28.63 | 1.06x |
+| 3072 | 3.486 | 33.27 | 5.398 | 3.931 | 29.50 | 1.13x |
+| 4096 | 4.296 | 35.99 | 6.001 | 3.873 | 39.92 | 0.90x |
+
+The 3072/4096 rows were added in a separate process using the same protocol,
+production kernels, benchmark sources, weights and upstream Cosmos revision.
+The 3072 row additionally includes a second independent run because its
+full-call latency varied substantially across rounds: it pools all ten round
+medians from both five-round runs and takes their median, without discarding
+either run. All other rows retain five-round medians. The two individual 3072
+run medians were INT8 **3.675 / 3.303 ms**, eager BF16 **5.618 / 5.179 ms** and
+compiled BF16 **3.910 / 3.952 ms**. Treat the 3072 speedup as a variable full-call
+measurement; it is not a stable isolated-kernel speedup.
+Across its ten rounds, INT8 round medians ranged from **3.274 to 4.133 ms**,
+and compiled BF16 from **3.242 to 4.349 ms**.
 
 The ratio is BF16 latency divided by INT8 latency; values above one favor INT8.
 INT8 auto selects ragged Triton at 128/512 tokens and the Thor native batched
-CUTLASS path at 2048 tokens (capacity 320 per expert). The BF16 methods retain
+CUTLASS path at 2048/3072/4096 tokens (capacity 320/448/640 per expert,
+respectively). The BF16 methods retain
 Cosmos's variable-size groups with each expert padded independently to a
 multiple of 16; they do not loop over experts in Python.
 
@@ -65,10 +82,13 @@ than GEMM-only throughput. INT8 is measured through its eager public auto API;
 Cosmos is shown both eager and compiled.
 
 Each method receives at least 200 ms of untimed warmup after cooling. Five rounds
-rotate the three-method execution order. Each round takes the median of five
-full-call CUDA event samples; the table reports the median of round medians.
+per run rotate the three-method execution order. Each round takes the median of
+five full-call CUDA event samples; the table reports the median of round medians
+(ten round medians for the repeated 3072 case, as explained above).
 Effective throughput uses `6*T*top_k*H*I / latency`, excluding non-GEMM operation
-counts. Recorded temperatures ranged from approximately 49 to 53 C, clocks
+counts. This counts both gate/up (`4*T*top_k*H*I`) and down
+(`2*T*top_k*H*I`), using valid routes and excluding extra padding work.
+Recorded temperatures ranged from approximately 49 to 54 C, clocks
 remained locked at 1197 MHz and no thermal slowdown was reported.
 
 Scores are normalized once in FP32 and rounded to BF16 before timing. Cosmos
@@ -96,6 +116,14 @@ PYTHONPATH=src python benchmarks/bench_moe_cosmos.py \
   --cosmos-dir /path/to/cosmos-framework \
   --output benchmarks/results/thor/moe_ffn_cosmos.json
 
+PYTHONPATH=src python benchmarks/bench_moe_cosmos.py \
+  --cosmos-dir /path/to/cosmos-framework --tokens 3072 4096 \
+  --output benchmarks/results/thor/moe_ffn_cosmos_large_tokens.json
+
+PYTHONPATH=src python benchmarks/bench_moe_cosmos.py \
+  --cosmos-dir /path/to/cosmos-framework --tokens 3072 \
+  --output benchmarks/results/thor/moe_ffn_cosmos_3072_repeat.json
+
 GRAIN_COSMOS_DIR=/path/to/cosmos-framework PYTHONPATH=src \
   python -m pytest -q tests/test_cosmos_moe_baseline.py
 ```
@@ -103,7 +131,11 @@ GRAIN_COSMOS_DIR=/path/to/cosmos-framework PYTHONPATH=src \
 The benchmark records clocks and does not change them. Use the pinned upstream
 revision to reproduce this source version.
 
-- [Raw results, timing rounds and provenance](moe_ffn_cosmos.json)
-- [CSV](moe_ffn_cosmos.csv)
+- Original 128/512/2048 tokens: [raw results, rounds and provenance](moe_ffn_cosmos.json),
+  [CSV](moe_ffn_cosmos.csv).
+- Added 3072/4096 tokens: [raw results, rounds and provenance](moe_ffn_cosmos_large_tokens.json),
+  [CSV](moe_ffn_cosmos_large_tokens.csv).
+- Repeated 3072 tokens: [raw results, rounds and provenance](moe_ffn_cosmos_3072_repeat.json),
+  [CSV](moe_ffn_cosmos_3072_repeat.csv).
 - [Earlier per-expert-loop comparison](moe_ffn.md)
 - [Public API and numerical contract](../../../docs/moe_ffn.md)
