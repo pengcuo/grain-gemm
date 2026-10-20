@@ -1,5 +1,9 @@
 # Thor INT8 MoE FFN measurements
 
+For the original Cosmos Framework grouped-MM BF16 baseline, use the newer
+[Cosmos comparison](moe_ffn_cosmos.md). This report retains the earlier
+per-expert-loop baseline and its separate measurement run.
+
 GPU frequency was **reduced to 1.2 GHz**; the actual supported locked setting
 was **1197 MHz** throughout this run. This is an end-to-end FFN measurement,
 separate from the square-GEMM protocol in this directory.

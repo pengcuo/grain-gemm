@@ -203,6 +203,8 @@ baseline is an eager PyTorch per-expert FFN reference, not a tuned fused BF16 Mo
 kernel. It records the clock, temperature, correctness sample and timing rounds;
 the earlier square-GEMM reports use a different protocol.
 
-A [Thor end-to-end report](../benchmarks/results/thor/moe_ffn.md) records the
-complete FFN at a reduced 1.2 GHz GPU clock (actual 1197 MHz), including effective
-throughput and the precise eager BF16 baseline.
+A [Cosmos Framework comparison](../benchmarks/results/thor/moe_ffn_cosmos.md)
+measures the complete pre-routed FFN against its original grouped-MM BF16 path,
+both eager and compiled, at a reduced 1.2 GHz GPU clock (actual 1197 MHz).
+The [earlier report](../benchmarks/results/thor/moe_ffn.md) retains the separate
+per-expert-loop BF16 baseline; its speedups do not describe Cosmos grouped-MM.

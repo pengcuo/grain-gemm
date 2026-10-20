@@ -1,0 +1,620 @@
+{
+  "complete": true,
+  "seed": 2026,
+  "expected_tokens": [
+    128,
+    512,
+    2048
+  ],
+  "timestamp_utc": "2026-10-20T02:36:04.237229+00:00",
+  "gpu": "NVIDIA Thor",
+  "compute_capability": [
+    11,
+    0
+  ],
+  "dtype": "bfloat16",
+  "experts": 32,
+  "hidden": 1536,
+  "intermediate": 1024,
+  "top_k": 4,
+  "group_size": 256,
+  "activation": "swiglu",
+  "int8_backend": "auto",
+  "rounds": 5,
+  "repetitions": 5,
+  "warmup": 2,
+  "warmup_ms": 200,
+  "software": {
+    "torch": "2.11.0a0+a6c236b9fd.nv26.03.46836102",
+    "triton": "3.6.0",
+    "cuda": "13.2",
+    "python": "3.12.3"
+  },
+  "cosmos": {
+    "cosmos_dir": "/tmp/cosmos-framework-moe-review",
+    "source_sha256": {
+      "cosmos_framework/model/generator/reasoner/qwen3_vl_moe/moe.py": "fb87a095199198c5f36999e01b8974d8c39f7b32b683d5ebdbfbeccf1be5adc8",
+      "cosmos_framework/model/generator/reasoner/qwen3_vl_moe/moe_kernels.py": "93dff7a19639756e8b434ee7054a4ade2369c199db0697f28a3eda488a749212",
+      "cosmos_framework/model/generator/reasoner/qwen3_vl_moe/qwen3_vl_moe.py": "49ba8d9ff21130f05fc9fdbdf9911523b8708e90beb353799248687cb644097c",
+      "cosmos_framework/model/generator/reasoner/qwen3_vl_moe/configuration_qwen3_vl_moe.py": "22b60a4500d5199b07f40be5132a919aa45a6e464216e8c89709a1f717261178",
+      "cosmos_framework/model/generator/reasoner/qwen3_vl_moe/moe_bench.py": "3d65ce5fe8e08cb573c91360cf7e06b7960e69a081b2f4eda68bd63de0b64d34"
+    },
+    "git_commit": "4ed6244506e00bb270ed17d4532897f2aaa7bc16",
+    "git_remote": "https://github.com/NVIDIA/cosmos-framework.git",
+    "source_dirty": false,
+    "loader": "unchanged_ast_definitions_and_original_kernel_module",
+    "module": "_grain_cosmos_moe_experts_fb87a095199198c5",
+    "extracted_names": [
+      "_run_experts_grouped_mm",
+      "Qwen3VLMoeTextExpertsGroupedMm",
+      "_weighted_expert_counts"
+    ],
+    "normal_import_error": "ModuleNotFoundError: No module named 'transformers'",
+    "kernel_module": "_grain_cosmos_moe_kernels_93dff7a19639756e",
+    "token_group_alignment": 16,
+    "activation_provider": "equivalent PyTorch silu provider",
+    "activation_source_url": "https://github.com/huggingface/transformers/blob/v4.57.6/src/transformers/activations.py",
+    "activation_equivalence": "SiLUActivation.forward calls nn.functional.silu(input)",
+    "activation_import_error": "ModuleNotFoundError: No module named 'transformers'",
+    "dtype": "torch.bfloat16",
+    "weight_layout": "upstream N-contiguous Parameters; Linear transpose/copy once before timing",
+    "gate_up_shape": [
+      32,
+      1536,
+      2048
+    ],
+    "gate_up_stride": [
+      3145728,
+      2048,
+      1
+    ],
+    "down_shape": [
+      32,
+      1024,
+      1536
+    ],
+    "down_stride": [
+      1572864,
+      1536,
+      1
+    ],
+    "score_position": "after SwiGLU, before down grouped GEMM",
+    "counts": "unchanged upstream _weighted_expert_counts, included in timed forward; no mask: torch.histc int32 input; mask: int32 scatter_add",
+    "counts_loader": "unchanged AST definition from qwen3_vl_moe.py",
+    "score_dtype": "cast to hidden_states.dtype inside timed forward"
+  },
+  "compilation": {
+    "fullgraph": true,
+    "dynamic": true,
+    "backend": "inductor",
+    "mode": "default",
+    "boundary": "counts plus original Cosmos expert forward"
+  },
+  "timing": "Full-call CUDA events including host dispatch gaps; rotating three-method order; median of round medians; no CUDA Graph capture.",
+  "scope": "Includes expert histogram, sort/pad/gather dispatch, two projections, activation and combine; INT8 includes dynamic activation quantization. Excludes router/top-k, weight preparation, compilation, warmup, correctness and cooling.",
+  "score_policy": "FP32 random scores normalized once, rounded to BF16, then supplied to INT8 as FP32 with identical numeric values. No extra INT8 normalization.",
+  "cosmos_score_input_dtype": "BF16, prepared before timing as in the original Cosmos expert interface",
+  "numerical_difference": "Cosmos multiplies routing score before down and uses BF16 scatter_add. INT8 multiplies after down and reduces in FP32. Their rounding and quantization contracts differ; equality between methods is not asserted.",
+  "throughput": "6*T*top_k*H*I divided by complete FFN latency; non-GEMM operation counts excluded. INT8 in effective TOPS, BF16 in effective TFLOPS.",
+  "source": {
+    "git_commit": "11303848ea8b59cb22c503d03ce4936f61112219",
+    "git_status_porcelain": "M benchmarks/results/thor/moe_ffn.md\n M docs/moe_ffn.md\n?? benchmarks/bench_moe_cosmos.py\n?? benchmarks/cosmos_moe_baseline.py\n?? benchmarks/results/thor/moe_ffn_cosmos.csv\n?? benchmarks/results/thor/moe_ffn_cosmos.json\n?? benchmarks/results/thor/moe_ffn_cosmos.md\n?? tests/test_cosmos_moe_baseline.py",
+    "native_file_sha256": {
+      "build.json": "f5134348907ed9de95a40f96bf41e25b97011ce71ffa64a7d62a32529de09358",
+      "cutlass_build.json": "1b45c3ecb1725e7486b3b40b6464d672da7a3123a8182edd45a7f7b25ef4c895",
+      "libgrain_cuda.so": "ffa6c369f539fe6a7a3bd8999d871ace2d0d7dfa92fbfb1fefbd037558572884",
+      "libgrain_cutlass.so": "042fca65e18b40740b7f67b77abd665fd708500fc3ddb3de29c17c4a8a78e85f"
+    }
+  },
+  "source_sha256": {
+    "__init__.py": "e2d29e4f57861cf6c5f935e7d02819a1c1f3e8298f36a2a5d13f373f0a6090b5",
+    "baselines/__init__.py": "b045e960f98bbc0d0ffc1d9ad4ad3e9ecff31d859fd5761dd0f20423dd14c211",
+    "baselines/sglang.py": "cde6cf5e9cef6bb66a8da2af5cdb7a74bd744eee4ca50686bc39dae661953b81",
+    "gemm.py": "c9b73f162cf64e9411306cdd987c7db1798760ea9f3c57fba547237166175783",
+    "kernels/__init__.py": "df3df411d10614aabefa0a3893e37899c67b80d984a70f2d82b6f334658f69ab",
+    "kernels/_native/build.json": "f5134348907ed9de95a40f96bf41e25b97011ce71ffa64a7d62a32529de09358",
+    "kernels/_native/cutlass_build.json": "1b45c3ecb1725e7486b3b40b6464d672da7a3123a8182edd45a7f7b25ef4c895",
+    "kernels/_native.py": "b6331520d0472260b25a4b9406e760baa810a016260a6feb97a279843d7a9e85",
+    "kernels/configs/gb10_sm121_g256.json": "a88ae37bff252d6da04eb80ac7d1bb77e05e31f31bfa36a99a60f09674b3c529",
+    "kernels/configs/gb10_sm121_g256_cutlass.json": "5fe34e1093543dc239594c47a762a3a5eab8c58904560d66a706d02b520c9422",
+    "kernels/configs/thor_sm110_g256.json": "128f189245a3575faaa1bbd6994bb65198ff115be23ae4c86be2ea060763568a",
+    "kernels/csrc/sm110/include/cutlass/arch/reg_reconfig.h": "0fb2b25800ea6ca721b3d621aa3fe354eb12161452dd290e48d25b8b4e947c17",
+    "kernels/csrc/sm110/include/cutlass/gemm/collective/sm100_mma_warpspecialized_blockwise_scaling.hpp": "13f0637b22af94e802e43c41a2b71a27e93f355cff9974f35401947c4b5e1c51",
+    "kernels/csrc/sm110/include/cutlass/gemm/kernel/sm100_gemm_tma_warpspecialized_mma_transform.hpp": "f93fab18e5bbb35263dbc80582ab87adbde6d727118de64344c3724ba2fa4327",
+    "kernels/csrc/sm110/int8_g256_cute.cu": "47926db4bda1a083ce63363e9f5e9dbad65b4957eb46c9e12ec5b3eb049968aa",
+    "kernels/csrc/sm110/int8_g256_cutlass.cu": "0eb71ee3e7b5798f35f3e1d83ea3c41c53d3521183a4d524bf399c83200cee79",
+    "kernels/csrc/sm110/int8_g256_pipeline.cuh": "2e3f263f046737bbc536b71c9dfbb930ea14ae6548044fc4b79aa0cdd4472433",
+    "kernels/csrc/sm110/int8_g256_pipeline_1sm.cuh": "a78b8379b12a18da51eee4f93d0273f19049cab9a02f4945f13d91dfa56c4ad3",
+    "kernels/csrc/sm12x/cutlass/collective.hpp": "482a26e13af8acd2e097deabcc4b29cefe5c3664f5223ec952638937a26ff80c",
+    "kernels/csrc/sm12x/cutlass/epilogue.hpp": "a4a7d9c0b20322880eee6afe5a4f690096a0dac7a0012ee16a5e243dfd11bfcd",
+    "kernels/csrc/sm12x/cutlass/int8_g256.cu": "8d2f5dd34bd931d6be93264585d41edf747b5dc07baa0a94d1bcb4285a8651ac",
+    "kernels/csrc/sm12x/cutlass/kernel.hpp": "e979950bb2e1cb613e47ea335f1d7579a5c575a24faa1833a48728afbe3e028c",
+    "kernels/csrc/sm12x/int8_g256_cute.cu": "ff3707f9ae33075add88148fa680b768cccd13c748bf8defa1136ad48e448148",
+    "kernels/cuda.py": "efe42a48481c71a7b9a1ad4e54efcdabcee2d849a5b01467dc9c0f9239357b44",
+    "kernels/cutlass.py": "b79803e07bdffc6d249b0478f5d511f80754cea3653a486e871bf0866d0b705c",
+    "kernels/moe.py": "5d2ce005455c4c8aac0db6601ab2f29fadb6e3b6f9b3bcf29ddc4abe7e8311e0",
+    "kernels/triton.py": "0e4834f409c64c3cffb4481a985948239c8d737bb53b805270eabe15f029da21",
+    "moe.py": "d127696becc448694bd217273029fa6588524ec9765063c20c32f45cfacc9f2f"
+  },
+  "benchmark_sha256": {
+    "bench_moe_cosmos.py": "a4c7a8d2e8c2333638a96c547656c0effbd34d1333c5c2f33c30f2ab57344130",
+    "cosmos_moe_baseline.py": "0ca7bf702347f87a9971d045eb653121ee200965be9e6eeeecb45b634d852058",
+    "bench_moe_ffn.py": "d03722a842ca63a6c62b88a5130ca65719bb94be06b273874677faa5794d9a01"
+  },
+  "gpu_state_before": {
+    "min_freq_hz": 1197000000,
+    "max_freq_hz": 1197000000,
+    "cur_freq_hz": 1197000000,
+    "temperature_c": 49.03,
+    "graphics_clock_mhz": 1197.0,
+    "sw_thermal_slowdown": "Not Active"
+  },
+  "cases": [
+    {
+      "tokens": 128,
+      "experts": 32,
+      "hidden": 1536,
+      "intermediate": 1024,
+      "top_k": 4,
+      "route_counts": [
+        15,
+        18,
+        13,
+        19,
+        11,
+        22,
+        13,
+        9,
+        19,
+        16,
+        11,
+        15,
+        14,
+        11,
+        19,
+        17,
+        17,
+        16,
+        18,
+        18,
+        15,
+        17,
+        21,
+        21,
+        19,
+        15,
+        11,
+        22,
+        16,
+        16,
+        12,
+        16
+      ],
+      "checks": {
+        "independent_cpu_tokens": 2,
+        "independent_cpu_routes": 8,
+        "int8_matches_int32_reference": true,
+        "all_outputs_finite": true,
+        "cosmos_bf16_eager_vs_cpu": {
+          "max_abs": 0.0078125,
+          "rmse": 0.0009580387268215418,
+          "relative_l2": 0.002807426266372204
+        },
+        "int8_vs_cosmos_bf16_eager": {
+          "max_abs": 0.0390625,
+          "rmse": 0.007794640026986599,
+          "relative_l2": 0.02278822474181652
+        },
+        "cosmos_bf16_compiled_vs_cpu": {
+          "max_abs": 0.0078125,
+          "rmse": 0.000966024526860565,
+          "relative_l2": 0.0028308280743658543
+        },
+        "int8_vs_cosmos_bf16_compiled": {
+          "max_abs": 0.0400390625,
+          "rmse": 0.007753397338092327,
+          "relative_l2": 0.022663485258817673
+        },
+        "cosmos_compiled_vs_eager": {
+          "max_abs": 0.015625,
+          "rmse": 0.0017312542768195271,
+          "relative_l2": 0.005061453673988581
+        }
+      },
+      "first_call_seconds": {
+        "int8_auto": 0.8406136280391365,
+        "cosmos_bf16_eager": 1.1020157469902188,
+        "cosmos_bf16_compiled": 4.4626312690088525
+      },
+      "warmup": {
+        "int8_auto": {
+          "calls": 70,
+          "elapsed_ms": 200.62773197423667
+        },
+        "cosmos_bf16_eager": {
+          "calls": 78,
+          "elapsed_ms": 202.55970500875264
+        },
+        "cosmos_bf16_compiled": {
+          "calls": 87,
+          "elapsed_ms": 202.04738795291632
+        }
+      },
+      "results": {
+        "int8_auto": {
+          "round_medians_ms": [
+            1.3620799779891968,
+            1.1360960006713867,
+            1.1530239582061768,
+            1.1677440404891968,
+            0.9429119825363159
+          ],
+          "median_ms": 1.1530239582061768,
+          "min_ms": 0.9429119825363159,
+          "max_ms": 1.3620799779891968,
+          "effective_tops": 4.190579192749089
+        },
+        "cosmos_bf16_eager": {
+          "round_medians_ms": [
+            2.344480037689209,
+            2.365151882171631,
+            2.3519999980926514,
+            2.4893438816070557,
+            2.4112958908081055
+          ],
+          "median_ms": 2.365151882171631,
+          "min_ms": 2.344480037689209,
+          "max_ms": 2.4893438816070557,
+          "effective_tflops": 2.042929354525643
+        },
+        "cosmos_bf16_compiled": {
+          "round_medians_ms": [
+            2.0312960147857666,
+            2.055936098098755,
+            2.0906240940093994,
+            2.1975998878479004,
+            2.2176640033721924
+          ],
+          "median_ms": 2.0906240940093994,
+          "min_ms": 2.0312960147857666,
+          "max_ms": 2.2176640033721924,
+          "effective_tflops": 2.311194165342991
+        }
+      },
+      "ratios": {
+        "eager_bf16_over_int8": 2.0512599632805797,
+        "compiled_bf16_over_int8": 1.8131662218553544
+      },
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 49.31,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 50.28,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "tokens": 512,
+      "experts": 32,
+      "hidden": 1536,
+      "intermediate": 1024,
+      "top_k": 4,
+      "route_counts": [
+        70,
+        73,
+        63,
+        72,
+        69,
+        75,
+        57,
+        58,
+        63,
+        76,
+        55,
+        68,
+        65,
+        67,
+        61,
+        68,
+        62,
+        56,
+        56,
+        71,
+        51,
+        55,
+        64,
+        62,
+        57,
+        81,
+        55,
+        68,
+        58,
+        74,
+        56,
+        62
+      ],
+      "checks": {
+        "independent_cpu_tokens": 2,
+        "independent_cpu_routes": 8,
+        "int8_matches_int32_reference": true,
+        "all_outputs_finite": true,
+        "cosmos_bf16_eager_vs_cpu": {
+          "max_abs": 0.0078125,
+          "rmse": 0.0009234143071807921,
+          "relative_l2": 0.0030904526356607676
+        },
+        "int8_vs_cosmos_bf16_eager": {
+          "max_abs": 0.04296875,
+          "rmse": 0.0077587454579770565,
+          "relative_l2": 0.0227986890822649
+        },
+        "cosmos_bf16_compiled_vs_cpu": {
+          "max_abs": 0.0078125,
+          "rmse": 0.0009461381123401225,
+          "relative_l2": 0.0031664669513702393
+        },
+        "int8_vs_cosmos_bf16_compiled": {
+          "max_abs": 0.04296875,
+          "rmse": 0.007719506975263357,
+          "relative_l2": 0.022680072113871574
+        },
+        "cosmos_compiled_vs_eager": {
+          "max_abs": 0.015625,
+          "rmse": 0.0017051220638677478,
+          "relative_l2": 0.005010416265577078
+        }
+      },
+      "first_call_seconds": {
+        "int8_auto": 0.007226955960504711,
+        "cosmos_bf16_eager": 0.010268926969729364,
+        "cosmos_bf16_compiled": 0.0026875699404627085
+      },
+      "warmup": {
+        "int8_auto": {
+          "calls": 126,
+          "elapsed_ms": 200.41365700308233
+        },
+        "cosmos_bf16_eager": {
+          "calls": 73,
+          "elapsed_ms": 203.31221795640886
+        },
+        "cosmos_bf16_compiled": {
+          "calls": 101,
+          "elapsed_ms": 200.90237201657146
+        }
+      },
+      "results": {
+        "int8_auto": {
+          "round_medians_ms": [
+            1.3207999467849731,
+            1.3299200534820557,
+            1.3036479949951172,
+            1.3299520015716553,
+            1.3088639974594116
+          ],
+          "median_ms": 1.3207999467849731,
+          "min_ms": 1.3036479949951172,
+          "max_ms": 1.3299520015716553,
+          "effective_tops": 14.633066028693975
+        },
+        "cosmos_bf16_eager": {
+          "round_medians_ms": [
+            2.2954559326171875,
+            2.317471981048584,
+            2.289344072341919,
+            2.314784049987793,
+            2.294368028640747
+          ],
+          "median_ms": 2.2954559326171875,
+          "min_ms": 2.289344072341919,
+          "max_ms": 2.317471981048584,
+          "effective_tflops": 8.4198317891312
+        },
+        "cosmos_bf16_compiled": {
+          "round_medians_ms": [
+            1.8789440393447876,
+            1.886847972869873,
+            1.9106559753417969,
+            1.8759360313415527,
+            1.9071359634399414
+          ],
+          "median_ms": 1.886847972869873,
+          "min_ms": 1.8759360313415527,
+          "max_ms": 1.9106559753417969,
+          "effective_tflops": 10.243195588568447
+        }
+      },
+      "ratios": {
+        "eager_bf16_over_int8": 1.737928547169217,
+        "compiled_bf16_over_int8": 1.4285645433759642
+      },
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 49.94,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 51.03,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      }
+    },
+    {
+      "tokens": 2048,
+      "experts": 32,
+      "hidden": 1536,
+      "intermediate": 1024,
+      "top_k": 4,
+      "route_counts": [
+        243,
+        276,
+        249,
+        246,
+        237,
+        262,
+        235,
+        266,
+        256,
+        267,
+        277,
+        241,
+        246,
+        272,
+        235,
+        237,
+        253,
+        253,
+        261,
+        271,
+        271,
+        257,
+        252,
+        247,
+        268,
+        256,
+        256,
+        277,
+        256,
+        269,
+        253,
+        247
+      ],
+      "checks": {
+        "independent_cpu_tokens": 2,
+        "independent_cpu_routes": 8,
+        "int8_matches_int32_reference": true,
+        "all_outputs_finite": true,
+        "cosmos_bf16_eager_vs_cpu": {
+          "max_abs": 0.0078125,
+          "rmse": 0.0009409647900611162,
+          "relative_l2": 0.002673103241249919
+        },
+        "int8_vs_cosmos_bf16_eager": {
+          "max_abs": 0.0498046875,
+          "rmse": 0.007797146216034889,
+          "relative_l2": 0.022874951362609863
+        },
+        "cosmos_bf16_compiled_vs_cpu": {
+          "max_abs": 0.0078125,
+          "rmse": 0.0009614910813979805,
+          "relative_l2": 0.0027312785387039185
+        },
+        "int8_vs_cosmos_bf16_compiled": {
+          "max_abs": 0.0498046875,
+          "rmse": 0.0077530862763524055,
+          "relative_l2": 0.02274198830127716
+        },
+        "cosmos_compiled_vs_eager": {
+          "max_abs": 0.015625,
+          "rmse": 0.0017019251827150583,
+          "relative_l2": 0.004993039183318615
+        }
+      },
+      "first_call_seconds": {
+        "int8_auto": 0.06807309202849865,
+        "cosmos_bf16_eager": 0.017741235089488328,
+        "cosmos_bf16_compiled": 0.0031034150160849094
+      },
+      "warmup": {
+        "int8_auto": {
+          "calls": 70,
+          "elapsed_ms": 201.32649398874491
+        },
+        "cosmos_bf16_eager": {
+          "calls": 53,
+          "elapsed_ms": 201.47237495984882
+        },
+        "cosmos_bf16_compiled": {
+          "calls": 74,
+          "elapsed_ms": 200.55018598213792
+        }
+      },
+      "results": {
+        "int8_auto": {
+          "round_medians_ms": [
+            2.5482239723205566,
+            2.5568320751190186,
+            2.550368070602417,
+            2.6054399013519287,
+            2.548640012741089
+          ],
+          "median_ms": 2.550368070602417,
+          "min_ms": 2.5482239723205566,
+          "max_ms": 2.6054399013519287,
+          "effective_tops": 30.313040779929036
+        },
+        "cosmos_bf16_eager": {
+          "round_medians_ms": [
+            3.794975996017456,
+            3.834944009780884,
+            3.7950398921966553,
+            3.8146560192108154,
+            3.8625600337982178
+          ],
+          "median_ms": 3.8146560192108154,
+          "min_ms": 3.794975996017456,
+          "max_ms": 3.8625600337982178,
+          "effective_tflops": 20.26641745380595
+        },
+        "cosmos_bf16_compiled": {
+          "round_medians_ms": [
+            2.686016082763672,
+            2.7005441188812256,
+            2.693056106567383,
+            2.811199903488159,
+            2.7618560791015625
+          ],
+          "median_ms": 2.7005441188812256,
+          "min_ms": 2.686016082763672,
+          "max_ms": 2.811199903488159,
+          "effective_tflops": 28.627346166085797
+        }
+      },
+      "ratios": {
+        "eager_bf16_over_int8": 1.49572764150461,
+        "compiled_bf16_over_int8": 1.0588840685428342
+      },
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 50.47,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 52.75,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      }
+    }
+  ],
+  "frequency_note": "GPU clock reduced to 1.2 GHz; actual supported locked setting is 1197 MHz.",
+  "updated_at_utc": "2026-10-20T02:36:15.920452+00:00",
+  "gpu_state_after": {
+    "min_freq_hz": 1197000000,
+    "max_freq_hz": 1197000000,
+    "cur_freq_hz": 1197000000,
+    "temperature_c": 52.75,
+    "graphics_clock_mhz": 1197.0,
+    "sw_thermal_slowdown": "Not Active"
+  }
+}
