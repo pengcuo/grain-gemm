@@ -113,6 +113,13 @@ separable scale, and reduced-precision scale schemes are disabled. The C ABI
 accepts caller-owned workspace on each launch, preserving CUDA Graph and
 stream ownership, and retains the original 32 warp-MMA configurations.
 
+`src/grain_gemm/kernels/csrc/sm110/int8_g256_moe.cu` composes the same
+Cosmos-derived G256 collective into a separate MoE library. It retains the
+upstream BSD-3-Clause notice and uses smaller one-SM/two-SM tiles and persistent
+schedulers for expert matrices. The public weight and scale layouts, INT32
+group dots and FP32 scaled accumulation are preserved. Its configurations do
+not replace the single-GEMM configurations or the SM12x implementations.
+
 ## Optional upstream vLLM BF16 MoE benchmark
 
 `benchmarks/vllm_moe_baseline.py` loads unchanged function definitions and

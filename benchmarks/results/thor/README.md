@@ -87,3 +87,13 @@ python benchmarks/bench_thor.py --rounds 5 --rep-ms 20 --warmup-ms 1500
 The tuning command remeasures the installed dispatch table's CUDA/Triton winners alongside compatible new CuTe and CUTLASS candidates. Candidate counts can differ from the historical tuning run. Use `--tune` without `--reuse-fallbacks` to search the full candidate set for every shape. In this container commands were run with `LD_LIBRARY_PATH='' PYTHONPATH=src`. Native binaries are built locally and excluded from distributions; source, shadow headers, helpers and dispatch data are included in the wheel. Restart Python after rebuilding a loaded library.
 
 [Complete tuning](tuning.json) · [Independent comparison](comparison.json) · [Per-shape CSV](comparison.csv)
+
+## Complete INT8 MoE FFN at reduced frequency
+
+The separate [MoE FFN optimization report](moe_ffn_optimized.md) compares the
+previous INT8 implementation, optimized INT8, upstream vLLM BF16 and Cosmos
+compiled BF16 in a fresh paired run. **GPU frequency was reduced to 1.2 GHz
+(actual 1197 MHz).** At 4096 tokens, the full INT8 FFN reaches 64.30 effective
+TOPS: 2.405 ms versus 4.297 ms before optimization and 3.286 ms for vLLM BF16.
+These full-FFN measurements use a different scope and frequency from the
+historical single-GEMM results above.

@@ -140,6 +140,12 @@ T/E/R; the routing metadata and valid tile counts are recomputed on the device.
 This permits graph replay with changed tokens, ids, scores, masks and expert
 counts. Warm up all signatures before capturing.
 
+For up to 64 experts and 65536 expanded slots, routing uses stable device-side
+counting sort: chunk histograms, a prefix sum, then stable scattering. Larger
+cases retain the general stable-sort path. Quantization and packing process
+several rows per program; output combination uses wider column tiles to
+amortize routing-index loads. Every path preserves duplicate slots and masks.
+
 `backend="cutlass"` uses the native SM110 batched G256 kernel for both
 projections. Actual per-expert counts are padded internally to a common
 capacity. Weights and scales must be 16-byte aligned, BF16 activations are
@@ -149,17 +155,44 @@ required, and the matching optional library must be built:
 python tools/build_cutlass.py --cutlass-dir /path/to/cutlass --arch sm_110
 ```
 
+The Thor build also installs a separate `libgrain_cutlass_moe.so`. To rebuild
+only the MoE kernels without rebuilding single GEMM:
+
+```bash
+python tools/build_cutlass_moe.py --cutlass-dir /path/to/cutlass
+```
+
 The Thor native implementation adapts the G256 mainloop from
 [`nvidia-cosmos/cosmos-int8-gemm`, commit `8977529`](https://github.com/nvidia-cosmos/cosmos-int8-gemm/blob/8977529aa23f70f02bfc36559599f00d59792996/docs/quantization/tools/cutlass_int8_sm110/blockwise_gemm.cuh#L79).
-Cosmos configs 20/21 correspond to GrainGEMM configs 32/33: a 2SM
+Cosmos configs 20/21 correspond to the original GrainGEMM configs 32/33: a 2SM
 256x256x256 tile, TMA operands, INT32 TMEM partials, eight promotion warps,
 three fragment buffers and vector scale loads. Config 32 retains the original
-automatic epilogue tile; config 33 uses an explicit 128x16 tile. Both projections
-use one batched launch over experts rather than one launch per expert.
+automatic epilogue tile; config 33 uses an explicit 128x16 tile. These remain
+the compatibility path when the separate MoE library is unavailable.
 The build enables `G128_OPT_PROMOTION`, `G128_OPT_PIPE2`, `G128_OPT_SBVEC` and
 `NDEBUG`, as in the Cosmos production path. The activation-scale layout is
 specialized to K-major so it directly consumes GrainGEMM's `[E,M,K/256]` scales;
 weight scales remain `[E,K/256,N]`, with N contiguous.
+
+The separate MoE library reuses that collective with smaller 128-row tiles,
+one-SM/two-SM variants and dynamic/static persistent schedulers. Counts-aware
+variants read `[E]` INT32 counts on the current CUDA stream and skip subsequent
+tiles whose entire cluster lies in padding. The initial work tile is retained
+to preserve the collective's producer/consumer and barrier protocol. Valid
+rows retain the original G256 math; padding output need not be written. SwiGLU
+masks these rows before loading, and combination reads only live routes.
+Entirely padded SwiGLU blocks write zero INT8 values and the original finite
+zero-group scale directly, avoiding nonlinear math while fully initializing
+the next GEMM's inputs.
+Each projection uses a single batched launch over experts. All native workspace
+belongs to the invocation; no tensor pointers or routing-dependent arguments
+are cached between calls or graph replays.
+
+For Thor native top-k up to eight, a fused producer quantizes each original
+token/group once and scatters it to its selected packed expert rows. A separate
+padding kernel initializes only unused rows. This removes intermediate token
+INT8/scale tensors while retaining the original packed layout, exact rounding,
+duplicate-route behavior and fully initialized TMA inputs.
 
 Cosmos supplies the equal-capacity batched GEMM. This function additionally
 implements ragged routing, padding without token dropping, dynamic activation
@@ -179,6 +212,14 @@ for BF16 and the nominal dimensions satisfy `T*R >= E*128`. This first threshold
 includes masked slots. It retains ragged Triton execution if equal-capacity
 padding would exceed twice the number of valid, unmasked assignments. This is
 a conservative heuristic, not an offline-tuned optimal dispatcher.
+
+Within the separate Thor MoE library, the default is config 34: a dynamic
+persistent 2SM 128x256x256 tile. Full-FFN calibration selects config 44, a
+counts-aware static 1SM 128x128x256 tile, for `(E,C,N,K)` equal to
+`(32,320,2048,1536)` or `(32,320,1536,1024)`. Larger tested capacities favor
+config 34 despite its padding. These choices do not modify any single-GEMM
+dispatch table. Captured explicit native calls still use their reserved
+worst-case capacity when choosing a configuration.
 
 Captured auto execution always selects Triton. Explicit native capture reserves
 the worst-case capacity `round_up(T*R,64)` per expert to accommodate any valid
@@ -214,3 +255,9 @@ Omni](../benchmarks/results/thor/moe_ffn_vllm.md) measures the original Triton
 functional FFN and freshly remeasured Cosmos compiled FFN on the same inputs
 at 1197 MHz. Its scope includes pre-routed dispatch and both projections,
 without the full Omni serving engine.
+
+The [optimized INT8 comparison](../benchmarks/results/thor/moe_ffn_optimized.md)
+remeasures before/after INT8, upstream vLLM BF16 and Cosmos compiled BF16 in
+one process on identical inputs at 1197 MHz. It records actual per-projection
+native configuration IDs, independent correctness checks, raw samples and
+source/build hashes; the earlier measurements above remain unchanged.

@@ -14,6 +14,11 @@ The [BF16 expert FFN comparison for the vLLM core used by Omni](results/thor/moe
 measures 128–4096 tokens at 1197 MHz, reaching **47.19 effective TFLOPS**
 at 4096 tokens, with a freshly measured Cosmos compiled baseline.
 
+The [optimized Thor INT8 MoE FFN comparison](results/thor/moe_ffn_optimized.md)
+remeasures the previous INT8 implementation, optimized INT8, upstream vLLM
+BF16 and Cosmos compiled BF16 together at the reduced 1.2 GHz setting
+(actual 1197 MHz). It includes activation quantization and both projections.
+
 **Hardware scope: the historical batch below is GB10-only (SM121, compute capability
 12.1).** Measured performance, tuned configurations and backend rankings in
 those historical reports, especially the CuTe/CUTLASS comparisons, apply only to

@@ -74,6 +74,11 @@ def main():
                                            "G128_OPT_SBVEC", "NDEBUG"]
     (output_dir / "cutlass_build.json").write_text(json.dumps(metadata, indent=2) + "\n")
     print(f"Built {output}")
+    if args.arch == "sm_110":
+        # MoE has its own tile families and library. Keep the single-GEMM
+        # configurations above intact while installing both Thor backends.
+        subprocess.run([sys.executable, str(ROOT / "tools/build_cutlass_moe.py"),
+                        "--cutlass-dir", str(cutlass), "--nvcc", nvcc], check=True)
 
 
 if __name__ == "__main__":

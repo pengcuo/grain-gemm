@@ -100,6 +100,78 @@ def _routing_prefix(COUNTS, OFFSETS, TILE_OFFSETS, INVALID_COUNTS, STATISTICS,
 
 
 @triton.jit
+def _routing_chunk_histogram(IDS, MASK, KEYS, HISTOGRAM, INVALID_COUNTS,
+                             S: tl.constexpr, R: tl.constexpr, E: tl.constexpr,
+                             HAS_MASK: tl.constexpr, BINS: tl.constexpr,
+                             BLOCK: tl.constexpr):
+    chunk = tl.program_id(0)
+    assignments = chunk * BLOCK + tl.arange(0, BLOCK)
+    present = assignments < S
+    ids = tl.load(IDS + assignments, present, other=E)
+    enabled = present
+    if HAS_MASK:
+        enabled = enabled & tl.load(MASK + assignments // R, present, other=False)
+    # Check at the original index width before narrowing into histogram bins.
+    in_range = (ids >= 0) & (ids < E)
+    keys = tl.where(enabled & in_range, ids, E)
+    tl.store(KEYS + assignments, keys, present)
+    histogram = tl.histogram(keys.to(tl.int32), BINS, mask=present)
+    bins = tl.arange(0, BINS)
+    tl.store(HISTOGRAM + chunk * BINS + bins, histogram)
+    tl.store(INVALID_COUNTS + chunk,
+             tl.sum((enabled & ~in_range).to(tl.int32), axis=0))
+
+
+@triton.jit
+def _routing_chunk_prefix(HISTOGRAM, CHUNK_BASES, COUNTS, OFFSETS,
+                          TILE_OFFSETS, INVALID_COUNTS, STATISTICS,
+                          E: tl.constexpr, CHUNKS: tl.constexpr,
+                          CHUNK_BLOCK: tl.constexpr, BINS: tl.constexpr,
+                          BM: tl.constexpr, INCLUDE_TILES: tl.constexpr):
+    chunks = tl.arange(0, CHUNK_BLOCK)
+    experts = tl.arange(0, BINS)
+    histogram = tl.load(HISTOGRAM + chunks[:, None] * BINS + experts[None, :],
+                        chunks[:, None] < CHUNKS, other=0)
+    totals = tl.sum(histogram, axis=0)
+    expert_ends = tl.cumsum(totals, axis=0)
+    # The E-th bin contains masked/invalid assignments and forms the sorted
+    # tail. Including it keeps the entire ORDER stable, not only valid rows.
+    expert_starts = expert_ends - totals
+    bases = (tl.cumsum(histogram, axis=0) - histogram
+             + expert_starts[None, :])
+    tl.store(CHUNK_BASES + chunks[:, None] * BINS + experts[None, :],
+             bases, chunks[:, None] < CHUNKS)
+    tl.store(COUNTS + experts, totals, experts < E)
+    tl.store(OFFSETS, 0)
+    tl.store(OFFSETS + experts + 1, expert_ends, experts < E)
+    valid_counts = tl.where(experts < E, totals, 0)
+    if INCLUDE_TILES:
+        tl.store(TILE_OFFSETS, 0)
+        tl.store(TILE_OFFSETS + experts + 1,
+                 tl.cumsum(tl.cdiv(valid_counts, BM), axis=0), experts < E)
+    invalid = tl.load(INVALID_COUNTS + chunks, chunks < CHUNKS, other=0)
+    tl.store(STATISTICS, tl.sum(invalid, axis=0))
+    tl.store(STATISTICS + 1, tl.max(valid_counts, axis=0))
+    tl.store(STATISTICS + 2, tl.sum(valid_counts, axis=0))
+
+
+@triton.jit
+def _routing_chunk_scatter(KEYS, CHUNK_BASES, ORDER, INVERSE,
+                           S: tl.constexpr, E: tl.constexpr,
+                           BINS: tl.constexpr, BLOCK: tl.constexpr):
+    chunk = tl.program_id(0)
+    expert = tl.program_id(1)
+    assignments = chunk * BLOCK + tl.arange(0, BLOCK)
+    keys = tl.load(KEYS + assignments, assignments < S, other=-1)
+    selected = (assignments < S) & (keys == expert)
+    local_rank = tl.cumsum(selected.to(tl.int32), axis=0) - 1
+    base = tl.load(CHUNK_BASES + chunk * BINS + expert)
+    slots = base + local_rank
+    tl.store(ORDER + slots, assignments, selected)
+    tl.store(INVERSE + assignments, tl.where(expert < E, slots, -1), selected)
+
+
+@triton.jit
 def _routing_tile_prefix(COUNTS, TILE_OFFSETS, E: tl.constexpr,
                          BM: tl.constexpr, BLOCK: tl.constexpr):
     experts = tl.arange(0, BLOCK)
@@ -150,29 +222,57 @@ def prepare_routes(topk_ids, num_experts, token_mask=None, block_m=32,
     tokens, top_k = topk_ids.shape
     slots = tokens * top_k
     effective_ids = torch.empty((slots,), dtype=topk_ids.dtype, device=topk_ids.device)
-    key_blocks = triton.cdiv(slots, 1024)
-    invalid_counts = torch.empty((key_blocks,), dtype=torch.int32, device=topk_ids.device)
-    if slots:
-        _routing_keys[(key_blocks,)](
-            topk_ids, token_mask, effective_ids, invalid_counts,
-            slots, top_k, num_experts,
-            token_mask is not None, 1024,
-        )
-    order = torch.argsort(effective_ids, stable=True)
-    counts = torch.zeros((num_experts,), dtype=torch.int32, device=topk_ids.device)
+    # For ordinary expert counts a small counting sort replaces the general
+    # Torch stable sort and its temporary allocations/launches. The bounded
+    # prefix workspace keeps the fallback practical for very large inputs.
+    counting_sort = 0 < slots <= 65536 and num_experts <= 64
+    counts = torch.empty((num_experts,), dtype=torch.int32, device=topk_ids.device)
     inverse = torch.empty((slots,), dtype=torch.int32, device=topk_ids.device)
     offsets = torch.empty((num_experts + 1,), dtype=torch.int32, device=topk_ids.device)
     tile_offsets = torch.empty_like(offsets) if include_tiles else None
     statistics = torch.empty((3,), dtype=torch.int32, device=topk_ids.device)
-    if slots:
-        _routing_histogram_inverse[(triton.cdiv(slots, 1024),)](
-            effective_ids, order, counts, inverse, slots, num_experts, 1024,
+    if counting_sort:
+        block = 512
+        chunks = triton.cdiv(slots, block)
+        bins = triton.next_power_of_2(num_experts + 1)
+        histogram = torch.empty((chunks, bins), dtype=torch.int32, device=topk_ids.device)
+        bases = torch.empty_like(histogram)
+        invalid_counts = torch.empty((chunks,), dtype=torch.int32, device=topk_ids.device)
+        order = torch.empty((slots,), dtype=torch.int64, device=topk_ids.device)
+        _routing_chunk_histogram[(chunks,)](
+            topk_ids, token_mask, effective_ids, histogram, invalid_counts,
+            slots, top_k, num_experts, token_mask is not None, bins, block,
+            num_warps=4,
         )
-    _routing_prefix[(1,)](
-        counts, offsets, tile_offsets, invalid_counts, statistics,
-        num_experts, block_m, triton.next_power_of_2(num_experts),
-        key_blocks, triton.next_power_of_2(max(1, key_blocks)), include_tiles,
-    )
+        chunk_block = triton.next_power_of_2(chunks)
+        _routing_chunk_prefix[(1,)](
+            histogram, bases, counts, offsets, tile_offsets, invalid_counts, statistics,
+            num_experts, chunks, chunk_block, bins, block_m, include_tiles,
+            num_warps=8 if chunk_block * bins >= 8192 else 4,
+        )
+        _routing_chunk_scatter[(chunks, num_experts + 1)](
+            effective_ids, bases, order, inverse, slots, num_experts, bins, block,
+            num_warps=4,
+        )
+    else:
+        key_blocks = triton.cdiv(slots, 1024)
+        invalid_counts = torch.empty((key_blocks,), dtype=torch.int32, device=topk_ids.device)
+        if slots:
+            _routing_keys[(key_blocks,)](
+                topk_ids, token_mask, effective_ids, invalid_counts,
+                slots, top_k, num_experts, token_mask is not None, 1024,
+            )
+        order = torch.argsort(effective_ids, stable=True)
+        counts.zero_()
+        if slots:
+            _routing_histogram_inverse[(triton.cdiv(slots, 1024),)](
+                effective_ids, order, counts, inverse, slots, num_experts, 1024,
+            )
+        _routing_prefix[(1,)](
+            counts, offsets, tile_offsets, invalid_counts, statistics,
+            num_experts, block_m, triton.next_power_of_2(num_experts),
+            key_blocks, triton.next_power_of_2(max(1, key_blocks)), include_tiles,
+        )
     # sum(ceil(count_e / BM)) <= ceil(S / BM) + E - 1 for S > 0.
     max_tiles = triton.cdiv(slots, block_m) + num_experts
     routes = Routes(order, counts, offsets, tile_offsets, inverse, effective_ids,
@@ -209,27 +309,29 @@ def prepare_ragged_tiles(routes):
 
 
 @triton.jit
-def _symmetric_quantize(values):
-    """The existing GrainGEMM benchmark's symmetric per-group quantizer."""
-    maximum = tl.maximum(tl.max(tl.abs(values), axis=0), 1.0e-12)
+def _symmetric_quantize_row_block(values):
+    """Independent G256 reductions for several rows in one program."""
+    maximum = tl.maximum(tl.max(tl.abs(values), axis=1), 1.0e-12)
     scale = libdevice.div_rn(maximum, 127.0)
-    rounded = libdevice.nearbyint(libdevice.div_rn(values, scale))
+    rounded = libdevice.nearbyint(libdevice.div_rn(values, scale[:, None]))
     quantized = tl.minimum(tl.maximum(rounded, -127.0), 127.0).to(tl.int8)
     return quantized, scale
 
 
 @triton.jit
-def _quantize_rows(X, Q, S, K: tl.constexpr, GROUP: tl.constexpr):
-    row = tl.program_id(0)
+def _quantize_row_block(X, Q, S, M: tl.constexpr, K: tl.constexpr,
+                        GROUP: tl.constexpr, ROWS: tl.constexpr):
+    rows = tl.program_id(0) * ROWS + tl.arange(0, ROWS)
     group = tl.program_id(1)
     cols = group * GROUP + tl.arange(0, GROUP)
-    values = tl.load(X + row * K + cols).to(tl.float32)
-    quantized, scale = _symmetric_quantize(values)
-    tl.store(Q + row * K + cols, quantized)
-    tl.store(S + row * (K // GROUP) + group, scale)
+    values = tl.load(X + rows[:, None] * K + cols[None, :],
+                     rows[:, None] < M, other=0).to(tl.float32)
+    quantized, scales = _symmetric_quantize_row_block(values)
+    tl.store(Q + rows[:, None] * K + cols[None, :], quantized, rows[:, None] < M)
+    tl.store(S + rows * (K // GROUP) + group, scales, rows < M)
 
 
-def quantize_rows(x, group_size=256):
+def quantize_rows(x, group_size=256, *, rows_per_program=4):
     """Quantize contiguous floating rows; return INT8 data and FP32 row scales."""
     width = x.shape[-1]
     rows = prod(x.shape[:-1])
@@ -237,8 +339,8 @@ def quantize_rows(x, group_size=256):
     scales = torch.empty((*x.shape[:-1], width // group_size),
                          dtype=torch.float32, device=x.device)
     if rows:
-        _quantize_rows[(rows, width // group_size)](
-            x, quantized, scales, width, group_size, num_warps=4,
+        _quantize_row_block[(triton.cdiv(rows, rows_per_program), width // group_size)](
+            x, quantized, scales, rows, width, group_size, rows_per_program, num_warps=4,
             enable_fp_fusion=False,
         )
     return quantized, scales
@@ -304,28 +406,32 @@ def ragged_gemm(q, w_linear, scale_a, scale_b, routes, *, output_dtype,
 
 
 @triton.jit
-def _pack_inputs(Q, SA, ORDER, COUNTS, OFFSETS, PACKED_Q, PACKED_SA,
-                  K: tl.constexpr, R: tl.constexpr, C: tl.constexpr,
-                  GROUP: tl.constexpr, BLOCK: tl.constexpr):
-    packed_row = tl.program_id(0)
-    expert = packed_row // C
-    local_row = packed_row % C
-    count = tl.load(COUNTS + expert)
-    valid = local_row < count
-    start = tl.load(OFFSETS + expert)
-    assignment = tl.load(ORDER + start + local_row, valid, other=0)
-    token = assignment // R
+def _pack_input_row_block(Q, SA, ORDER, COUNTS, OFFSETS, PACKED_Q, PACKED_SA,
+                          E: tl.constexpr, K: tl.constexpr, R: tl.constexpr,
+                          C: tl.constexpr, GROUP: tl.constexpr,
+                          BLOCK: tl.constexpr, ROWS: tl.constexpr):
+    packed_rows = tl.program_id(0) * ROWS + tl.arange(0, ROWS)
+    present = packed_rows < E * C
+    experts = packed_rows // C
+    local_rows = packed_rows % C
+    counts = tl.load(COUNTS + experts, present, other=0)
+    valid = present & (local_rows < counts)
+    starts = tl.load(OFFSETS + experts, present, other=0)
+    assignments = tl.load(ORDER + starts + local_rows, valid, other=0)
+    tokens = assignments // R
     cols = tl.program_id(1) * BLOCK + tl.arange(0, BLOCK)
-    values = tl.load(Q + token * K + cols, valid & (cols < K), other=0)
-    tl.store(PACKED_Q + packed_row * K + cols, values, cols < K)
+    values = tl.load(Q + tokens[:, None] * K + cols[None, :],
+                     valid[:, None] & (cols[None, :] < K), other=0)
+    tl.store(PACKED_Q + packed_rows[:, None] * K + cols[None, :], values,
+             present[:, None] & (cols[None, :] < K))
     groups = tl.program_id(1) * (BLOCK // GROUP) + tl.arange(0, BLOCK // GROUP)
-    scales = tl.load(SA + token * (K // GROUP) + groups,
-                     valid & (groups < K // GROUP), other=0)
-    tl.store(PACKED_SA + packed_row * (K // GROUP) + groups, scales,
-             groups < K // GROUP)
+    scales = tl.load(SA + tokens[:, None] * (K // GROUP) + groups[None, :],
+                     valid[:, None] & (groups[None, :] < K // GROUP), other=0)
+    tl.store(PACKED_SA + packed_rows[:, None] * (K // GROUP) + groups[None, :], scales,
+             present[:, None] & (groups[None, :] < K // GROUP))
 
 
-def pack_inputs(q, scale_a, routes, capacity, group_size=256):
+def pack_inputs(q, scale_a, routes, capacity, group_size=256, *, rows_per_program=4):
     """Build zero-padded [E,C,K] inputs for an equal-capacity native batched GEMM.
 
     The caller guarantees capacity >= max(counts).  Routing and packing itself
@@ -337,38 +443,154 @@ def pack_inputs(q, scale_a, routes, capacity, group_size=256):
     packed_scale = torch.empty((routes.experts, capacity, k // group_size),
                                dtype=torch.float32, device=q.device)
     if capacity:
-        _pack_inputs[(routes.experts * capacity, triton.cdiv(k, 1024))](
+        _pack_input_row_block[(triton.cdiv(routes.experts * capacity, rows_per_program),
+                               triton.cdiv(k, 1024))](
             q, scale_a, routes.order, routes.counts, routes.offsets,
-            packed_q, packed_scale, k, routes.top_k, capacity, group_size, 1024,
+            packed_q, packed_scale, routes.experts, k, routes.top_k,
+            capacity, group_size, 1024, rows_per_program,
             num_warps=4,
         )
     return packed_q, packed_scale
 
 
 @triton.jit
-def _swiglu_quantize(GATE_UP, Q, S, OFFSETS, COUNTS,
-                      I: tl.constexpr, GROUP: tl.constexpr,
-                      HAS_ROUTES: tl.constexpr, E: tl.constexpr,
-                      CAPACITY: tl.constexpr):
-    row = tl.program_id(0)
+def _quantize_pack_input_row_block(X, INVERSE, KEYS, OFFSETS, PACKED_Q, PACKED_SA,
+                                   T: tl.constexpr, E: tl.constexpr,
+                                   K: tl.constexpr, R: tl.constexpr,
+                                   C: tl.constexpr, GROUP: tl.constexpr,
+                                   ROWS: tl.constexpr):
+    tokens = tl.program_id(0) * ROWS + tl.arange(0, ROWS)
+    present = tokens < T
+    enabled = tl.full((ROWS,), False, tl.int1)
+    destinations = ()
+    route_masks = ()
+    # A token is quantized once, including when several ranks select the same
+    # expert. Each valid assignment has a unique inverse slot, so stores from
+    # different tokens/ranks cannot collide.
+    for rank in tl.static_range(R):
+        assignment = tokens * R + rank
+        slot = tl.load(INVERSE + assignment, present, other=-1)
+        valid = present & (slot >= 0)
+        expert = tl.load(KEYS + assignment, valid, other=0)
+        valid = valid & (expert >= 0) & (expert < E)
+        start = tl.load(OFFSETS + expert, valid, other=0)
+        local_row = slot - start
+        valid = valid & (local_row >= 0) & (local_row < C)
+        destinations += (expert * C + local_row,)
+        route_masks += (valid,)
+        enabled = enabled | valid
     group = tl.program_id(1)
-    valid = tl.full((), True, tl.int1)
+    cols = group * GROUP + tl.arange(0, GROUP)
+    # Mask before loading X: a masked token is allowed to contain NaNs.
+    values = tl.load(X + tokens[:, None] * K + cols[None, :],
+                     enabled[:, None], other=0).to(tl.float32)
+    quantized, scales = _symmetric_quantize_row_block(values)
+    for rank in tl.static_range(R):
+        destination = destinations[rank]
+        valid = route_masks[rank]
+        tl.store(PACKED_Q + destination[:, None] * K + cols[None, :],
+                 quantized, valid[:, None])
+        tl.store(PACKED_SA + destination * (K // GROUP) + group, scales, valid)
+
+
+@triton.jit
+def _zero_packed_input_padding(COUNTS, PACKED_Q, PACKED_SA,
+                               K: tl.constexpr, C: tl.constexpr,
+                               GROUP: tl.constexpr, BLOCK: tl.constexpr,
+                               ROWS: tl.constexpr):
+    expert = tl.program_id(0)
+    count = tl.load(COUNTS + expert)
+    first = count + tl.program_id(1) * ROWS
+    if first < C:
+        local_rows = first + tl.arange(0, ROWS)
+        packed_rows = expert * C + local_rows
+        padding = local_rows < C
+        cols = tl.program_id(2) * BLOCK + tl.arange(0, BLOCK)
+        tl.store(PACKED_Q + packed_rows[:, None] * K + cols[None, :], 0,
+                 padding[:, None] & (cols[None, :] < K))
+        groups = tl.program_id(2) * (BLOCK // GROUP) + tl.arange(0, BLOCK // GROUP)
+        tl.store(PACKED_SA + packed_rows[:, None] * (K // GROUP) + groups[None, :],
+                 0, padding[:, None] & (groups[None, :] < K // GROUP))
+
+
+def quantize_pack_inputs(hidden_states, routes, capacity, group_size=256, *,
+                         rows_per_program=8, padding_rows_per_program=16,
+                         zero_initialize=False):
+    """Native producer: quantize once and scatter to packed rows.
+
+    Returns the exact layout and values of ``pack_inputs(*quantize_rows(x), ...)``
+    without intermediate token INT8/scale tensors. Valid rows and padding are
+    written by disjoint kernels; both buffers are fully initialized on every
+    call, including CUDA graph replay with different routes. ``zero_initialize``
+    permits benchmarking a full-buffer zero fill instead of padding-only stores.
+    Thor native execution selects this producer for top-k up to eight, bounding
+    the unrolled scatter's register usage. Other cases retain separate producers.
+    """
+    k = hidden_states.shape[-1]
+    allocate = torch.zeros if zero_initialize else torch.empty
+    packed_q = allocate((routes.experts, capacity, k), dtype=torch.int8,
+                        device=hidden_states.device)
+    packed_scale = allocate((routes.experts, capacity, k // group_size),
+                            dtype=torch.float32, device=hidden_states.device)
+    if capacity:
+        if not zero_initialize:
+            _zero_packed_input_padding[(routes.experts,
+                                       triton.cdiv(capacity, padding_rows_per_program),
+                                       triton.cdiv(k, 1024))](
+                routes.counts, packed_q, packed_scale, k, capacity, group_size,
+                1024, padding_rows_per_program, num_warps=4,
+            )
+        if routes.tokens:
+            _quantize_pack_input_row_block[(triton.cdiv(routes.tokens, rows_per_program),
+                                            k // group_size)](
+                hidden_states, routes.inverse, routes.effective_ids, routes.offsets,
+                packed_q, packed_scale, routes.tokens, routes.experts, k,
+                routes.top_k, capacity, group_size, rows_per_program,
+                num_warps=4, enable_fp_fusion=False,
+            )
+    return packed_q, packed_scale
+
+
+@triton.jit
+def _swiglu_quantize_row_block(GATE_UP, Q, S, OFFSETS, COUNTS,
+                               M: tl.constexpr, I: tl.constexpr,
+                               GROUP: tl.constexpr, ROWS: tl.constexpr,
+                               HAS_ROUTES: tl.constexpr, E: tl.constexpr,
+                               CAPACITY: tl.constexpr):
+    rows = tl.program_id(0) * ROWS + tl.arange(0, ROWS)
+    group = tl.program_id(1)
+    present = rows < M
+    valid = present
     if HAS_ROUTES:
         if CAPACITY > 0:
-            count = tl.load(COUNTS + row // CAPACITY)
-            valid = row % CAPACITY < count
+            counts = tl.load(COUNTS + rows // CAPACITY, present, other=0)
+            valid = present & (rows % CAPACITY < counts)
         else:
-            valid = row < tl.load(OFFSETS + E)
+            valid = present & (rows < tl.load(OFFSETS + E))
     cols = group * GROUP + tl.arange(0, GROUP)
-    gate = tl.load(GATE_UP + row * (2 * I) + cols, valid, other=0).to(tl.float32)
-    up = tl.load(GATE_UP + row * (2 * I) + I + cols, valid, other=0).to(tl.float32)
-    hidden = libdevice.div_rn(gate, 1.0 + libdevice.exp(-gate)) * up
-    quantized, scale = _symmetric_quantize(hidden)
-    tl.store(Q + row * I + cols, quantized)
-    tl.store(S + row * (I // GROUP) + group, scale)
+    # Native storage includes complete padding blocks. Avoid their nonlinear
+    # math while still initializing every output row for the next GEMM's TMA.
+    # Other layouts keep the original straight-line path at compile time.
+    has_values = True
+    if HAS_ROUTES and CAPACITY > 0:
+        has_values = tl.sum(valid.to(tl.int32), axis=0) > 0
+    if has_values:
+        gate = tl.load(GATE_UP + rows[:, None] * (2 * I) + cols[None, :],
+                       valid[:, None], other=0).to(tl.float32)
+        up = tl.load(GATE_UP + rows[:, None] * (2 * I) + I + cols[None, :],
+                     valid[:, None], other=0).to(tl.float32)
+        hidden = libdevice.div_rn(gate, 1.0 + libdevice.exp(-gate)) * up
+        quantized, scales = _symmetric_quantize_row_block(hidden)
+    else:
+        quantized = tl.full((ROWS, GROUP), 0, tl.int8)
+        zero_scale = libdevice.div_rn(tl.full((), 1.0e-12, tl.float32), 127.0)
+        scales = tl.broadcast_to(zero_scale, (ROWS,))
+    tl.store(Q + rows[:, None] * I + cols[None, :], quantized, present[:, None])
+    tl.store(S + rows * (I // GROUP) + group, scales, present)
 
 
-def swiglu_quantize(gate_up, routes=None, *, packed_capacity=None, group_size=256):
+def swiglu_quantize(gate_up, routes=None, *, packed_capacity=None, group_size=256,
+                    rows_per_program=8):
     """Compute SwiGLU in FP32 and directly quantize without a BF16 hidden round.
 
     Accept either [S,2I] ragged storage or [E,C,2I] native storage.  If routes is
@@ -383,9 +605,9 @@ def swiglu_quantize(gate_up, routes=None, *, packed_capacity=None, group_size=25
                          dtype=torch.float32, device=gate_up.device)
     if rows:
         capacity = packed_capacity or (gate_up.shape[1] if gate_up.ndim == 3 else 0)
-        _swiglu_quantize[(rows, intermediate // group_size)](
+        _swiglu_quantize_row_block[(triton.cdiv(rows, rows_per_program), intermediate // group_size)](
             gate_up, q, scales, routes.offsets if routes else None,
-            routes.counts if routes else None, intermediate, group_size,
+            routes.counts if routes else None, rows, intermediate, group_size, rows_per_program,
             routes is not None, routes.experts if routes else 0, capacity,
             num_warps=4, enable_fp_fusion=False,
         )
@@ -422,10 +644,16 @@ def combine(expert_output, topk_weights, routes, *, output_dtype,
     if routes.tokens:
         capacity = packed_capacity or (expert_output.shape[1]
                                        if expert_output.ndim == 3 else 0)
-        _combine[(routes.tokens, triton.cdiv(h, 128))](
+        block_r = triton.next_power_of_2(routes.top_k)
+        # Wide columns amortize the routing-index loads and launch far fewer
+        # small CTAs. Bound the common tile to 8192 routed elements; retain the
+        # existing narrow configuration for exceptionally large top-k values.
+        block_h = (min(triton.next_power_of_2(min(h, 2048)), 8192 // block_r)
+                   if block_r <= 64 else 128)
+        _combine[(routes.tokens, triton.cdiv(h, block_h))](
             expert_output, topk_weights, routes.inverse, routes.effective_ids,
             routes.offsets, out, h, routes.top_k, routes.experts, capacity,
-            triton.next_power_of_2(routes.top_k), 128,
+            block_r, block_h,
             num_warps=4, enable_fp_fusion=False,
         )
     return out

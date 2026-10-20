@@ -144,6 +144,13 @@ def isolated_build(request, tmp_path):
         helper = tmp_path / "repo/src/grain_gemm/kernels/_native.py"
         helper.parent.mkdir(parents=True)
         shutil.copyfile(ROOT / "src/grain_gemm/kernels/_native.py", helper)
+        if request.param == "tools/build_cutlass.py":
+            # The normal Thor build installs the independent MoE library too.
+            # Copy its real entrypoint/helper so the isolated repository has
+            # the same dependency closure while SM12x still builds one library.
+            for relative in ("tools/build_cutlass_moe.py", "src/grain_gemm/kernels/cutlass_moe.py"):
+                destination = tmp_path / "repo" / relative
+                shutil.copyfile(ROOT / relative, destination)
     headers = tmp_path / "cutlass"
     for relative in ("include/cute/tensor.hpp",
                      "include/cutlass/gemm/device/gemm_universal_adapter.h"):
@@ -195,9 +202,7 @@ def test_gb10_experiment_builds_still_reject_sm120(isolated_build):
     assert tree_paths(directory) == before
 
 
-@pytest.mark.parametrize("isolated_build", NATIVE_BUILD_SCRIPTS, indirect=True)
-@pytest.mark.parametrize("arch", ["sm_110", "sm_120", "sm_121"])
-def test_native_build_records_requested_target_without_gpu(isolated_build, arch):
+def prepare_fake_native_compiler(isolated_build):
     script, headers, nvcc, directory = isolated_build
     source = directory / "repo/src/grain_gemm/kernels/csrc"
     source.mkdir(parents=True, exist_ok=True)
@@ -207,6 +212,7 @@ def test_native_build_records_requested_target_without_gpu(isolated_build, arch)
         "sm110/int8_g256_pipeline.cuh": "// isolated Thor 2SM pipeline\n",
         "sm110/int8_g256_pipeline_1sm.cuh": "// isolated Thor 1SM pipeline\n",
         "sm110/int8_g256_cutlass.cu": "// isolated Thor CUTLASS source\n",
+        "sm110/int8_g256_moe.cu": "// isolated Thor MoE source\n",
         "sm110/include/cutlass/arch/reg_reconfig.h": "// isolated register config\n",
         "sm110/include/cutlass/gemm/collective/sm100_mma_warpspecialized_blockwise_scaling.hpp": "// isolated Thor collective\n",
         "sm110/include/cutlass/gemm/kernel/sm100_gemm_tma_warpspecialized_mma_transform.hpp": "// isolated Thor kernel\n",
@@ -225,17 +231,64 @@ def test_native_build_records_requested_target_without_gpu(isolated_build, arch)
         "if '--version' in sys.argv:\n"
         "    print('Fake CUDA compiler for CPU-only build contract test')\n"
         "    raise SystemExit(0)\n"
-        "Path(__file__).with_name('compiler_args.json').write_text(json.dumps(sys.argv[1:]))\n"
+        "record = Path(__file__).with_name('compiler_args.json')\n"
+        "calls = json.loads(record.read_text()) if record.exists() else []\n"
+        "calls.append(sys.argv[1:])\n"
+        "record.write_text(json.dumps(calls))\n"
         "Path(sys.argv[sys.argv.index('-o') + 1]).write_bytes(b'test-native-library')\n"
     )
+    blocked_dependencies = directory / "blocked_dependencies"
+    blocked_dependencies.mkdir()
+    for dependency in ("torch", "triton"):
+        (blocked_dependencies / (dependency + ".py")).write_text(
+            f"raise AssertionError('Build scripts must not import {dependency}')\n"
+        )
+    # The parent uses -S. These import sentinels also cover the real builder's
+    # subprocess, whose interpreter does not inherit the parent's -S option.
+    environment = dict(os.environ, CUDA_VISIBLE_DEVICES="", PYTHONPATH=str(blocked_dependencies),
+                       PYTHONDONTWRITEBYTECODE="1")
+    return contents, environment
+
+
+def assert_moe_build_artifacts(directory, contents, flags):
+    native = directory / "repo/src/grain_gemm/kernels/_native"
+    manifest_path = native / "moe_cutlass_build.json"
+    manifest = json.loads(manifest_path.read_text())
+    assert manifest["architecture"] == "sm_110"
+    assert manifest["compiler_architecture"] == "sm_110a"
+    assert manifest["source_sha256"] == {
+        name: hashlib.sha256(content.encode()).hexdigest()
+        for name, content in contents.items()
+        if name == "sm110/int8_g256_moe.cu" or name.startswith("sm110/include/")
+    }
+    module = runpy.run_path(str(directory / "repo/src/grain_gemm/kernels/cutlass_moe.py"))
+    assert manifest["configs"] == {str(config): values for config, values in module["CONFIGS"].items()}
+    definitions = ["G128_OPT_PROMOTION", "G128_OPT_PIPE2", "G128_OPT_SBVEC", "NDEBUG"]
+    assert manifest["compile_definitions"] == definitions
+    assert all("-D" + definition in flags for definition in definitions)
+    assert "-gencode=arch=compute_110a,code=sm_110a" in flags
+    assert "-O3" in flags and "-std=c++17" in flags
+    source = directory / "repo/src/grain_gemm/kernels/csrc/sm110/int8_g256_moe.cu"
+    assert str(source) in flags
+    assert (native / "libgrain_cutlass_moe.so").read_bytes() == b"test-native-library"
+
+
+@pytest.mark.parametrize("isolated_build", NATIVE_BUILD_SCRIPTS, indirect=True)
+@pytest.mark.parametrize("arch", ["sm_110", "sm_120", "sm_121"])
+def test_native_build_records_requested_target_without_gpu(isolated_build, arch):
+    script, headers, nvcc, directory = isolated_build
+    contents, environment = prepare_fake_native_compiler(isolated_build)
     result = subprocess.run(
         [sys.executable, "-S", "-B", str(script), "--cutlass-dir", str(headers),
          "--nvcc", str(nvcc), "--arch", arch],
-        cwd=directory, env=dict(os.environ, CUDA_VISIBLE_DEVICES=""),
+        cwd=directory, env=environment,
         capture_output=True, text=True, timeout=15,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    flags = json.loads((directory / "compiler_args.json").read_text())
+    calls = json.loads((directory / "compiler_args.json").read_text())
+    builds_moe = script.name == "build_cutlass.py" and arch == "sm_110"
+    assert len(calls) == (2 if builds_moe else 1)
+    flags = calls[0]
     compiler_arch = "sm_110a" if arch == "sm_110" else arch
     assert f"-arch={compiler_arch}" in flags
     native = directory / "repo/src/grain_gemm/kernels/_native"
@@ -264,6 +317,31 @@ def test_native_build_records_requested_target_without_gpu(isolated_build, arch)
     assert manifest["source_sha256"] == expected
     library = manifests[0].with_name(f"libgrain_{backend}.so")
     assert library.read_bytes() == b"test-native-library"
+    if builds_moe:
+        assert_moe_build_artifacts(directory, contents, calls[1])
+    else:
+        assert not (native / "libgrain_cutlass_moe.so").exists()
+        assert not (native / "moe_cutlass_build.json").exists()
+        assert all(not any(argument.endswith("/int8_g256_moe.cu") for argument in flags)
+                   for flags in calls)
+
+
+@pytest.mark.parametrize("isolated_build", ["tools/build_cutlass.py"], indirect=True)
+def test_standalone_moe_build_needs_no_gpu_or_single_gemm_build(isolated_build):
+    script, headers, nvcc, directory = isolated_build
+    contents, environment = prepare_fake_native_compiler(isolated_build)
+    result = subprocess.run(
+        [sys.executable, "-S", "-B", str(script.with_name("build_cutlass_moe.py")),
+         "--cutlass-dir", str(headers), "--nvcc", str(nvcc)],
+        cwd=directory, env=environment, capture_output=True, text=True, timeout=15,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    calls = json.loads((directory / "compiler_args.json").read_text())
+    assert len(calls) == 1
+    assert_moe_build_artifacts(directory, contents, calls[0])
+    native = directory / "repo/src/grain_gemm/kernels/_native"
+    assert not (native / "libgrain_cutlass.so").exists()
+    assert not (native / "cutlass_build.json").exists()
 
 
 def test_build_help_needs_no_cuda_or_optional_dependencies(isolated_build):

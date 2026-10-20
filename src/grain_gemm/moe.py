@@ -94,13 +94,35 @@ def _native_available(backend, device):
     if backend == "cuda":
         from .kernels import cuda
         return cuda.is_available(device)
+    if torch.cuda.get_device_capability(device) == (11, 0):
+        from .kernels import cutlass_moe
+        if cutlass_moe.is_available(device):
+            return True
     from .kernels import cutlass
     return cutlass.is_available(device)
 
 
-def _native_gemm(a, weight, sa, sb, out, backend):
+def _native_config(capacity, output_width, reduction_width, *, experts=None):
+    """Thor MoE tile choice; independent of single-GEMM configuration tables."""
+    # Full-FFN comparisons favor counted 1SM tiles for these measured shapes.
+    # Larger capacities favor the dynamic 2SM scheduler despite extra padding.
+    if (experts, capacity, output_width, reduction_width) in (
+            (32, 320, 2048, 1536), (32, 320, 1536, 1024)):
+        return 44
+    return 34
+
+
+def _native_gemm(a, weight, sa, sb, out, backend, *, counts=None):
     if backend == "cutlass" and torch.cuda.get_device_capability(a.device) == (11, 0):
-        from .kernels import cutlass
+        from .kernels import cutlass, cutlass_moe
+        if cutlass_moe.is_available(a.device):
+            config = _native_config(a.shape[1], weight.shape[1], a.shape[2], experts=a.shape[0])
+            # Public validation and the helpers above establish the layouts.
+            # Reuse the enclosing device context, retaining per-call workspace
+            # ownership and current-stream launch in the private bridge.
+            return cutlass_moe._launch_prevalidated(
+                a, weight, sa, sb, out, config_id=config, counts=counts,
+            )
         return cutlass.launch_batched(a, weight, sa, sb, out, config_id=32)
     from .gemm import get_kernel_config
     from .kernels import cuda, cutlass
@@ -209,11 +231,11 @@ def moe_ffn(hidden_states, w_gate_up, w_down, topk_weights, topk_ids, *,
                     capacity = None
                     routes = kernels.prepare_ragged_tiles(routes)
 
-        qx, sx = kernels.quantize_rows(hidden_states, group_size)
         w1_linear = w_gate_up.transpose(-2, -1)
         w2_linear = w_down.transpose(-2, -1)
 
         if selected == "triton":
+            qx, sx = kernels.quantize_rows(hidden_states, group_size)
             gate_up = kernels.ragged_gemm(
                 qx, w1_linear, sx, scale_gate_up, routes,
                 output_dtype=hidden_states.dtype, source_is_token=True,
@@ -227,13 +249,24 @@ def moe_ffn(hidden_states, w_gate_up, w_down, topk_weights, topk_ids, *,
             if max(experts * capacity * hidden,
                    experts * capacity * 2 * intermediate) > 2**31 - 1:
                 raise ValueError("native MoE workspace exceeds the supported indexing range")
-            packed_x, packed_sx = kernels.pack_inputs(qx, sx, routes, capacity)
+            if (selected == "cutlass" and top_k <= 8
+                    and torch.cuda.get_device_capability(hidden_states.device) == (11, 0)):
+                packed_x, packed_sx = kernels.quantize_pack_inputs(
+                    hidden_states, routes, capacity, group_size,
+                )
+            else:
+                qx, sx = kernels.quantize_rows(hidden_states, group_size)
+                packed_x, packed_sx = kernels.pack_inputs(qx, sx, routes, capacity)
             gate_up = torch.empty((experts, capacity, 2 * intermediate),
                                   device=hidden_states.device, dtype=hidden_states.dtype)
-            _native_gemm(packed_x, w1_linear, packed_sx, scale_gate_up, gate_up, selected)
-            qh, sh = kernels.swiglu_quantize(gate_up)
+            _native_gemm(packed_x, w1_linear, packed_sx, scale_gate_up, gate_up,
+                         selected, counts=routes.counts)
+            qh, sh = kernels.swiglu_quantize(
+                gate_up, routes=routes, packed_capacity=capacity,
+            )
             expert_output = torch.empty((experts, capacity, hidden),
                                         device=hidden_states.device, dtype=hidden_states.dtype)
-            _native_gemm(qh, w2_linear, sh, scale_down, expert_output, selected)
+            _native_gemm(qh, w2_linear, sh, scale_down, expert_output,
+                         selected, counts=routes.counts)
         return kernels.combine(expert_output, topk_weights, routes,
                                output_dtype=hidden_states.dtype, packed_capacity=capacity)

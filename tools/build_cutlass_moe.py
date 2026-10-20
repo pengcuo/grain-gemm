@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+"""Build only the Thor MoE TMA/TMEM configurations, preserving single GEMM."""
+
+import argparse
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+
+CUTLASS_COMMIT = "098de2a652cf8f00fd70b2df54051c7eccbb855a"
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src/grain_gemm/kernels"))
+from cutlass_moe import CONFIGS, source_hashes
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--cutlass-dir", type=Path, required=True)
+    parser.add_argument("--nvcc")
+    args = parser.parse_args()
+    cutlass = args.cutlass_dir.expanduser().resolve()
+    if not (cutlass / "include/cutlass/gemm/device/gemm_universal_adapter.h").is_file():
+        parser.error("CUTLASS headers were not found")
+    nvcc = args.nvcc or shutil.which("nvcc") or "/usr/local/cuda/bin/nvcc"
+    if not Path(nvcc).is_file() and shutil.which(nvcc) is None:
+        parser.error(f"CUDA compiler was not found: {nvcc}")
+    target = ROOT / "src/grain_gemm/kernels/csrc/sm110"
+    output_dir = ROOT / "src/grain_gemm/kernels/_native"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output = output_dir / "libgrain_cutlass_moe.so"
+    definitions = ["G128_OPT_PROMOTION", "G128_OPT_PIPE2", "G128_OPT_SBVEC", "NDEBUG"]
+    version = subprocess.check_output([nvcc,"--version"], text=True).strip()
+    revision = None
+    if shutil.which("git"):
+        result = subprocess.run(["git", "-C", str(cutlass), "rev-parse", "HEAD"],
+                                text=True, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        if result.returncode == 0:
+            revision = result.stdout.strip()
+    with tempfile.TemporaryDirectory(prefix="cutlass-moe-build-", dir=output_dir) as temporary:
+        built = Path(temporary) / output.name
+        command = [nvcc,"-O3","-std=c++17","--expt-relaxed-constexpr",
+                   "-gencode=arch=compute_110a,code=sm_110a",
+                   "-Xcompiler=-fPIC","-shared",f"-I{target/'include'}",
+                   f"-I{cutlass/'include'}",f"-I{cutlass/'tools/util/include'}",
+                   *(f"-D{definition}" for definition in definitions),
+                   "--ptxas-options=-v",str(target/"int8_g256_moe.cu"),"-o",str(built)]
+        print(f"Building Thor MoE configurations {tuple(CONFIGS)}", flush=True)
+        subprocess.run(command, check=True)
+        built.replace(output)
+    metadata = dict(architecture="sm_110", compiler_architecture="sm_110a",
+                    cutlass_commit=revision, tested_cutlass_commit=CUTLASS_COMMIT, nvcc_version=version,
+                    compile_definitions=definitions, source_sha256=source_hashes(), configs=CONFIGS)
+    output.with_name("moe_cutlass_build.json").write_text(json.dumps(metadata,indent=2)+"\n")
+    print(f"Built {output}")
+
+
+if __name__ == "__main__":
+    main()

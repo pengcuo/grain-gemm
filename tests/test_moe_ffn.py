@@ -10,6 +10,7 @@ torch = pytest.importorskip("torch")
 pytest.importorskip("triton")
 
 from grain_gemm import moe_ffn
+from grain_gemm.kernels import cutlass_moe
 
 
 cuda = pytest.mark.skipif(
@@ -206,6 +207,46 @@ def test_route_statistics_match_independent_counts(kind, include_tiles):
 
 
 @cuda
+@pytest.mark.parametrize("experts,tokens", [(32, 1031), (64, 1031), (65, 1031),
+                                           (64, 65536), (64, 65537)])
+def test_multichunk_routes_preserve_stable_order_and_invalid_tail(experts, tokens):
+    """Chunk boundaries and the small-expert boundary preserve every slot."""
+    from grain_gemm.kernels import moe as kernels
+
+    ids = ((torch.arange(tokens, dtype=torch.int64) * 17 + 11) % experts).reshape(-1, 1)
+    mask = torch.arange(tokens) % 11 != 0
+    for token, value in ((1, 2**40), (255, -(2**40)), (256, experts),
+                         (1024, 2**63 - 1), (1030, -(2**63))):
+        ids[token, 0] = value
+    counts = [0] * experts
+    keys, invalid = [], 0
+    for token, (expert,) in enumerate(ids.tolist()):
+        enabled = bool(mask[token])
+        valid = enabled and 0 <= expert < experts
+        keys.append(expert if valid else experts)
+        if valid:
+            counts[expert] += 1
+        elif enabled:
+            invalid += 1
+    order = sorted(range(tokens), key=keys.__getitem__)
+    inverse = [-1] * tokens
+    for position, assignment in enumerate(order):
+        if keys[assignment] < experts:
+            inverse[assignment] = position
+    offsets = [sum(counts[:expert]) for expert in range(experts + 1)]
+
+    routes = kernels.prepare_routes(ids.cuda(), experts, mask.cuda(), include_tiles=False)
+    assert routes.effective_ids.cpu().tolist() == keys
+    # Include the invalid tail: it is stable too, although downstream GEMMs
+    # only consume the valid prefix and inverse=-1 for invalid assignments.
+    assert routes.order.cpu().tolist() == order
+    assert routes.inverse.cpu().tolist() == inverse
+    assert routes.counts.cpu().tolist() == counts
+    assert routes.offsets.cpu().tolist() == offsets
+    assert routes.statistics.cpu().tolist() == [invalid, max(counts), sum(counts)]
+
+
+@cuda
 def test_routes_without_tiles_support_pack_combine_and_late_tile_preparation():
     from grain_gemm.kernels import moe as kernels
 
@@ -264,6 +305,64 @@ def test_routes_without_tiles_support_pack_combine_and_late_tile_preparation():
 
 
 @cuda
+@pytest.mark.parametrize("dtype", [torch.bfloat16, torch.float16])
+@pytest.mark.parametrize("capacity", [17, 64])
+@pytest.mark.parametrize("zero_initialize", [False, True], ids=["padding_fill", "full_fill"])
+def test_quantize_pack_matches_independent_routes_and_unfused_bits(dtype, capacity, zero_initialize):
+    """Fused quantization preserves duplicate routes and fully defines padding."""
+    from grain_gemm.kernels import moe as kernels
+
+    tokens, experts, top_k, k = 19, 5, 3, 768
+    generator = torch.Generator().manual_seed(20261020)
+    x = torch.randn((tokens, k), generator=generator).to(dtype)
+    # Exact unit scales expose nearest-even ties in every reduction group;
+    # another valid row exercises the clamp_min scale for an all-zero group.
+    x[:, ::256] = 127
+    ties = torch.tensor([0.5, 1.5, 2.5, -0.5, -1.5, -2.5], dtype=dtype)
+    x[:, 1::256] = ties[torch.arange(tokens) % ties.numel(), None]
+    x[1].zero_()
+    choices = torch.tensor([[0, 0, 1], [1, 1, 2], [2, 2, 0]], dtype=torch.int64)
+    ids = choices[torch.arange(tokens) % 3].contiguous()
+    mask = torch.ones(tokens, dtype=torch.bool)
+    mask[[0, 7, 18]] = False
+    x[~mask] = float("nan")
+    ids[~mask] = torch.tensor([2**40, -(2**40), 2**63 - 1])
+    expected_q = torch.zeros((experts, capacity, k), dtype=torch.int8)
+    expected_s = torch.zeros((experts, capacity, k // 256), dtype=torch.float32)
+    counts = [0] * experts
+    for token in range(tokens):
+        if not mask[token]:
+            continue
+        q, scale = quantize_rows_cpu(x[token : token + 1])
+        for expert in ids[token].tolist():
+            row = counts[expert]
+            expected_q[expert, row] = q[0]
+            expected_s[expert, row] = scale[0]
+            counts[expert] += 1
+    assert counts == [16, 15, 17, 0, 0]
+
+    def offset_cuda(value):
+        backing = torch.empty(value.numel() + 16, device="cuda", dtype=value.dtype)
+        view = backing[16:].view(value.shape)
+        view.copy_(value)
+        assert view.storage_offset() == 16 and view.data_ptr() % 16 == 0
+        return view
+
+    x, ids, mask = (offset_cuda(value) for value in (x, ids, mask))
+    routes = kernels.prepare_routes(ids, experts, mask, include_tiles=False)
+    qx, sx = kernels.quantize_rows(x)
+    unfused_q, unfused_s = kernels.pack_inputs(qx, sx, routes, capacity)
+    actual_q, actual_s = kernels.quantize_pack_inputs(
+        x, routes, capacity, zero_initialize=zero_initialize,
+    )
+    for actual in (unfused_q.cpu(), actual_q.cpu()):
+        torch.testing.assert_close(actual, expected_q, rtol=0, atol=0)
+    for actual in (unfused_s.cpu(), actual_s.cpu()):
+        assert torch.isfinite(actual).all()
+        torch.testing.assert_close(actual.view(torch.int32), expected_s.view(torch.int32), rtol=0, atol=0)
+
+
+@cuda
 @pytest.mark.parametrize("backend", ["auto", "triton", "cuda", "cutlass"])
 @pytest.mark.parametrize("dtype", [torch.bfloat16, torch.float16])
 def test_ragged_routes_empty_experts_extrema_and_nonunit_scores(backend, dtype):
@@ -278,6 +377,48 @@ def test_ragged_routes_empty_experts_extrema_and_nonunit_scores(backend, dtype):
     assert torch.count_nonzero(actual[~case["token_mask"]]).item() == 0
     for name, value in case.items():
         torch.testing.assert_close(value, saved[name], rtol=0, atol=0)
+
+
+@cuda
+@pytest.mark.parametrize("backend", ["auto", "triton"])
+@pytest.mark.parametrize("dtype", [torch.bfloat16, torch.float16])
+def test_masked_nan_offset_views_and_signed_scales_preserve_ffn(backend, dtype):
+    """Optimized dispatch retains public mask, view and numerical behavior."""
+    case = make_case(tokens=129, h=512, i=256, experts=4, dtype=dtype)
+    case["topk_ids"] = torch.arange(4, device="cuda").repeat(129, 1)
+    case["topk_ids"][64].fill_(1)
+    case["topk_weights"] = torch.tensor([0.25, 1.5, -0.5, 0.0], device="cuda").repeat(129, 1)
+    case["token_mask"] = torch.ones(129, dtype=torch.bool, device="cuda")
+    masked_rows = [0, 63, 128]
+    case["token_mask"][masked_rows] = False
+    case["hidden_states"][masked_rows] = float("nan")
+    case["topk_weights"][masked_rows] = float("nan")
+    case["topk_ids"][masked_rows] = torch.tensor(
+        [2**40, -(2**40), 2**63 - 1, -(2**63)], device="cuda", dtype=torch.int64
+    )
+    for name in ("scale_gate_up", "scale_down"):
+        case[name][:, ::2, ::3].mul_(-1)
+        case[name][..., 5::17].zero_()
+    # Every view keeps its required shape/stride and 16-byte alignment, while
+    # its tensor pointer differs from the storage base. Native descriptors and
+    # fused gathers must consume the view's data_ptr and honor masked rows.
+    for name, value in case.items():
+        backing = torch.empty(value.numel() + 16, device=value.device, dtype=value.dtype)
+        offset_view = torch.as_strided(backing, value.shape, value.stride(), storage_offset=16)
+        offset_view.copy_(value)
+        assert offset_view.storage_offset() == 16
+        case[name] = offset_view
+    actual = moe_ffn(**case, backend=backend)
+    assert torch.isfinite(actual).all().item()
+    torch.testing.assert_close(actual[masked_rows], torch.zeros_like(actual[masked_rows]), rtol=0, atol=0)
+    # This shape qualifies for Thor's eager native auto path. A few rows retain
+    # the full H/I reduction and all routes, including duplicate expert slots,
+    # without making an independent INT32 CPU reference unnecessarily large.
+    indices = [0, 1, 63, 64, 127, 128]
+    subset = dict(case)
+    for name in ("hidden_states", "topk_weights", "topk_ids", "token_mask"):
+        subset[name] = case[name][indices].contiguous()
+    assert_reference(actual[indices], subset)
 
 
 @cuda
@@ -297,9 +438,9 @@ def test_thor_auto_selects_native_for_balanced_routing(monkeypatch, backend):
     native_gemm = implementation._native_gemm
     prepare_routes = kernels.prepare_routes
 
-    def tracked_native(a, weight, sa, sb, out, backend):
+    def tracked_native(a, weight, sa, sb, out, backend, *, counts=None):
         calls.append((backend, tuple(a.shape), tuple(weight.shape)))
-        return native_gemm(a, weight, sa, sb, out, backend)
+        return native_gemm(a, weight, sa, sb, out, backend, counts=counts)
 
     def tracked_routes(*args, **kwargs):
         route_calls.append(kwargs.get("include_tiles", True))
@@ -327,6 +468,65 @@ def test_thor_auto_selects_native_for_balanced_routing(monkeypatch, backend):
     indices = [0, 127, 128, 255]
     subset = dict(case)
     for name in ("hidden_states", "topk_weights", "topk_ids"):
+        subset[name] = case[name][indices].contiguous()
+    assert_reference(actual[indices], subset)
+
+
+@cuda
+@pytest.mark.parametrize("config_id", [43, 44])
+def test_thor_counted_ffn_ignores_unwritten_nan_padding(monkeypatch, config_id):
+    """Sparse native padding cannot reach SwiGLU or valid combined outputs."""
+    if torch.cuda.get_device_capability() != (11, 0) or not cutlass_moe.is_available():
+        pytest.skip("Build the dedicated Thor MoE library on SM110")
+    import grain_gemm.moe as implementation
+
+    case = make_case(tokens=257, h=256, i=256, experts=4)
+    case["topk_ids"] = torch.stack(
+        (torch.zeros(257, dtype=torch.int64), torch.arange(257) % 3), dim=1,
+    ).cuda()
+    case["topk_weights"] = torch.tensor([0.25, -0.5], device="cuda").repeat(257, 1)
+    case["token_mask"] = torch.ones(257, dtype=torch.bool, device="cuda")
+    masked_rows = [0, 128, 256]
+    case["token_mask"][masked_rows] = False
+    case["hidden_states"][masked_rows] = float("nan")
+    case["topk_weights"][masked_rows] = float("nan")
+    case["topk_ids"][masked_rows] = torch.tensor([2**63 - 1, -(2**40)], device="cuda")
+    expected_counts = [0] * 4
+    for token in range(257):
+        if token not in masked_rows:
+            expected_counts[0] += 1
+            expected_counts[token % 3] += 1
+    assert max(expected_counts) > 256 and expected_counts[3] == 0
+    calls = []
+    native = implementation._native_gemm
+
+    def poison_padding(a, weight, sa, sb, out, backend, *, counts=None):
+        assert counts is not None
+        assert counts.cpu().tolist() == expected_counts
+        # On FC2 this also inspects padded hidden scales: an unmasked SwiGLU
+        # load from the poisoned FC1 padding would leave NaNs here even if
+        # the final route combination happened to ignore those rows.
+        assert torch.isfinite(sa).all().item()
+        config = implementation._native_config(a.shape[1], weight.shape[1], a.shape[2])
+        calls.append((config, a.shape[1]))
+        # A counts-aware scheduler may leave whole padding tiles untouched.
+        # Start both native outputs as NaNs so ignoring the live-row mask in
+        # SwiGLU or combination becomes an observable correctness failure.
+        out.fill_(float("nan"))
+        return native(a, weight, sa, sb, out, backend, counts=counts)
+
+    with monkeypatch.context() as native_patch:
+        # Exercise the counted scheduler with a small independent-reference
+        # fixture; production tuning uses larger E32 projection shapes.
+        native_patch.setattr(implementation, "_native_config", lambda *args, **kwargs: config_id)
+        native_patch.setattr(implementation, "_native_gemm", poison_padding)
+        actual = moe_ffn(**case, backend="cutlass")
+    assert calls == [(config_id, 384), (config_id, 384)]
+    assert torch.isfinite(actual).all().item()
+    torch.testing.assert_close(actual[masked_rows], torch.zeros_like(actual[masked_rows]), rtol=0, atol=0)
+    indices = [0, 1, 2, 127, 255, 256]
+    subset = dict(case)
+    for name in ("hidden_states", "topk_weights", "topk_ids", "token_mask"):
         subset[name] = case[name][indices].contiguous()
     assert_reference(actual[indices], subset)
 
@@ -549,6 +749,133 @@ def test_thor_batched_gemm_preserves_expert_and_group_scale_strides(config_id):
     assert out.stride() == (m * n, n, 1)
     cutlass.launch_batched(a, weight, sa, sb, out, config_id=config_id)
     torch.testing.assert_close(out.cpu(), expected, rtol=0, atol=0)
+
+
+def native_moe_operands_cpu(experts, m, n, k):
+    """Integer extrema and signed binary scales with exactly FP32 group sums."""
+    groups = k // 256
+    generator = torch.Generator().manual_seed(20261020)
+    a = torch.randint(-8, 9, (experts, m, k), generator=generator, dtype=torch.int8)
+    weight = torch.randint(-8, 9, (experts, n, k), generator=generator, dtype=torch.int8)
+    for start in range(0, k, 256):
+        a[..., start], a[..., start + 1] = -128, 127
+        weight[..., start], weight[..., start + 1] = 127, -128
+    expert = torch.arange(experts)[:, None, None]
+    row = torch.arange(m)[None, :, None]
+    column = torch.arange(n)[None, None, :]
+    group = torch.arange(groups)
+    # Binary fractions make products and the full group sums exactly FP32
+    # representable, including zero scales and cancellation across groups.
+    sa = (((expert * 3 + row * 5 + group[None, None, :] * 7) % 9) - 4).float() / 32
+    sb = (((expert * 5 + group[None, :, None] * 3 + column * 7) % 11) - 5).float() / 64
+    return a, weight, sa, sb
+
+
+@cuda
+@pytest.mark.parametrize("config_id", tuple(cutlass_moe.CONFIGS))
+@pytest.mark.parametrize("experts", [1, 3], ids=["single_expert", "batched_experts"])
+def test_thor_moe_tiles_preserve_group_math_and_offset_views(config_id, experts):
+    """New 1SM/2SM tiles retain exact G256 math at partial M/N boundaries."""
+    if torch.cuda.get_device_capability() != (11, 0):
+        pytest.skip("The dedicated MoE collective requires Thor SM110")
+    if not cutlass_moe.is_available():
+        pytest.skip("Build the optional Thor MoE library")
+    assert config_id in cutlass_moe.CONFIGS
+    m, n, k = 192, 320, 768
+    a, weight, sa, sb = native_moe_operands_cpu(experts, m, n, k)
+    rows = torch.linspace(0, m - 1, 16).long()
+    columns = torch.linspace(0, n - 1, 16).long()
+    expected = torch.stack([
+        group_dot_cpu(
+            a[e].index_select(0, rows), weight[e].index_select(0, columns).t(),
+            sa[e].index_select(0, rows), sb[e].index_select(1, columns),
+        ).bfloat16()
+        for e in range(experts)
+    ])
+
+    def cuda_offset_view(value, elements):
+        backing = torch.empty(value.numel() + elements, device="cuda", dtype=value.dtype)
+        view = backing[elements:].view(value.shape)
+        view.copy_(value)
+        assert view.storage_offset() == elements
+        return view
+
+    a = cuda_offset_view(a, 16)
+    weight = cuda_offset_view(weight, 16)
+    sa = cuda_offset_view(sa, 1)  # Valid scalar SFA alignment, deliberately not 16-byte aligned.
+    sb = cuda_offset_view(sb, 4)
+    out = cuda_offset_view(torch.full((experts, m, n), float("nan"), dtype=torch.bfloat16), 8)
+    assert sa.data_ptr() % 16 == 4
+    assert all(tensor.data_ptr() % 16 == 0 for tensor in (a, weight, sb, out))
+    cutlass_moe.launch(a, weight, sa, sb, out, config_id=config_id)
+    actual = out.cpu()
+    assert torch.isfinite(actual).all()
+    actual_sample = actual.index_select(1, rows).index_select(2, columns)
+    torch.testing.assert_close(actual_sample.view(torch.int16), expected.view(torch.int16), rtol=0, atol=0)
+
+
+@cuda
+@pytest.mark.parametrize("config_id", tuple(
+    config for config, metadata in cutlass_moe.CONFIGS.items() if metadata.get("counts_aware")
+))
+@pytest.mark.parametrize("captured", [False, True], ids=["eager", "graph_replay"])
+def test_thor_moe_counted_scheduler_consumes_uneven_and_changing_populations(config_id, captured):
+    """Device counts retain valid rows across empty experts and tile tails."""
+    if torch.cuda.get_device_capability() != (11, 0):
+        pytest.skip("The dedicated MoE collective requires Thor SM110")
+    if not cutlass_moe.is_available():
+        pytest.skip("Build the optional Thor MoE library")
+    experts, capacity, n, k = 6, 320, 320, 768
+    host_operands = native_moe_operands_cpu(experts, capacity, n, k)
+    operands = [value.cuda() for value in host_operands]
+    out = torch.empty((experts, capacity, n), dtype=torch.bfloat16, device="cuda")
+    # A four-byte offset is a valid count pointer. The scheduler must consume
+    # the tensor view, including on replay, rather than its allocation base.
+    count_storage = torch.full((experts + 1,), -777, dtype=torch.int32, device="cuda")
+    counts = count_storage[1:]
+    assert counts.storage_offset() == 1 and counts.data_ptr() % 4 == 0
+    populations = [[0, 1, 127, 128, 129, 319]]
+    if captured:
+        populations += [[0] * experts, [320, 0, 129, 1, 0, 128], [1, 319, 128, 127, 0, 320]]
+    counts.copy_(torch.tensor(populations[0], dtype=torch.int32))
+
+    def run():
+        return cutlass_moe.launch(*operands, out, config_id=config_id, counts=counts)
+
+    if captured:
+        stream = torch.cuda.Stream()
+        stream.wait_stream(torch.cuda.current_stream())
+        with torch.cuda.stream(stream):
+            for _ in range(2):
+                run()
+        stream.synchronize()
+        graph = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(graph, stream=stream):
+            run()
+
+    columns = torch.linspace(0, n - 1, 16).long()
+    for population in populations:
+        counts.copy_(torch.tensor(population, dtype=torch.int32))
+        out.fill_(float("nan"))
+        if captured:
+            graph.replay()
+        else:
+            run()
+        actual = out.cpu()
+        for expert, count in enumerate(population):
+            if count == 0:
+                continue
+            assert torch.isfinite(actual[expert, :count]).all()
+            rows = torch.linspace(0, count - 1, min(count, 16)).long().unique()
+            a, weight, sa, sb = host_operands
+            expected = group_dot_cpu(
+                a[expert].index_select(0, rows), weight[expert].index_select(0, columns).t(),
+                sa[expert].index_select(0, rows), sb[expert].index_select(1, columns),
+            ).bfloat16()
+            sampled = actual[expert].index_select(0, rows).index_select(1, columns)
+            torch.testing.assert_close(sampled.view(torch.int16), expected.view(torch.int16), rtol=0, atol=0)
+        # Padding rows may remain unwritten, including an empty expert's first
+        # tile. Only [0, count_e) is part of this native scheduler's contract.
 
 
 @cuda
