@@ -174,7 +174,7 @@ The build enables `G128_OPT_PROMOTION`, `G128_OPT_PIPE2`, `G128_OPT_SBVEC` and
 specialized to K-major so it directly consumes GrainGEMM's `[E,M,K/256]` scales;
 weight scales remain `[E,K/256,N]`, with N contiguous.
 
-The separate MoE library reuses that collective with smaller 128-row tiles,
+The separate MoE library reuses that collective with 128-row and 256-row tiles,
 one-SM/two-SM variants and dynamic/static persistent schedulers. Counts-aware
 variants read `[E]` INT32 counts on the current CUDA stream and skip subsequent
 tiles whose entire cluster lies in padding. The initial work tile is retained
@@ -216,10 +216,19 @@ a conservative heuristic, not an offline-tuned optimal dispatcher.
 Within the separate Thor MoE library, the default is config 34: a dynamic
 persistent 2SM 128x256x256 tile. Full-FFN calibration selects config 44, a
 counts-aware static 1SM 128x128x256 tile, for `(E,C,N,K)` equal to
-`(32,320,2048,1536)` or `(32,320,1536,1024)`. Larger tested capacities favor
-config 34 despite its padding. These choices do not modify any single-GEMM
-dispatch table. Captured explicit native calls still use their reserved
-worst-case capacity when choosing a configuration.
+`(32,320,2048,1536)` or `(32,320,1536,1024)`. Config 45 retains the original
+dynamic 2SM 256x256x256 tile and is selected for measured E32 capacities:
+
+| Projection `(N,K)` | Capacities selecting config 45 |
+|---|---|
+| Gate/up `(2048,1536)` | 768, 960, 1024, 1088, 1152, 1216, 2048, 2112, 2176, 2240, 4096, 4288, 4352 |
+| Down `(1536,1024)` | 768, 960, 1024, 1216, 2048, 2240, 4096, 4288, 4352 |
+
+The projections choose independently: at capacity 1152, the larger tile speeds
+up gate/up but slows down down-projection because of tile padding. Capacities
+640 and 896 retain config 34, as do uncalibrated shapes. These choices do not
+modify any single-GEMM dispatch table. Captured explicit native calls still
+use their reserved worst-case capacity when choosing a configuration.
 
 Captured auto execution always selects Triton. Explicit native capture reserves
 the worst-case capacity `round_up(T*R,64)` per expert to accommodate any valid

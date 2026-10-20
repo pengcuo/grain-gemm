@@ -102,13 +102,24 @@ def _native_available(backend, device):
     return cutlass.is_available(device)
 
 
+_THOR_MOE_TILE45_CAPACITIES = {
+    (2048, 1536): (768, 960, 1024, 1088, 1152, 1216, 2048, 2112, 2176, 2240, 4096, 4288, 4352),
+    (1536, 1024): (768, 960, 1024, 1216, 2048, 2240, 4096, 4288, 4352),
+}
+
+
 def _native_config(capacity, output_width, reduction_width, *, experts=None):
     """Thor MoE tile choice; independent of single-GEMM configuration tables."""
     # Full-FFN comparisons favor counted 1SM tiles for these measured shapes.
-    # Larger capacities favor the dynamic 2SM scheduler despite extra padding.
     if (experts, capacity, output_width, reduction_width) in (
             (32, 320, 2048, 1536), (32, 320, 1536, 1024)):
         return 44
+    # The original 256-row tile wins on these measured E32 projections.
+    # Keep 128-row tiles at other capacities: extra M padding can reverse
+    # the result, and gate/up and down do not always prefer the same tile.
+    if experts == 32 and capacity in _THOR_MOE_TILE45_CAPACITIES.get(
+            (output_width, reduction_width), ()):
+        return 45
     return 34
 
 

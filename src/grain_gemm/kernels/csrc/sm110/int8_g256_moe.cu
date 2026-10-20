@@ -238,7 +238,8 @@ inline bool valid(int M, int N, int K, int E, int swizzle, int raster) {
   OP(41, 128, 256, true, true, false)   \
   OP(42, 128, 128, false, true, false) \
   OP(43, 128, 256, true, true, true)   \
-  OP(44, 128, 128, false, true, true)
+  OP(44, 128, 128, false, true, true)  \
+  OP(45, 256, 256, true, false, false)
 
 extern "C" size_t grain_cutlass_moe_workspace_bytes(
     int M, int N, int K, int E, int config, int swizzle, int raster) {

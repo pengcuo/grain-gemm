@@ -97,3 +97,9 @@ compiled BF16 in a fresh paired run. **GPU frequency was reduced to 1.2 GHz
 TOPS: 2.405 ms versus 4.297 ms before optimization and 3.286 ms for vLLM BF16.
 These full-FFN measurements use a different scope and frequency from the
 historical single-GEMM results above.
+
+The follow-up [native MoE tile selection report](moe_native_tile_tuning.md)
+adds the original 256-row tile to the separate MoE library and selects it at
+measured capacities. At 1197 MHz and 4096 rows per expert, gate/up recovers
+from 159.19 to 177.96 TOPS and down from 142.60 to 151.55 TOPS. The report
+also includes paired complete-FFN measurements and capacity-boundary checks.

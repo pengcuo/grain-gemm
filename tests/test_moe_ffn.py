@@ -128,6 +128,28 @@ def require_backend(backend, dtype):
         pytest.skip(f"Build the optional {backend} backend")
 
 
+def test_thor_native_selector_retains_measured_projection_choices():
+    """Large expert matrices keep the original tile without broadening tuning."""
+    from grain_gemm.moe import _native_config
+
+    for n, k in ((2048, 1536), (1536, 1024)):
+        for capacity in (1024, 2048, 4096):
+            assert _native_config(capacity, n, k, experts=32) == 45
+        assert _native_config(320, n, k, experts=32) == 44
+        assert _native_config(640, n, k, experts=32) == 34
+        assert _native_config(896, n, k, experts=32) == 34
+        assert _native_config(1024, n, k, experts=16) == 34
+    assert _native_config(1152, 2048, 1536, experts=32) == 45
+    assert _native_config(1152, 1536, 1024, experts=32) == 34
+    assert _native_config(1088, 1536, 1024, experts=32) == 34
+    assert _native_config(2176, 1536, 1024, experts=32) == 34
+    assert _native_config(2112, 2048, 1536, experts=32) == 45
+    assert _native_config(2112, 1536, 1024, experts=32) == 34
+    assert _native_config(1280, 2048, 1536, experts=32) == 34
+    assert _native_config(1024, 1024, 1536, experts=32) == 34
+    assert _native_config(1024, 2048, 1024, experts=32) == 34
+
+
 def routing_fixture_cpu():
     ids = torch.tensor([
         [0, 2, 2],
@@ -466,6 +488,54 @@ def test_thor_auto_selects_native_for_balanced_routing(monkeypatch, backend):
     expected = moe_ffn(**case, backend="triton")
     torch.testing.assert_close(actual, expected, rtol=0.015, atol=0.025)
     indices = [0, 127, 128, 255]
+    subset = dict(case)
+    for name in ("hidden_states", "topk_weights", "topk_ids"):
+        subset[name] = case[name][indices].contiguous()
+    assert_reference(actual[indices], subset)
+
+
+@cuda
+def test_thor_auto_uses_original_tile_for_large_expert_ffn(monkeypatch):
+    """Both real projections select the large tile and retain complete FFN math."""
+    if torch.cuda.get_device_capability() != (11, 0) or not cutlass_moe.is_available():
+        pytest.skip("Build the dedicated Thor MoE library on SM110")
+    import grain_gemm.moe as implementation
+
+    tokens, experts, top_k = 8192, 32, 4
+    case = make_case(tokens=tokens, experts=experts, h=1536, i=1024)
+    case["topk_ids"] = (
+        torch.arange(tokens * top_k, device="cuda", dtype=torch.int64)
+        .remainder(experts).reshape(tokens, top_k)
+    )
+    case["topk_weights"] = torch.tensor(
+        [0.25, -0.5, 1.5, 0.0], device="cuda", dtype=torch.float32,
+    ).repeat(tokens, 1)
+    calls = []
+    native_launch = cutlass_moe._launch_prevalidated
+
+    def tracked_launch(a, weight, sa, sb, out, config_id=34, **kwargs):
+        calls.append((config_id, tuple(a.shape), tuple(weight.shape)))
+        return native_launch(a, weight, sa, sb, out, config_id, **kwargs)
+
+    with monkeypatch.context() as native_patch:
+        native_patch.setattr(cutlass_moe, "_launch_prevalidated", tracked_launch)
+        actual = moe_ffn(**case, backend="auto")
+    assert calls == [
+        (45, (32, 1024, 1536), (32, 2048, 1536)),
+        (45, (32, 1024, 1024), (32, 1536, 1024)),
+    ]
+    calls.clear()
+    with monkeypatch.context() as native_patch:
+        native_patch.setattr(implementation, "_native_config", lambda *args, **kwargs: 34)
+        native_patch.setattr(cutlass_moe, "_launch_prevalidated", tracked_launch)
+        expected = moe_ffn(**case, backend="auto")
+    assert calls == [
+        (34, (32, 1024, 1536), (32, 2048, 1536)),
+        (34, (32, 1024, 1024), (32, 1536, 1024)),
+    ]
+    assert torch.isfinite(actual).all().item()
+    torch.testing.assert_close(actual.view(torch.int16), expected.view(torch.int16), rtol=0, atol=0)
+    indices = [0, 3, 4094, tokens - 1]
     subset = dict(case)
     for name in ("hidden_states", "topk_weights", "topk_ids"):
         subset[name] = case[name][indices].contiguous()
