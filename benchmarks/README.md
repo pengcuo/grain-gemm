@@ -10,6 +10,10 @@ A fresh [standalone Thor BF16 GEMM measurement at 1.2 GHz
 the tested square shapes. It measures GPU GEMM execution separately from
 [full Cosmos MoE FFN latency](results/thor/moe_ffn_cosmos.md).
 
+The [BF16 expert FFN comparison for the vLLM core used by Omni](results/thor/moe_ffn_vllm.md)
+measures 128–4096 tokens at 1197 MHz, reaching **47.19 effective TFLOPS**
+at 4096 tokens, with a freshly measured Cosmos compiled baseline.
+
 **Hardware scope: the historical batch below is GB10-only (SM121, compute capability
 12.1).** Measured performance, tuned configurations and backend rankings in
 those historical reports, especially the CuTe/CUTLASS comparisons, apply only to

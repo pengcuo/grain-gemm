@@ -112,3 +112,19 @@ normal promotion's FP32 fused multiply-add explicit. Experimental bias,
 separable scale, and reduced-precision scale schemes are disabled. The C ABI
 accepts caller-owned workspace on each launch, preserving CUDA Graph and
 stream ownership, and retains the original 32 warp-MMA configurations.
+
+## Optional upstream vLLM BF16 MoE benchmark
+
+`benchmarks/vllm_moe_baseline.py` loads unchanged function definitions and
+Triton kernels from an external [vLLM](https://github.com/vllm-project/vllm)
+checkout at commit `4e304b4d1ed0037514073305d839a79586d0e9de`.
+`benchmarks/vllm_moe_native.py` compiles that checkout's original CUDA
+alignment, activation and reduction files with a small standalone registration
+unit. The upstream files retain their Apache-2.0 notices and remain external
+dependencies; they and the compiled binaries are not redistributed here.
+The upstream license is [available in the pinned checkout](https://github.com/vllm-project/vllm/blob/4e304b4d1ed0037514073305d839a79586d0e9de/LICENSE).
+
+These helpers isolate serving imports for a single-GPU, unquantized BF16
+functional expert FFN measurement. They do not implement a vLLM engine or
+replace GrainGEMM's production kernels. Source, binding, configuration and
+native-library hashes are retained with the benchmark results.

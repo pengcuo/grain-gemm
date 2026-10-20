@@ -1,0 +1,1794 @@
+{
+  "complete": true,
+  "timestamp_utc": "2026-10-20T04:15:57.750279+00:00",
+  "expected_tokens": [
+    128,
+    512,
+    2048,
+    3072,
+    4096
+  ],
+  "experts": 32,
+  "hidden": 1536,
+  "intermediate": 1024,
+  "top_k": 4,
+  "seed": 2026,
+  "dtype": "bfloat16",
+  "activation": "swiglu",
+  "gpu": "NVIDIA Thor",
+  "compute_capability": [
+    11,
+    0
+  ],
+  "software": {
+    "torch": "2.11.0a0+a6c236b9fd.nv26.03.46836102",
+    "triton": "3.6.0",
+    "cuda": "13.2",
+    "python": "3.12.3"
+  },
+  "rounds": 5,
+  "repetitions": 5,
+  "warmup": 2,
+  "warmup_ms": 200,
+  "timing": "Full-call CUDA events including host dispatch gaps; rotating method order; median of round medians; no CUDA Graph capture",
+  "scope": "Pre-routed complete expert FFN: dispatch/alignment, gate/up, SwiGLU, down and combination. Excludes router/top-k, weight preparation, compilation, warmup, correctness and cooling. No Omni serving-engine overhead.",
+  "throughput": "6*T*top_k*H*I / (latency_seconds*1e12), effective dense TFLOPS; includes gate/up plus down, excludes padding and non-GEMM operation counts",
+  "score_policy": "Normalize FP32 scores once and round to BF16 outside timing. Cosmos receives BF16; vLLM receives FP32 with exactly the same numeric values.",
+  "numerical_difference": "Cosmos compiled fuses pointwise operations and multiplies score before down; vLLM native SiLU rounds before multiply, and score multiplies FC2 accumulator before BF16 conversion, then FP32 top-k sum. Same real-valued FFN, different rounding.",
+  "correctness": {
+    "vllm_reference": "Independent CPU FP64 full-H/I dot products with explicit BF16 rounding points",
+    "cosmos_reference": "Independent CPU FP32 full-H/I dot products with fused-pointwise BF16 reference",
+    "rtol": 0.025,
+    "atol": 0.008,
+    "reference_tokens": 2
+  },
+  "allow_bf16_reduced_precision_reduction": true,
+  "cosmos_compilation": {
+    "fullgraph": true,
+    "dynamic": true,
+    "backend": "inductor",
+    "mode": "default"
+  },
+  "vllm": {
+    "vllm_dir": "/tmp/vllm-moe-review",
+    "git_commit": "4e304b4d1ed0037514073305d839a79586d0e9de",
+    "git_remote": "https://github.com/vllm-project/vllm.git",
+    "source_dirty": false,
+    "source_sha256": {
+      "vllm/model_executor/layers/fused_moe/fused_moe.py": "21860340e4b409b01666e2ba0f0edae66b0f97b859756b174b573bab895cfaf7",
+      "vllm/model_executor/layers/fused_moe/moe_align_block_size.py": "2addb33632b611b4c0df21f2b874dc1124d2fc867785f19f05d4ce33d4b872c6",
+      "vllm/model_executor/layers/fused_moe/activation.py": "d955095c44b8de4954da61efa01f2e360eda76f4724eb53dd98d7b8f5cb9048f",
+      "vllm/model_executor/layers/fused_moe/utils.py": "3ddb067e3937b1311209435e9ac58f4932f37168e04f628d05be82ca7117b4da",
+      "vllm/model_executor/layers/fused_moe/config.py": "9da7b7b7f825e466792fc47efad92d47c46716a2e5774ec112d945c5ada5d2ad",
+      "vllm/model_executor/layers/fused_moe/modular_kernel.py": "b2a08bde8dcda8b440f7b63123955a38133690334d8ab0906059991d83adcd71",
+      "vllm/utils/math_utils.py": "33a8fa109989654855abdc32c48e499349caf8339a5642f06b4d625572e472b1",
+      "vllm/utils/platform_utils.py": "9501968a99185c29094610e252d00569afae20e59313c8e2e197e07370500aef"
+    },
+    "loader_sha256": "8ed5670eeff47f36a6f2847b11b84ff6cc0b46e9534bfe73cffec22553724294",
+    "loader": "unchanged upstream AST definitions plus original upstream CUDA ops",
+    "upstream_entrypoint": "fused_experts_impl",
+    "backend": "Triton BF16 functional",
+    "cuda_graph_capture": false,
+    "native": {
+      "original_source_sha256": {
+        "csrc/activation_kernels.cu": "27ba079b069fab4fa633b0ed23aad7fee6428c2a31330013dc98a1e2a6ef1e08",
+        "csrc/async_util.cuh": "efb1a6666ab82174c8bd7ccf1d5dc7a42b56fd92e7915ccbb43ebadde2e7a55e",
+        "csrc/core/cuda_compat.h": "07ff1081cb1ee616b4cb84b6ed3e81e536a08865b47f1f7890c8250645716a02",
+        "csrc/core/utils.hpp": "8e019dd075720c001dde5f09c8d110b99758420c85ee8299d3faf5cd938013f8",
+        "csrc/cuda_vec_utils.cuh": "2e60942f56be0c8d19b244cd8c4b46fdef97af5b491bbe01c6bb80b924d0a7f4",
+        "csrc/dispatch_utils.h": "0397432fab9020f2b39f3053d019f8b4fee78d78f4ac41c72490dd1b84a41fed",
+        "csrc/moe/moe_align_sum_kernels.cu": "d21e3309a45fd2439ffcf08a01ff429663f3ef684a675f13e8ea82a2e96fb495",
+        "csrc/moe/moe_ops.h": "edcc39bbb98cbc8fe8839e3b99c81e8975f942154c36be57f41fca1821e39f17",
+        "csrc/quantization/vectorization.cuh": "6b28cf0cfe9e948c989274adbfa46c6cdec393bf245efb49678213eca15171e7",
+        "csrc/torch_utils.h": "f619e1943039a67a3254f7e0679e1f3e0faa9d8fccae795f3b20df9e91a8a429"
+      },
+      "upstream_build_sha256": {
+        "CMakeLists.txt": "8aa5c4310c3bb84a3dcc50e60b091e2f5a6a02d63cbd022aa12212faee942918",
+        "cmake/utils.cmake": "01126448eb8bab7423edd58755358c1b3103206733e7faa767b1fb996c6dee16"
+      },
+      "binding_template_sha256": "89cc7fca2ec61d5e6faf62ead891a7370f8cef1e9cc1a93e0b57ea429dbeeed0",
+      "arch": "11.0a",
+      "torch": "2.11.0a0+a6c236b9fd.nv26.03.46836102",
+      "torch_cuda": "13.2",
+      "nvcc_version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Mon_Mar_02_09:52:54_PM_PST_2026\nCuda compilation tools, release 13.2, V13.2.51\nBuild cuda_13.2.r13.2/compiler.37434383_0",
+      "extra_cflags": [
+        "-O3",
+        "-DNDEBUG",
+        "-DUSE_CUDA",
+        "-std=c++20",
+        "-fvisibility=hidden",
+        "-DTORCH_TARGET_VERSION=0x020B000000000000ULL"
+      ],
+      "extra_cuda_cflags": [
+        "-O3",
+        "-DNDEBUG",
+        "-DUSE_CUDA",
+        "-std=c++20",
+        "-DTORCH_TARGET_VERSION=0x020B000000000000ULL",
+        "--expt-relaxed-constexpr",
+        "--expt-extended-lambda",
+        "-Xcompiler=-fvisibility=hidden",
+        "-gencode=arch=compute_110a,code=sm_110a",
+        "-DENABLE_FP8",
+        "-U__CUDA_NO_HALF_OPERATORS__",
+        "-U__CUDA_NO_HALF_CONVERSIONS__",
+        "-U__CUDA_NO_BFLOAT16_CONVERSIONS__",
+        "-U__CUDA_NO_HALF2_OPERATORS__"
+      ],
+      "upstream_dir": "/tmp/vllm-moe-review",
+      "upstream_commit": "4e304b4d1ed0037514073305d839a79586d0e9de",
+      "upstream_remote": "https://github.com/vllm-project/vllm.git",
+      "upstream_source_dirty": false,
+      "namespace": "grain_vllm_moe_d1b9ad5615f3ae95f924",
+      "build_directory": "/root/.cache/grain-gemm/vllm-moe-native/d1b9ad5615f3ae95f924",
+      "generated_binding_sha256": "eba81887d9f2c4068e1d21d0f722fa2f5329826d7e78564153b7038e7dfc04df",
+      "generated_binding_source": "\n#include <torch/csrc/stable/library.h>\n#include \"moe/moe_ops.h\"\n\nvoid silu_and_mul(torch::stable::Tensor& out, torch::stable::Tensor& input);\n\nSTABLE_TORCH_LIBRARY_FRAGMENT(grain_vllm_moe_d1b9ad5615f3ae95f924, m) {\n  m.def(\"silu_and_mul(Tensor! result, Tensor input) -> ()\");\n  m.def(\"moe_sum(Tensor input, Tensor! output, Tensor? topk_ids=None, \"\n        \"Tensor? expert_map=None) -> ()\");\n  m.def(\"moe_align_block_size(Tensor topk_ids, int num_experts, \"\n        \"int block_size, Tensor! sorted_token_ids, Tensor! experts_ids, \"\n        \"Tensor! num_tokens_post_pad, Tensor? maybe_expert_map, \"\n        \"Tensor(a!)? scatter_idx=None) -> ()\");\n}\n\nSTABLE_TORCH_LIBRARY_IMPL(grain_vllm_moe_d1b9ad5615f3ae95f924, CUDA, m) {\n  m.impl(\"silu_and_mul\", TORCH_BOX(&silu_and_mul));\n  m.impl(\"moe_sum\", TORCH_BOX(&moe_sum));\n  m.impl(\"moe_align_block_size\", TORCH_BOX(&moe_align_block_size));\n}\n",
+      "library_path": "/root/.cache/grain-gemm/vllm-moe-native/d1b9ad5615f3ae95f924/grain_vllm_moe_d1b9ad5615f3ae95f924.so",
+      "library_sha256": "a2f7c3ca3f4c645276eedec76fa838006df088e47a62b5fc8e8dd837ec9ee0d1",
+      "build_ninja_sha256": "688352a6af43dd5103448616d2ae2951effc6e65e1ad57bf6794a94211625c73",
+      "standalone_scope": "Unchanged moe_align_sum_kernels.cu and activation_kernels.cu; new registration only",
+      "algorithm": "Original upstream CUDA dispatcher, including small-batch and generic expert alignment paths"
+    },
+    "configurations": {
+      "128": {
+        "w1_shape": [
+          32,
+          2048,
+          1536
+        ],
+        "w2_shape": [
+          32,
+          1536,
+          1024
+        ],
+        "top_k": 4,
+        "config": {
+          "BLOCK_SIZE_M": 64,
+          "BLOCK_SIZE_N": 128,
+          "BLOCK_SIZE_K": 64,
+          "GROUP_SIZE_M": 1,
+          "SPLIT_K": 1,
+          "num_warps": 4,
+          "num_stages": 3
+        },
+        "config_filename": "E=32,N=1024,device_name=NVIDIA_Thor.json",
+        "source": "upstream_get_default_config",
+        "config_path": null,
+        "config_sha256": null
+      },
+      "512": {
+        "w1_shape": [
+          32,
+          2048,
+          1536
+        ],
+        "w2_shape": [
+          32,
+          1536,
+          1024
+        ],
+        "top_k": 4,
+        "config": {
+          "BLOCK_SIZE_M": 64,
+          "BLOCK_SIZE_N": 128,
+          "BLOCK_SIZE_K": 64,
+          "GROUP_SIZE_M": 1,
+          "SPLIT_K": 1,
+          "num_warps": 8,
+          "num_stages": 3
+        },
+        "config_filename": "E=32,N=1024,device_name=NVIDIA_Thor.json",
+        "source": "upstream_get_default_config",
+        "config_path": null,
+        "config_sha256": null
+      },
+      "2048": {
+        "w1_shape": [
+          32,
+          2048,
+          1536
+        ],
+        "w2_shape": [
+          32,
+          1536,
+          1024
+        ],
+        "top_k": 4,
+        "config": {
+          "BLOCK_SIZE_M": 128,
+          "BLOCK_SIZE_N": 128,
+          "BLOCK_SIZE_K": 64,
+          "GROUP_SIZE_M": 1,
+          "SPLIT_K": 1,
+          "num_warps": 8,
+          "num_stages": 3
+        },
+        "config_filename": "E=32,N=1024,device_name=NVIDIA_Thor.json",
+        "source": "upstream_get_default_config",
+        "config_path": null,
+        "config_sha256": null
+      },
+      "3072": {
+        "w1_shape": [
+          32,
+          2048,
+          1536
+        ],
+        "w2_shape": [
+          32,
+          1536,
+          1024
+        ],
+        "top_k": 4,
+        "config": {
+          "BLOCK_SIZE_M": 128,
+          "BLOCK_SIZE_N": 128,
+          "BLOCK_SIZE_K": 64,
+          "GROUP_SIZE_M": 1,
+          "SPLIT_K": 1,
+          "num_warps": 8,
+          "num_stages": 3
+        },
+        "config_filename": "E=32,N=1024,device_name=NVIDIA_Thor.json",
+        "source": "upstream_get_default_config",
+        "config_path": null,
+        "config_sha256": null
+      },
+      "4096": {
+        "w1_shape": [
+          32,
+          2048,
+          1536
+        ],
+        "w2_shape": [
+          32,
+          1536,
+          1024
+        ],
+        "top_k": 4,
+        "config": {
+          "BLOCK_SIZE_M": 128,
+          "BLOCK_SIZE_N": 128,
+          "BLOCK_SIZE_K": 64,
+          "GROUP_SIZE_M": 1,
+          "SPLIT_K": 1,
+          "num_warps": 8,
+          "num_stages": 3
+        },
+        "config_filename": "E=32,N=1024,device_name=NVIDIA_Thor.json",
+        "source": "upstream_get_default_config",
+        "config_path": null,
+        "config_sha256": null
+      }
+    },
+    "device_name": "NVIDIA Thor",
+    "compute_capability": [
+      11,
+      0
+    ],
+    "extracted_core_definitions": [
+      "write_zeros_to_output",
+      "fused_moe_kernel",
+      "invoke_fused_moe_triton_kernel",
+      "dispatch_fused_moe_kernel",
+      "get_config_file_name",
+      "get_moe_configs",
+      "get_default_config",
+      "try_get_optimal_moe_config",
+      "_prepare_expert_assignment",
+      "_get_config_quant_dtype",
+      "fused_experts_impl"
+    ],
+    "shims": [
+      "Calls unchanged fused_experts_impl directly; excludes the serving-facing torch.ops.vllm.fused_experts custom-op dispatch wrapper",
+      "No serving-package import: private module import hook supplies default get_config()=None and CUDA platform queries",
+      "Private torch proxy maps the unchanged activation's torch.ops._C.silu_and_mul to the original CUDA dispatcher binding",
+      "Standard-library re supplies upstream device-name normalization's identical whitespace/slash expression",
+      "Unquantized moe_kernel_quantize_input takes its original no-op branch; quantized/EP/nonstandard activation paths are not exposed",
+      "No CUDA tensor descriptors: upstream default VLLM_TRITON_USE_TD unset/0; no runtime tile override"
+    ],
+    "environment": {
+      "VLLM_TRITON_USE_TD": null,
+      "VLLM_BATCH_INVARIANT": false,
+      "VLLM_TUNED_CONFIG_FOLDER": null
+    },
+    "weights": "Original Linear format [E,2I,H] and [E,H,I], last dimension contiguous; no timed copy",
+    "score_position": "FP32 down accumulator times routing score, then BF16 cast; top-k summed in FP32",
+    "scope": "Original expert alignment/counts, two Triton GEMMs, original CUDA SiLU/multiply and top-k sum; excludes router/top-k selection"
+  },
+  "omni": {
+    "source_dir": "/tmp/vllm-omni-moe-review",
+    "git_commit": "da572cddb38383deae9caef33b8d490e292ef071",
+    "source_sha256": {
+      "vllm_omni/diffusion/layers/fused_moe.py": "48c93632f8af87ad562139baa8f122180e34b5c489867da022bf26a89845a0d7",
+      "vllm_omni/diffusion/models/hunyuan_image3/hunyuan_image3_transformer.py": "77d190b7e36480be17103a4f958a22127c423cf9c7e5937fe4e4c9683f9989bd"
+    },
+    "scope": "Omni adapter provenance only; executes its upstream Triton functional expert core, without engine, model router, distributed runner or forward-context hooks"
+  },
+  "cosmos": {
+    "cosmos_dir": "/tmp/cosmos-framework-moe-review",
+    "source_sha256": {
+      "cosmos_framework/model/generator/reasoner/qwen3_vl_moe/moe.py": "fb87a095199198c5f36999e01b8974d8c39f7b32b683d5ebdbfbeccf1be5adc8",
+      "cosmos_framework/model/generator/reasoner/qwen3_vl_moe/moe_kernels.py": "93dff7a19639756e8b434ee7054a4ade2369c199db0697f28a3eda488a749212",
+      "cosmos_framework/model/generator/reasoner/qwen3_vl_moe/qwen3_vl_moe.py": "49ba8d9ff21130f05fc9fdbdf9911523b8708e90beb353799248687cb644097c",
+      "cosmos_framework/model/generator/reasoner/qwen3_vl_moe/configuration_qwen3_vl_moe.py": "22b60a4500d5199b07f40be5132a919aa45a6e464216e8c89709a1f717261178",
+      "cosmos_framework/model/generator/reasoner/qwen3_vl_moe/moe_bench.py": "3d65ce5fe8e08cb573c91360cf7e06b7960e69a081b2f4eda68bd63de0b64d34"
+    },
+    "git_commit": "4ed6244506e00bb270ed17d4532897f2aaa7bc16",
+    "git_remote": "https://github.com/NVIDIA/cosmos-framework.git",
+    "source_dirty": false,
+    "loader": "unchanged_ast_definitions_and_original_kernel_module",
+    "module": "_grain_cosmos_moe_experts_fb87a095199198c5",
+    "extracted_names": [
+      "_run_experts_grouped_mm",
+      "Qwen3VLMoeTextExpertsGroupedMm",
+      "_weighted_expert_counts"
+    ],
+    "normal_import_error": "ModuleNotFoundError: No module named 'transformers'",
+    "kernel_module": "_grain_cosmos_moe_kernels_93dff7a19639756e",
+    "token_group_alignment": 16,
+    "activation_provider": "equivalent PyTorch silu provider",
+    "activation_source_url": "https://github.com/huggingface/transformers/blob/v4.57.6/src/transformers/activations.py",
+    "activation_equivalence": "SiLUActivation.forward calls nn.functional.silu(input)",
+    "activation_import_error": "ModuleNotFoundError: No module named 'transformers'",
+    "dtype": "torch.bfloat16",
+    "weight_layout": "upstream N-contiguous Parameters; Linear transpose/copy once before timing",
+    "gate_up_shape": [
+      32,
+      1536,
+      2048
+    ],
+    "gate_up_stride": [
+      3145728,
+      2048,
+      1
+    ],
+    "down_shape": [
+      32,
+      1024,
+      1536
+    ],
+    "down_stride": [
+      1572864,
+      1536,
+      1
+    ],
+    "score_position": "after SwiGLU, before down grouped GEMM",
+    "counts": "unchanged upstream _weighted_expert_counts, included in timed forward; no mask: torch.histc int32 input; mask: int32 scatter_add",
+    "counts_loader": "unchanged AST definition from qwen3_vl_moe.py",
+    "score_dtype": "cast to hidden_states.dtype inside timed forward"
+  },
+  "source": {
+    "git_commit": "45e58611469f5155b2631ad2960cb01749f8ac7e",
+    "git_status_porcelain": "?? benchmarks/bench_moe_vllm.py\n?? benchmarks/vllm_moe_baseline.py\n?? benchmarks/vllm_moe_native.py\n?? tests/test_vllm_moe_baseline.py",
+    "native_file_sha256": {
+      "build.json": "f5134348907ed9de95a40f96bf41e25b97011ce71ffa64a7d62a32529de09358",
+      "cutlass_build.json": "1b45c3ecb1725e7486b3b40b6464d672da7a3123a8182edd45a7f7b25ef4c895",
+      "libgrain_cuda.so": "ffa6c369f539fe6a7a3bd8999d871ace2d0d7dfa92fbfb1fefbd037558572884",
+      "libgrain_cutlass.so": "042fca65e18b40740b7f67b77abd665fd708500fc3ddb3de29c17c4a8a78e85f"
+    }
+  },
+  "benchmark_sha256": {
+    "bench_moe_vllm.py": "0570f86b12d2a7902a081ae1887836c43ec7bd1bc51e0f3b068eee7c561504a4",
+    "vllm_moe_baseline.py": "8ed5670eeff47f36a6f2847b11b84ff6cc0b46e9534bfe73cffec22553724294",
+    "vllm_moe_native.py": "47740d84fbbe883d2fab2197c51c0aa279bc889b680d9b8f2e35bc99bc040b5b",
+    "cosmos_moe_baseline.py": "0ca7bf702347f87a9971d045eb653121ee200965be9e6eeeecb45b634d852058",
+    "bench_moe_ffn.py": "d03722a842ca63a6c62b88a5130ca65719bb94be06b273874677faa5794d9a01",
+    "bench_moe_cosmos.py": "a4c7a8d2e8c2333638a96c547656c0effbd34d1333c5c2f33c30f2ab57344130"
+  },
+  "w1_shape": [
+    32,
+    2048,
+    1536
+  ],
+  "w1_stride": [
+    3145728,
+    1536,
+    1
+  ],
+  "w2_shape": [
+    32,
+    1536,
+    1024
+  ],
+  "w2_stride": [
+    1572864,
+    1024,
+    1
+  ],
+  "gpu_state_before": {
+    "min_freq_hz": 1197000000,
+    "max_freq_hz": 1197000000,
+    "cur_freq_hz": 1197000000,
+    "temperature_c": 49.66,
+    "graphics_clock_mhz": 1197.0,
+    "sw_thermal_slowdown": "Not Active"
+  },
+  "cases": [
+    {
+      "tokens": 128,
+      "experts": 32,
+      "hidden": 1536,
+      "intermediate": 1024,
+      "top_k": 4,
+      "vllm_config": {
+        "BLOCK_SIZE_M": 64,
+        "BLOCK_SIZE_N": 128,
+        "BLOCK_SIZE_K": 64,
+        "GROUP_SIZE_M": 1,
+        "SPLIT_K": 1,
+        "num_warps": 4,
+        "num_stages": 3
+      },
+      "route_counts": [
+        15,
+        18,
+        13,
+        19,
+        11,
+        22,
+        13,
+        9,
+        19,
+        16,
+        11,
+        15,
+        14,
+        11,
+        19,
+        17,
+        17,
+        16,
+        18,
+        18,
+        15,
+        17,
+        21,
+        21,
+        19,
+        15,
+        11,
+        22,
+        16,
+        16,
+        12,
+        16
+      ],
+      "checks": {
+        "independent_cpu_tokens": 2,
+        "independent_cpu_routes": 8,
+        "all_outputs_finite": true,
+        "vllm_vs_cpu": {
+          "max_abs": 0.001953125,
+          "rmse": 0.00010608242155285552,
+          "relative_l2": 0.00031089139520190656
+        },
+        "cosmos_compiled_vs_cpu": {
+          "max_abs": 0.0078125,
+          "rmse": 0.0009787225862964988,
+          "relative_l2": 0.0028680383693426847
+        },
+        "vllm_vs_cosmos_compiled": {
+          "max_abs": 0.015625,
+          "rmse": 0.0016272865468636155,
+          "relative_l2": 0.00475661177188158
+        }
+      },
+      "first_call_seconds": {
+        "vllm_bf16": 1.9460990119259804,
+        "cosmos_bf16_compiled": 2.308014201000333
+      },
+      "warmup": {
+        "vllm_bf16": {
+          "calls": 30,
+          "elapsed_ms": 200.68661007098854
+        },
+        "cosmos_bf16_compiled": {
+          "calls": 86,
+          "elapsed_ms": 201.7655170056969
+        }
+      },
+      "results": {
+        "vllm_bf16": {
+          "round_medians_ms": [
+            1.9298559427261353,
+            1.940351963043213,
+            1.9263360500335693,
+            1.9304640293121338,
+            1.926527976989746
+          ],
+          "median_ms": 1.9298559427261353,
+          "min_ms": 1.9263360500335693,
+          "max_ms": 1.940351963043213,
+          "effective_tflops": 2.5037299940504854
+        },
+        "cosmos_bf16_compiled": {
+          "round_medians_ms": [
+            2.3344318866729736,
+            2.3432319164276123,
+            2.348543882369995,
+            2.3564798831939697,
+            2.3568639755249023
+          ],
+          "median_ms": 2.348543882369995,
+          "min_ms": 2.3344318866729736,
+          "max_ms": 2.3568639755249023,
+          "effective_tflops": 2.0573761658326046
+        }
+      },
+      "sample_values_ms": [
+        {
+          "vllm_bf16": [
+            2.215456008911133,
+            1.9455039501190186,
+            1.9298559427261353,
+            1.9284160137176514,
+            1.928447961807251
+          ],
+          "cosmos_bf16_compiled": [
+            2.4241280555725098,
+            2.339871883392334,
+            2.3344318866729736,
+            2.3309121131896973,
+            2.3208000659942627
+          ]
+        },
+        {
+          "cosmos_bf16_compiled": [
+            2.9410240650177,
+            2.4191360473632812,
+            2.3432319164276123,
+            2.322783946990967,
+            2.3361599445343018
+          ],
+          "vllm_bf16": [
+            2.2056000232696533,
+            1.9461760520935059,
+            1.9249279499053955,
+            1.9124480485916138,
+            1.940351963043213
+          ]
+        },
+        {
+          "vllm_bf16": [
+            2.2059519290924072,
+            1.9752320051193237,
+            1.9263360500335693,
+            1.9181439876556396,
+            1.9190080165863037
+          ],
+          "cosmos_bf16_compiled": [
+            2.985408067703247,
+            2.402240037918091,
+            2.348543882369995,
+            2.3355519771575928,
+            2.3392961025238037
+          ]
+        },
+        {
+          "cosmos_bf16_compiled": [
+            2.862015962600708,
+            2.40447998046875,
+            2.3564798831939697,
+            2.327296018600464,
+            2.329535961151123
+          ],
+          "vllm_bf16": [
+            2.178816080093384,
+            1.9316480159759521,
+            1.9304640293121338,
+            1.9084479808807373,
+            1.9053759574890137
+          ]
+        },
+        {
+          "vllm_bf16": [
+            2.1616320610046387,
+            1.9472320079803467,
+            1.926527976989746,
+            1.9185600280761719,
+            1.9086719751358032
+          ],
+          "cosmos_bf16_compiled": [
+            2.9072000980377197,
+            2.3930559158325195,
+            2.3568639755249023,
+            2.3315200805664062,
+            2.3257598876953125
+          ]
+        }
+      ],
+      "measurement_orders": [
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ],
+        [
+          "cosmos_bf16_compiled",
+          "vllm_bf16"
+        ],
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ],
+        [
+          "cosmos_bf16_compiled",
+          "vllm_bf16"
+        ],
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ]
+      ],
+      "round_gpu_states": [
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 50.84,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 50.91,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 50.72,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 50.72,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 50.75,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        }
+      ],
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 49.81,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 50.5,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "cosmos_over_vllm": 1.2169529498934604
+    },
+    {
+      "tokens": 512,
+      "experts": 32,
+      "hidden": 1536,
+      "intermediate": 1024,
+      "top_k": 4,
+      "vllm_config": {
+        "BLOCK_SIZE_M": 64,
+        "BLOCK_SIZE_N": 128,
+        "BLOCK_SIZE_K": 64,
+        "GROUP_SIZE_M": 1,
+        "SPLIT_K": 1,
+        "num_warps": 8,
+        "num_stages": 3
+      },
+      "route_counts": [
+        70,
+        73,
+        63,
+        72,
+        69,
+        75,
+        57,
+        58,
+        63,
+        76,
+        55,
+        68,
+        65,
+        67,
+        61,
+        68,
+        62,
+        56,
+        56,
+        71,
+        51,
+        55,
+        64,
+        62,
+        57,
+        81,
+        55,
+        68,
+        58,
+        74,
+        56,
+        62
+      ],
+      "checks": {
+        "independent_cpu_tokens": 2,
+        "independent_cpu_routes": 8,
+        "all_outputs_finite": true,
+        "vllm_vs_cpu": {
+          "max_abs": 0.00390625,
+          "rmse": 0.0002477128291502595,
+          "relative_l2": 0.0008292042766697705
+        },
+        "cosmos_compiled_vs_cpu": {
+          "max_abs": 0.0078125,
+          "rmse": 0.0009461381123401225,
+          "relative_l2": 0.0031664669513702393
+        },
+        "vllm_vs_cosmos_compiled": {
+          "max_abs": 0.015625,
+          "rmse": 0.0016242368146777153,
+          "relative_l2": 0.0047720433212816715
+        }
+      },
+      "first_call_seconds": {
+        "vllm_bf16": 0.6052789649693295,
+        "cosmos_bf16_compiled": 0.0122296919580549
+      },
+      "warmup": {
+        "vllm_bf16": {
+          "calls": 94,
+          "elapsed_ms": 200.0599759630859
+        },
+        "cosmos_bf16_compiled": {
+          "calls": 76,
+          "elapsed_ms": 201.6185789834708
+        }
+      },
+      "results": {
+        "vllm_bf16": {
+          "round_medians_ms": [
+            2.076767921447754,
+            2.0821759700775146,
+            2.08569598197937,
+            2.0944321155548096,
+            2.125375986099243
+          ],
+          "median_ms": 2.08569598197937,
+          "min_ms": 2.076767921447754,
+          "max_ms": 2.125375986099243,
+          "effective_tflops": 9.26662035070803
+        },
+        "cosmos_bf16_compiled": {
+          "round_medians_ms": [
+            2.633791923522949,
+            2.6341440677642822,
+            2.619040012359619,
+            2.772736072540283,
+            2.7298879623413086
+          ],
+          "median_ms": 2.6341440677642822,
+          "min_ms": 2.619040012359619,
+          "max_ms": 2.772736072540283,
+          "effective_tflops": 7.337242130573368
+        }
+      },
+      "sample_values_ms": [
+        {
+          "vllm_bf16": [
+            2.264159917831421,
+            2.1125121116638184,
+            2.076767921447754,
+            2.073888063430786,
+            2.0630080699920654
+          ],
+          "cosmos_bf16_compiled": [
+            2.6653120517730713,
+            2.6368000507354736,
+            2.5939838886260986,
+            2.5950400829315186,
+            2.633791923522949
+          ]
+        },
+        {
+          "cosmos_bf16_compiled": [
+            2.6341440677642822,
+            2.6958720684051514,
+            2.6341440677642822,
+            2.6194560527801514,
+            2.6048638820648193
+          ],
+          "vllm_bf16": [
+            2.244447946548462,
+            2.1244800090789795,
+            2.08022403717041,
+            2.0821759700775146,
+            2.0646719932556152
+          ]
+        },
+        {
+          "vllm_bf16": [
+            2.074079990386963,
+            2.1282238960266113,
+            2.0862081050872803,
+            2.08569598197937,
+            2.0792319774627686
+          ],
+          "cosmos_bf16_compiled": [
+            2.7443199157714844,
+            2.6553280353546143,
+            2.6184959411621094,
+            2.619040012359619,
+            2.606112003326416
+          ]
+        },
+        {
+          "cosmos_bf16_compiled": [
+            3.140768051147461,
+            2.9295361042022705,
+            2.772736072540283,
+            2.716639995574951,
+            2.6744000911712646
+          ],
+          "vllm_bf16": [
+            2.3931519985198975,
+            2.1349120140075684,
+            2.0944321155548096,
+            2.071743965148926,
+            2.0662078857421875
+          ]
+        },
+        {
+          "vllm_bf16": [
+            2.3092479705810547,
+            2.1487998962402344,
+            2.108544111251831,
+            2.125375986099243,
+            2.0852160453796387
+          ],
+          "cosmos_bf16_compiled": [
+            3.1512959003448486,
+            2.817215919494629,
+            2.7298879623413086,
+            2.6789119243621826,
+            2.6600959300994873
+          ]
+        }
+      ],
+      "measurement_orders": [
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ],
+        [
+          "cosmos_bf16_compiled",
+          "vllm_bf16"
+        ],
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ],
+        [
+          "cosmos_bf16_compiled",
+          "vllm_bf16"
+        ],
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ]
+      ],
+      "round_gpu_states": [
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 51.47,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 51.38,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 51.31,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 51.28,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 51.25,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        }
+      ],
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 50.06,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 50.91,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "cosmos_over_vllm": 1.262956869324945
+    },
+    {
+      "tokens": 2048,
+      "experts": 32,
+      "hidden": 1536,
+      "intermediate": 1024,
+      "top_k": 4,
+      "vllm_config": {
+        "BLOCK_SIZE_M": 128,
+        "BLOCK_SIZE_N": 128,
+        "BLOCK_SIZE_K": 64,
+        "GROUP_SIZE_M": 1,
+        "SPLIT_K": 1,
+        "num_warps": 8,
+        "num_stages": 3
+      },
+      "route_counts": [
+        243,
+        276,
+        249,
+        246,
+        237,
+        262,
+        235,
+        266,
+        256,
+        267,
+        277,
+        241,
+        246,
+        272,
+        235,
+        237,
+        253,
+        253,
+        261,
+        271,
+        271,
+        257,
+        252,
+        247,
+        268,
+        256,
+        256,
+        277,
+        256,
+        269,
+        253,
+        247
+      ],
+      "checks": {
+        "independent_cpu_tokens": 2,
+        "independent_cpu_routes": 8,
+        "all_outputs_finite": true,
+        "vllm_vs_cpu": {
+          "max_abs": 0.001953125,
+          "rmse": 8.733630238566548e-05,
+          "relative_l2": 0.0002480656548868865
+        },
+        "cosmos_compiled_vs_cpu": {
+          "max_abs": 0.0078125,
+          "rmse": 0.0009614910813979805,
+          "relative_l2": 0.0027312785387039185
+        },
+        "vllm_vs_cosmos_compiled": {
+          "max_abs": 0.015625,
+          "rmse": 0.0016286157770082355,
+          "relative_l2": 0.004777189344167709
+        }
+      },
+      "first_call_seconds": {
+        "vllm_bf16": 0.7267045680200681,
+        "cosmos_bf16_compiled": 0.06513354601338506
+      },
+      "warmup": {
+        "vllm_bf16": {
+          "calls": 63,
+          "elapsed_ms": 201.13520603626966
+        },
+        "cosmos_bf16_compiled": {
+          "calls": 55,
+          "elapsed_ms": 201.3454649131745
+        }
+      },
+      "results": {
+        "vllm_bf16": {
+          "round_medians_ms": [
+            3.225600004196167,
+            2.6202239990234375,
+            2.619935989379883,
+            2.6089279651641846,
+            2.6200640201568604
+          ],
+          "median_ms": 2.6200640201568604,
+          "min_ms": 2.6089279651641846,
+          "max_ms": 3.225600004196167,
+          "effective_tflops": 29.506687902752684
+        },
+        "cosmos_bf16_compiled": {
+          "round_medians_ms": [
+            3.23088002204895,
+            3.2474238872528076,
+            3.2517759799957275,
+            3.233504056930542,
+            3.5268800258636475
+          ],
+          "median_ms": 3.2474238872528076,
+          "min_ms": 3.23088002204895,
+          "max_ms": 3.5268800258636475,
+          "effective_tflops": 23.806381307800475
+        }
+      },
+      "sample_values_ms": [
+        {
+          "vllm_bf16": [
+            3.327455997467041,
+            3.250880002975464,
+            3.222815990447998,
+            3.225600004196167,
+            3.0239360332489014
+          ],
+          "cosmos_bf16_compiled": [
+            3.315903902053833,
+            3.232800006866455,
+            3.23088002204895,
+            3.220128059387207,
+            3.2186241149902344
+          ]
+        },
+        {
+          "cosmos_bf16_compiled": [
+            3.306175947189331,
+            3.493056058883667,
+            3.2474238872528076,
+            3.232383966445923,
+            3.2110719680786133
+          ],
+          "vllm_bf16": [
+            2.743232011795044,
+            2.6202239990234375,
+            2.620352029800415,
+            2.612639904022217,
+            2.585024118423462
+          ]
+        },
+        {
+          "vllm_bf16": [
+            2.7877440452575684,
+            2.652575969696045,
+            2.619935989379883,
+            2.611072063446045,
+            2.6073598861694336
+          ],
+          "cosmos_bf16_compiled": [
+            3.760672092437744,
+            3.2929599285125732,
+            3.2517759799957275,
+            3.225152015686035,
+            3.22326397895813
+          ]
+        },
+        {
+          "cosmos_bf16_compiled": [
+            3.4384000301361084,
+            3.2532479763031006,
+            3.229055881500244,
+            3.2223360538482666,
+            3.233504056930542
+          ],
+          "vllm_bf16": [
+            2.745728015899658,
+            2.617248058319092,
+            2.6089279651641846,
+            2.5904319286346436,
+            2.592031955718994
+          ]
+        },
+        {
+          "vllm_bf16": [
+            2.763200044631958,
+            2.6465280055999756,
+            2.6147520542144775,
+            2.6043200492858887,
+            2.6200640201568604
+          ],
+          "cosmos_bf16_compiled": [
+            4.01577615737915,
+            3.558016061782837,
+            3.4286398887634277,
+            3.5268800258636475,
+            3.2207679748535156
+          ]
+        }
+      ],
+      "measurement_orders": [
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ],
+        [
+          "cosmos_bf16_compiled",
+          "vllm_bf16"
+        ],
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ],
+        [
+          "cosmos_bf16_compiled",
+          "vllm_bf16"
+        ],
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ]
+      ],
+      "round_gpu_states": [
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 54.03,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 53.66,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 53.09,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 53.34,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 53.41,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        }
+      ],
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 50.38,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 51.84,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "cosmos_over_vllm": 1.2394444800850277
+    },
+    {
+      "tokens": 3072,
+      "experts": 32,
+      "hidden": 1536,
+      "intermediate": 1024,
+      "top_k": 4,
+      "vllm_config": {
+        "BLOCK_SIZE_M": 128,
+        "BLOCK_SIZE_N": 128,
+        "BLOCK_SIZE_K": 64,
+        "GROUP_SIZE_M": 1,
+        "SPLIT_K": 1,
+        "num_warps": 8,
+        "num_stages": 3
+      },
+      "route_counts": [
+        363,
+        351,
+        373,
+        375,
+        371,
+        381,
+        402,
+        380,
+        418,
+        369,
+        366,
+        374,
+        382,
+        372,
+        369,
+        417,
+        398,
+        367,
+        373,
+        369,
+        366,
+        394,
+        412,
+        383,
+        379,
+        375,
+        418,
+        410,
+        422,
+        372,
+        393,
+        394
+      ],
+      "checks": {
+        "independent_cpu_tokens": 2,
+        "independent_cpu_routes": 8,
+        "all_outputs_finite": true,
+        "vllm_vs_cpu": {
+          "max_abs": 0.00390625,
+          "rmse": 0.00019369627989362925,
+          "relative_l2": 0.0005792435840703547
+        },
+        "cosmos_compiled_vs_cpu": {
+          "max_abs": 0.0078125,
+          "rmse": 0.0010158950462937355,
+          "relative_l2": 0.0030366794671863317
+        },
+        "vllm_vs_cosmos_compiled": {
+          "max_abs": 0.015625,
+          "rmse": 0.001636516535654664,
+          "relative_l2": 0.004777510184794664
+        }
+      },
+      "first_call_seconds": {
+        "vllm_bf16": 0.003098937915638089,
+        "cosmos_bf16_compiled": 0.02282685600221157
+      },
+      "warmup": {
+        "vllm_bf16": {
+          "calls": 75,
+          "elapsed_ms": 201.20725000742823
+        },
+        "cosmos_bf16_compiled": {
+          "calls": 61,
+          "elapsed_ms": 201.72528200782835
+        }
+      },
+      "results": {
+        "vllm_bf16": {
+          "round_medians_ms": [
+            2.6302719116210938,
+            2.619647979736328,
+            2.625312089920044,
+            2.5986878871917725,
+            2.609920024871826
+          ],
+          "median_ms": 2.619647979736328,
+          "min_ms": 2.5986878871917725,
+          "max_ms": 2.6302719116210938,
+          "effective_tflops": 44.26706102843328
+        },
+        "cosmos_bf16_compiled": {
+          "round_medians_ms": [
+            3.1886401176452637,
+            3.3104639053344727,
+            3.199903964996338,
+            3.2109439373016357,
+            3.193631887435913
+          ],
+          "median_ms": 3.199903964996338,
+          "min_ms": 3.1886401176452637,
+          "max_ms": 3.3104639053344727,
+          "effective_tflops": 36.23987415263968
+        }
+      },
+      "sample_values_ms": [
+        {
+          "vllm_bf16": [
+            2.750591993331909,
+            2.6302719116210938,
+            3.0720319747924805,
+            2.614527940750122,
+            2.60697603225708
+          ],
+          "cosmos_bf16_compiled": [
+            3.54201602935791,
+            3.3330559730529785,
+            3.1886401176452637,
+            3.168704032897949,
+            3.1758720874786377
+          ]
+        },
+        {
+          "cosmos_bf16_compiled": [
+            3.571808099746704,
+            3.391551971435547,
+            3.3104639053344727,
+            3.256671905517578,
+            3.246016025543213
+          ],
+          "vllm_bf16": [
+            2.8772799968719482,
+            2.6552960872650146,
+            2.619647979736328,
+            2.6071999073028564,
+            2.594752073287964
+          ]
+        },
+        {
+          "vllm_bf16": [
+            2.6307520866394043,
+            3.092288017272949,
+            2.625312089920044,
+            2.615135908126831,
+            2.6107521057128906
+          ],
+          "cosmos_bf16_compiled": [
+            3.4495999813079834,
+            3.2399680614471436,
+            3.1981759071350098,
+            3.199903964996338,
+            3.1796159744262695
+          ]
+        },
+        {
+          "cosmos_bf16_compiled": [
+            3.1887359619140625,
+            3.2546560764312744,
+            3.235775947570801,
+            3.2109439373016357,
+            3.1830079555511475
+          ],
+          "vllm_bf16": [
+            2.747904062271118,
+            2.6285760402679443,
+            2.5912959575653076,
+            2.5986878871917725,
+            2.5901119709014893
+          ]
+        },
+        {
+          "vllm_bf16": [
+            2.5958399772644043,
+            2.9590399265289307,
+            2.6193599700927734,
+            2.609920024871826,
+            2.60479998588562
+          ],
+          "cosmos_bf16_compiled": [
+            3.4179201126098633,
+            3.210239887237549,
+            3.193631887435913,
+            3.1784000396728516,
+            3.1876161098480225
+          ]
+        }
+      ],
+      "measurement_orders": [
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ],
+        [
+          "cosmos_bf16_compiled",
+          "vllm_bf16"
+        ],
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ],
+        [
+          "cosmos_bf16_compiled",
+          "vllm_bf16"
+        ],
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ]
+      ],
+      "round_gpu_states": [
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 58.53,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 57.34,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 56.78,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 57.03,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 56.66,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        }
+      ],
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 51.5,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 54.84,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "cosmos_over_vllm": 1.221501510793986
+    },
+    {
+      "tokens": 4096,
+      "experts": 32,
+      "hidden": 1536,
+      "intermediate": 1024,
+      "top_k": 4,
+      "vllm_config": {
+        "BLOCK_SIZE_M": 128,
+        "BLOCK_SIZE_N": 128,
+        "BLOCK_SIZE_K": 64,
+        "GROUP_SIZE_M": 1,
+        "SPLIT_K": 1,
+        "num_warps": 8,
+        "num_stages": 3
+      },
+      "route_counts": [
+        526,
+        481,
+        502,
+        529,
+        490,
+        518,
+        507,
+        533,
+        578,
+        491,
+        531,
+        501,
+        528,
+        495,
+        518,
+        493,
+        507,
+        500,
+        537,
+        477,
+        527,
+        531,
+        536,
+        528,
+        491,
+        524,
+        497,
+        533,
+        493,
+        519,
+        504,
+        459
+      ],
+      "checks": {
+        "independent_cpu_tokens": 2,
+        "independent_cpu_routes": 8,
+        "all_outputs_finite": true,
+        "vllm_vs_cpu": {
+          "max_abs": 0.0009765625,
+          "rmse": 1.969901131815277e-05,
+          "relative_l2": 5.9603968111332506e-05
+        },
+        "cosmos_compiled_vs_cpu": {
+          "max_abs": 0.0078125,
+          "rmse": 0.001062425202690065,
+          "relative_l2": 0.0032127778977155685
+        },
+        "vllm_vs_cosmos_compiled": {
+          "max_abs": 0.015625,
+          "rmse": 0.001634506625123322,
+          "relative_l2": 0.004773851018399
+        }
+      },
+      "first_call_seconds": {
+        "vllm_bf16": 0.0037835820112377405,
+        "cosmos_bf16_compiled": 0.023459951975382864
+      },
+      "warmup": {
+        "vllm_bf16": {
+          "calls": 58,
+          "elapsed_ms": 201.21820294298232
+        },
+        "cosmos_bf16_compiled": {
+          "calls": 52,
+          "elapsed_ms": 201.66641008108854
+        }
+      },
+      "results": {
+        "vllm_bf16": {
+          "round_medians_ms": [
+            3.27673602104187,
+            3.2752959728240967,
+            3.294111967086792,
+            3.276319980621338,
+            3.310368061065674
+          ],
+          "median_ms": 3.27673602104187,
+          "min_ms": 3.2752959728240967,
+          "max_ms": 3.310368061065674,
+          "effective_tflops": 47.186841314985585
+        },
+        "cosmos_bf16_compiled": {
+          "round_medians_ms": [
+            3.8440959453582764,
+            3.8724160194396973,
+            3.860640048980713,
+            3.8714559078216553,
+            4.149856090545654
+          ],
+          "median_ms": 3.8714559078216553,
+          "min_ms": 3.8440959453582764,
+          "max_ms": 4.149856090545654,
+          "effective_tflops": 39.938159270680956
+        }
+      },
+      "sample_values_ms": [
+        {
+          "vllm_bf16": [
+            3.4454400539398193,
+            3.299168109893799,
+            3.27673602104187,
+            3.247904062271118,
+            3.243583917617798
+          ],
+          "cosmos_bf16_compiled": [
+            3.945312023162842,
+            3.8440959453582764,
+            3.8318400382995605,
+            3.8283839225769043,
+            3.8678719997406006
+          ]
+        },
+        {
+          "cosmos_bf16_compiled": [
+            4.1187520027160645,
+            3.9302079677581787,
+            3.8724160194396973,
+            3.871040105819702,
+            3.8565120697021484
+          ],
+          "vllm_bf16": [
+            3.4242238998413086,
+            3.30348801612854,
+            3.2752959728240967,
+            3.2576639652252197,
+            3.256671905517578
+          ]
+        },
+        {
+          "vllm_bf16": [
+            3.294111967086792,
+            3.3372480869293213,
+            3.3037760257720947,
+            3.282464027404785,
+            3.2738559246063232
+          ],
+          "cosmos_bf16_compiled": [
+            4.3639678955078125,
+            3.888319969177246,
+            3.860640048980713,
+            3.851936101913452,
+            3.8352959156036377
+          ]
+        },
+        {
+          "cosmos_bf16_compiled": [
+            3.9447360038757324,
+            3.9201600551605225,
+            3.8714559078216553,
+            3.837536096572876,
+            3.847872018814087
+          ],
+          "vllm_bf16": [
+            3.427999973297119,
+            3.294719934463501,
+            3.276319980621338,
+            3.2541120052337646,
+            3.2527360916137695
+          ]
+        },
+        {
+          "vllm_bf16": [
+            3.4126079082489014,
+            3.3789119720458984,
+            3.310368061065674,
+            3.2984321117401123,
+            3.2917439937591553
+          ],
+          "cosmos_bf16_compiled": [
+            4.307328224182129,
+            4.149856090545654,
+            4.255936145782471,
+            3.985503911972046,
+            3.9185280799865723
+          ]
+        }
+      ],
+      "measurement_orders": [
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ],
+        [
+          "cosmos_bf16_compiled",
+          "vllm_bf16"
+        ],
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ],
+        [
+          "cosmos_bf16_compiled",
+          "vllm_bf16"
+        ],
+        [
+          "vllm_bf16",
+          "cosmos_bf16_compiled"
+        ]
+      ],
+      "round_gpu_states": [
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 60.12,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 59.28,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 58.78,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 58.66,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        },
+        {
+          "min_freq_hz": 1197000000,
+          "max_freq_hz": 1197000000,
+          "cur_freq_hz": 1197000000,
+          "temperature_c": 58.5,
+          "graphics_clock_mhz": 1197.0,
+          "sw_thermal_slowdown": "Not Active"
+        }
+      ],
+      "gpu_state_before": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 52.72,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "gpu_state_after": {
+        "min_freq_hz": 1197000000,
+        "max_freq_hz": 1197000000,
+        "cur_freq_hz": 1197000000,
+        "temperature_c": 56.22,
+        "graphics_clock_mhz": 1197.0,
+        "sw_thermal_slowdown": "Not Active"
+      },
+      "cosmos_over_vllm": 1.1814976497834233
+    }
+  ],
+  "frequency_note": "GPU frequency reduced to 1.2 GHz; actual supported locked setting is 1197 MHz.",
+  "updated_at_utc": "2026-10-20T04:16:08.992827+00:00",
+  "gpu_state_after": {
+    "min_freq_hz": 1197000000,
+    "max_freq_hz": 1197000000,
+    "cur_freq_hz": 1197000000,
+    "temperature_c": 56.22,
+    "graphics_clock_mhz": 1197.0,
+    "sw_thermal_slowdown": "Not Active"
+  }
+}

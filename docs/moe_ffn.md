@@ -208,3 +208,9 @@ measures the complete pre-routed FFN against its original grouped-MM BF16 path,
 both eager and compiled, at a reduced 1.2 GHz GPU clock (actual 1197 MHz).
 The [earlier report](../benchmarks/results/thor/moe_ffn.md) retains the separate
 per-expert-loop BF16 baseline; its speedups do not describe Cosmos grouped-MM.
+
+An additional [BF16 comparison for the upstream vLLM expert core used by
+Omni](../benchmarks/results/thor/moe_ffn_vllm.md) measures the original Triton
+functional FFN and freshly remeasured Cosmos compiled FFN on the same inputs
+at 1197 MHz. Its scope includes pre-routed dispatch and both projections,
+without the full Omni serving engine.
