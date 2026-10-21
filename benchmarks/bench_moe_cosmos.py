@@ -168,7 +168,7 @@ def main():
         compilation=dict(fullgraph=True, dynamic=True, backend="inductor", mode="default",
                          boundary="counts plus original Cosmos expert forward"),
         timing="Full-call CUDA events including host dispatch gaps; rotating three-method order; median of round medians; no CUDA Graph capture.",
-        scope="Includes expert histogram, sort/pad/gather dispatch, two projections, activation and combine; INT8 includes dynamic activation quantization. Excludes router/top-k, weight preparation, compilation, warmup, correctness and cooling.",
+        scope="Includes expert histogram, sort/pad/gather dispatch, two projections, activation and combine; INT8 includes dynamic intermediate activation quantization; entry INT8 quantization is outside timing. Excludes router/top-k, weight preparation, compilation, warmup, correctness and cooling.",
         score_policy="FP32 random scores normalized once, rounded to BF16, then supplied to INT8 as FP32 with identical numeric values. No extra INT8 normalization.",
         cosmos_score_input_dtype="BF16, prepared before timing as in the original Cosmos expert interface",
         numerical_difference="Cosmos multiplies routing score before down and uses BF16 scatter_add. INT8 multiplies after down and reduces in FP32. Their rounding and quantization contracts differ; equality between methods is not asserted.",
@@ -195,9 +195,11 @@ def main():
             scores = torch.rand((tokens, r), device="cuda")
             scores_bf16 = (scores / scores.sum(-1, keepdim=True)).bfloat16().contiguous()
             scores = scores_bf16.float()
+            from bench_moe_ffn import quantize_rows
+            qx, sx = quantize_rows(x, torch)  # Prepared before timing.
             functions = dict(
                 int8_auto=lambda: grain_gemm.moe_ffn(
-                    x, q1, q2, scores, ids, scale_gate_up=s1, scale_down=s2),
+                    qx, q1, q2, scores, ids, scale_x=sx, scale_gate_up=s1, scale_down=s2),
                 cosmos_bf16_eager=lambda: eager(x, ids, scores_bf16),
                 cosmos_bf16_compiled=lambda: compiled(x, ids, scores_bf16),
             )

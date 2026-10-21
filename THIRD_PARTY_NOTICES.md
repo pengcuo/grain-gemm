@@ -99,6 +99,17 @@ The CuTe source derivation and license attribution are to CUTLASS as described
 above; the scheduling inspiration does not introduce copied DeepInfer or
 DeepGEMM source code.
 
+`src/grain_gemm/kernels/csrc/sm110/int8_g256_moe_gather.cu` extends that
+CuTe-derived two-SM pipeline with original-token indexed asynchronous shared
+memory loads. It retains the complete NVIDIA BSD-3-Clause notice in the source
+and uses the same external CUTLASS dependency and license noted above. No
+DeepInfer/DeepGEMM source is copied by this original-token implementation.
+
+`src/grain_gemm/kernels/csrc/sm110/int8_g256_moe_interleaved.cu` extends
+that original-token CuTe pipeline with adjacent gate/up weight rows and paired
+output fragments. It retains NVIDIA's full BSD-3-Clause source notice and
+uses the same external CUTLASS dependency and license.
+
 ## Thor CUTLASS blockwise implementation
 
 `src/grain_gemm/kernels/csrc/sm110/int8_g256_cutlass.cu` and the three
@@ -130,6 +141,23 @@ upstream BSD-3-Clause notice and uses smaller one-SM/two-SM tiles and persistent
 schedulers for expert matrices. The public weight and scale layouts, INT32
 group dots and FP32 scaled accumulation are preserved. Its configurations do
 not replace the single-GEMM configurations or the SM12x implementations.
+
+The isolated `experiments/thor_interleaved_mega/mega_cluster.cu` also uses the
+same pinned CUTLASS CuTe primitives and retains the full NVIDIA BSD-3-Clause
+notice. Its interleaved INT8 scheduler, resident hidden buffers, exact SiLU
+table and output staging are GrainGEMM experimental changes. DeepInfer is an
+external performance/scheduling reference; its FP8 kernel source is not copied
+into this experiment.
+
+## Optional DeepGEMM Mega comparison
+
+`experiments/thor_mega_bf16/` contains comparison orchestration, numerical and
+provenance helpers, and a narrow patch to the pinned external DeepGEMM host
+dispatch. It does not bundle upstream device kernels or compiled libraries.
+The original DeepGEMM and deep_jit MIT notices and the CUTLASS BSD notice are
+retained in that experiment's `LICENSES/` directory. See its
+[source and license provenance](experiments/thor_mega_bf16/THIRD_PARTY.md) for
+the exact revisions, patch scope and redistribution requirements.
 
 ## Optional upstream vLLM BF16 MoE benchmark
 

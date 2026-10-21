@@ -1,8 +1,8 @@
 # INT8 MoE FFN
 
 `grain_gemm.moe_ffn` runs a complete, pre-routed mixture-of-experts FFN. The
-caller supplies floating-point tokens, prequantized expert weights, their scales
-and top-k routing results. Routing preparation, input quantization, gate/up GEMM,
+caller supplies prequantized INT8 tokens and expert weights, their FP32 scales
+and top-k routing results. Routing preparation, indexed gate/up loads,
 SwiGLU, intermediate quantization, down GEMM and weighted combination are included
 in the call. Router logits and top-k selection remain outside it.
 
@@ -13,6 +13,7 @@ copy fixed expert weights on each forward.
 ## API
 
 ```python
+import torch
 from grain_gemm import moe_ffn
 
 y = moe_ffn(
@@ -21,12 +22,15 @@ y = moe_ffn(
     w_down,
     topk_weights,
     topk_ids,
+    scale_x=scale_x,
     scale_gate_up=scale_gate_up,
     scale_down=scale_down,
     group_size=256,
     activation="swiglu",
     token_mask=None,
+    output_dtype=torch.bfloat16,
     backend="auto",
+    gate_up_layout="split",  # or "interleaved" with paired weight/scale columns
 )
 ```
 
@@ -37,7 +41,8 @@ positive E, and `1 <= R <= E`. T may be zero.
 
 | Tensor | Shape | Dtype | Stride |
 |---|---|---|---|
-| `hidden_states` | `[T,H]` | BF16 or FP16 | `(H,1)` |
+| `hidden_states` | `[T,H]` | INT8 | `(H,1)` |
+| `scale_x` | `[T,H/G]` | FP32 | `(H/G,1)` |
 | `w_gate_up` | `[E,H,2I]` | INT8 | `(H*2I,1,H)` |
 | `w_down` | `[E,I,H]` | INT8 | `(I*H,1,I)` |
 | `topk_weights` | `[T,R]` | FP32 | `(R,1)` |
@@ -45,7 +50,14 @@ positive E, and `1 <= R <= E`. T may be zero.
 | `scale_gate_up` | `[E,H/G,2I]` | FP32 | `((H/G)*2I,2I,1)` |
 | `scale_down` | `[E,I/G,H]` | FP32 | `((I/G)*H,H,1)` |
 | `token_mask` | `[T]` or `None` | bool | `(1,)` |
-| output | `[T,H]` | Same as input | `(H,1)` |
+| output | `[T,H]` | `output_dtype`, default BF16; FP16 supported by Triton | `(H,1)` |
+
+`scale_x` is required, like GEMM's `scale_a`: the reconstructed activation is
+`hidden_states[t,k] * scale_x[t,k//256]`. All INT8 values including -128 are
+accepted. Supplied activations/scales are consumed without re-quantization,
+clamping or scale recomputation. BF16/FP16 inputs are rejected; callers prepare
+INT8 activations before the call. `output_dtype` also determines both projection
+rounding points, preserving the former BF16/FP16 numerical choices.
 
 All tensors must be on the same SM80-or-newer CUDA device. Strides on dimensions
 with size one may differ, since those dimensions are never stepped through;
@@ -59,24 +71,28 @@ dimension added. Start with contiguous Linear-format weights `[E,2I,H]` and
 `[E,H,I]`, then pass `transpose(-2,-1)` views. This transpose only changes tensor
 metadata. Their reduction dimensions remain contiguous in storage.
 
-The first I output channels of `w_gate_up` are gate and the next I are up.
+With default `gate_up_layout="split"`, the first I output channels of
+`w_gate_up` are gate and the next I are up. The optional
+[`gate_up_layout="interleaved"`](moe_interleaved.md) uses
+`[g0,u0,g1,u1,...]` for both weight and scale output columns; logical shapes,
+required strides and down weights stay the same. No runtime repacking occurs.
 For example, the reconstructed gate/up weight is
 `weight[e,n,k] = w_gate_up[e,k,n] * scale_gate_up[e,k//256,n]`.
 There is no bias or shared-expert branch in this first API.
 
 ## Numerical and routing behavior
 
-- Input activations are quantized independently per token and 256-element
-  reduction group: `scale = absmax.clamp_min(1e-12)/127`, round to nearest even,
-  clip to `[-127,127]`, and store INT8.
+- Input activations and contiguous per-token G256 FP32 scales are provided by
+  the caller. The function does no input amax reduction, quantization or cast.
+  Masked token data and scales are not read; they may contain arbitrary values.
 - Each GEMM uses INT32 dots within a group, FP32 `scale_a * scale_b`, and an
   FP32 fused multiply-add of the scaled group partial. Each projection's result
-  is converted to the input dtype, as in the existing GEMM API.
+  is converted to `output_dtype`, as in the existing GEMM API.
 - Gate/up results are converted to FP32 for `silu(gate) * up`, then quantized
   directly with the same group quantizer. There is no extra BF16/FP16 rounding
   of the SwiGLU product before quantization.
 - Down-projection values are converted to FP32, multiplied by the supplied
-  `topk_weights`, summed across slots in FP32 and converted to the input dtype.
+  `topk_weights`, summed across slots in FP32 and converted to `output_dtype`.
   Scores are not softmaxed or renormalized. This ordering is important: applying
   scores before intermediate INT8 quantization would change the result.
 - Every selected slot contributes, including repeated selections of an expert.
@@ -127,8 +143,13 @@ with torch.inference_mode():
     probs = torch.randn(T, E, device="cuda").softmax(-1)
     scores, ids = probs.topk(R, dim=-1)
     scores = (scores / scores.sum(-1, keepdim=True)).contiguous()
-    y = moe_ffn(x, w1, w2, scores, ids,
-                scale_gate_up=s1, scale_down=s2)
+    # Preparation belongs to the caller, outside the FFN or its timer.
+    blocks = x.float().reshape(T, H // 256, 256)
+    sx = (blocks.abs().amax(-1).clamp_min(1e-12) / 127).contiguous()
+    qx = (blocks / sx[..., None]).round().clamp(-127, 127).to(torch.int8).reshape(T, H)
+    y = moe_ffn(qx, w1, w2, scores, ids,
+                scale_x=sx, scale_gate_up=s1, scale_down=s2,
+                output_dtype=torch.bfloat16)
     print(y.shape, y.dtype)  # [T,H], BF16
 ```
 
@@ -150,7 +171,7 @@ duplicate slots and masks.
 
 `backend="cutlass"` uses native SM110 G256 kernels for the expert
 projections. Actual per-expert counts are padded internally to a common
-capacity. Weights and scales must be 16-byte aligned, BF16 activations are
+capacity. Weights and scales must be 16-byte aligned, BF16 output is
 required, and the matching optional library must be built:
 
 ```bash
@@ -190,81 +211,83 @@ masks these rows before loading, and combination reads only live routes.
 Entirely padded SwiGLU blocks write zero INT8 values and the original finite
 zero-group scale directly, avoiding nonlinear math while fully initializing
 the next GEMM's inputs.
-Each projection uses a single batched launch over experts. All native workspace
+Native down uses a single batched launch over experts; current G1 uses the
+original-token kernel described below. All native workspace
 belongs to the invocation; no tensor pointers or routing-dependent arguments
 are cached between calls or graph replays.
 
-For Thor native top-k up to eight, a fused producer quantizes each original
-token/group once and scatters it to its selected packed expert rows. A separate
-padding kernel initializes only unused rows. This removes intermediate token
-INT8/scale tensors while retaining the original packed layout, exact rounding,
-duplicate-route behavior and fully initialized TMA inputs.
-For the calibrated E32/H1536/Top-4 cases with at least 16384 tokens, a separate
-input producer shares route loads across adjacent G256 groups and initializes
-padding in the same launch.
+### Thor original-token Gate/Up
 
-An additional optional SM110 library fuses gate/up projection, FP32 SwiGLU and
-G256 activation quantization. Build it independently of either GEMM library:
+The current Thor native G1 kernel consumes original `hidden_states[T,H]` and
+`scale_x[T,H/256]`. It looks up each expert-local row through
+`order[offsets[expert]+local_row] // R` and loads that token directly into CTA
+shared memory with vectorized `cp.async`. Routing sorts indices only. There is
+**no expert-expanded global input/scale allocation, initialization, or pack
+kernel**, for any top-k handled by this native kernel. Triton also reads original
+token/scales by index. Other architectures retain their existing native paths.
+
+Build the separate original-token library alongside native down GEMM:
 
 ```bash
-python tools/build_moe_fused.py --cutlass-dir /path/to/cutlass
+python tools/build_cutlass_moe.py --cutlass-dir /path/to/cutlass
+python tools/build_moe_gather.py --cutlass-dir /path/to/cutlass
 ```
 
-This installs `libgrain_moe_fused.so` and `moe_fused_build.json` under the private
-native-library directory. The loader checks the SM110 target, ABI, source hashes
-and binary hash. A missing or stale build retains the original gate/up GEMM
-plus activation-quantization path. No new public arguments or weight preparation
-are required.
+`libgrain_moe_gather.so` and its build manifest are private build artifacts.
+The loader verifies architecture, ABI, source and binary hashes. Missing builds
+make auto choose Triton; explicit native Thor requires the new library. Original
+x must be 16-byte aligned for native asynchronous vector loads. Auto uses Triton
+for unaligned contiguous input views; explicit native reports an alignment error
+without copying the original tensor. Source FP32 scales require only their normal
+contiguous layout and four-byte alignment. Public shapes, strides and scale
+values are unchanged.
 
-Eligible eager CUTLASS calls, including `backend="auto"` after it selects
-CUTLASS, use the fusion for BF16 inputs with T=4096, 8192 or 16384 and
-E=32/H=1536/I=1024/Top-4. Existing padding/skew checks still apply. T=32768
-and other token counts retain the native separate gate/up GEMM and activation
-quantization. SM120/GB10, FP16 auto, captured auto and captured explicit native
-calls retain their existing implementations.
+The two-SM cluster has a 128-row tile and 64 rows per CTA. One producer warp
+loads original A, a second loads B with TMA, and a third loads scales by original
+token indices. Both A producers signal the leader's operand barrier after their
+asynchronous copies complete; weight TMA bytes and both producer arrivals must
+complete before MMA starts. Gate/up share A. At H1536 all six G256 A blocks stay
+in shared memory across the two I128 halves. This cache is local to a task and
+has no global packed counterpart. Fully unused clusters skip the GEMM work;
+partially live clusters zero-fill invalid source rows without reading them.
 
-The fused kernel uses two-SM clusters with a 128-row cluster tile, 64 rows per
-physical CTA, and paired 128-channel gate/up projections. Each G256 output
-group is computed in two I128 halves. Gate and up share the loaded input A;
-for H=1536, all six input G256 blocks remain in shared memory for reuse by the
-second I128 half. Two operand stages and four paired TMEM accumulator buffers
-overlap input movement, INT8 matrix operations and FP32 scaled accumulation.
-The private launcher's `persistent_blocks` counts physical CTAs and rounds up
-to an even count. Zero starts from the device SM count; the number of clusters
-is capped by the available cluster tasks.
+G1, BF16 rounding of gate/up, FP32 SwiGLU and G256 intermediate quantization are
+fused. The complete 256-channel hidden group stays FP32 in shared memory until
+quantization; only INT8 QH `[E,C,I]` and FP32 SH `[E,C,I/256]` are written. Padding
+is QH=0 with SH=`1e-12/127`, preserving the former quantizer. Down still consumes
+this intermediate expert-major output, and output combination is separate.
+This removes input packing and the full BF16 `[E,C,2I]` workspace, but does not
+fuse the complete MoE into one kernel or eliminate QH/Down-output global IO.
 
-Both projections retain their BF16 rounding before FP32 SwiGLU. The complete
-256-channel SwiGLU group stays FP32 in CTA shared memory until its scale
-reduction and INT8 quantization, then the kernel writes INT8 `[E,C,I]` and FP32
-`[E,C,I/256]` directly. It removes the full BF16 `[E,C,2I]` global intermediate
-allocation and its write/read. Packed inputs and quantized intermediate
-outputs still use global memory; input packing, down GEMM and output
-combination remain separate kernels. This is a fused G1 stage, not a complete
-single-kernel Mega MoE. Public weight/scale shapes, strides, G256 grouping and
-score placement are unchanged. Kernel arguments and output buffers belong to
-each invocation on its current stream; weight tensors and their pointers are
-not cached.
+All eligible native Thor shapes use this original-token G1, including 32768
+and uneven token distributions. Native explicit CUDA Graph capture reads current
+original x/scales and route metadata on replay; captured auto retains ragged
+Triton. The former optional packed-input `moe_fused` library and its build tool
+remain available for isolated historical comparisons and bit references; they
+are no longer the public Thor G1 dispatcher. No tensor pointers are cached.
 
-Cosmos supplies the equal-capacity batched GEMM. This function additionally
+Cosmos supplies the equal-capacity native down batched GEMM. This function additionally
 implements ragged routing, padding without token dropping, dynamic activation
 quantization, fused SwiGLU/intermediate quantization and FP32 weighted
 combination. Native execution does not generate the ragged GEMM's tile metadata;
 if auto falls back to Triton for skewed routing, it generates those tiles then.
 
-`backend="cuda"` uses the existing CuTe GEMMs with a fixed expert loop. On
+On Thor, `backend="cuda"` uses original-token G1 and the existing CuTe down
+GEMM with a fixed expert loop. On
 other supported native architectures, explicit CUTLASS also uses its existing
 per-expert GEMMs. These explicit paths provide native comparisons without
 changing the original single-GEMM implementations or their configuration IDs.
-They require BF16 and the corresponding architecture-specific build; they do
+They require BF16 output and the corresponding architecture-specific build; they do
 not silently execute Triton when explicitly requested.
 
 `backend="auto"` uses Triton unless a matching Thor CUTLASS build is available
-for BF16 and the nominal dimensions satisfy `T*R >= E*128`. This first threshold
+for BF16 output and the nominal dimensions satisfy `T*R >= E*128`. This first threshold
 includes masked slots. It retains ragged Triton execution if equal-capacity
 padding would exceed twice the number of valid, unmasked assignments. This is
 a conservative heuristic, not an offline-tuned optimal dispatcher.
 
-Within the separate Thor MoE library, the default is config 43: a counts-aware
+For native down and the retained packed G1 comparison, the separate Thor
+MoE library defaults to config 43: a counts-aware
 static persistent 2SM 128x256x256 tile. Full-FFN calibration selects config 44, a
 counts-aware static 1SM 128x128x256 tile, for `(E,C,N,K)` equal to
 `(32,320,2048,1536)` or `(32,320,1536,1024)`. Config 47 uses a counts-aware
@@ -280,8 +303,7 @@ at capacities 640, 1152 and 4288 selects config 44; the first two use swizzle 4.
 E32 gate/up `(N,K)=(2048,1536)` at capacity 4288 also selects config 47.
 Uncalibrated shapes retain config 43. Config 46 provides a counts-aware static
 2SM 256x128x256 alternative. Original dynamic configurations 34, 36 and 45
-remain available for isolated comparisons. The projections choose independently;
-these choices
+remain available for isolated comparisons. These packed-reference/down choices
 do not modify any single-GEMM dispatch table. Captured explicit native calls
 still use their reserved worst-case capacity when choosing a configuration.
 
@@ -289,9 +311,14 @@ Captured auto execution always selects Triton. Explicit native capture reserves
 the worst-case capacity `round_up(T*R,64)` per expert to accommodate any valid
 routing on replay. Counts-aware tiles reread the GPU counts on every replay
 and skip wholly unused clusters, but the reserved memory and partial-cluster
-padding remain. Input/intermediate padding initialization still writes its
-required zero values. Prefer auto/Triton for graphs with dynamic routing.
+padding remain. Intermediate padding initialization still writes its required zero values;
+current original-token G1 has no input padding buffer. Prefer auto/Triton for graphs with dynamic routing.
 See the [per-expert padding-skip measurements](../benchmarks/results/thor/moe_ffn_padding_skip_emc2750.md).
+
+The reports produced before the INT8-input API change start from BF16
+activations and include input quantization, as documented in each report.
+New benchmarks prepare entry INT8 quantization outside the timer. These timing
+scopes should not be mixed when comparing results.
 
 ## Validation and measurements
 
@@ -304,10 +331,11 @@ PYTHONPATH=src python benchmarks/bench_moe_ffn.py --output /tmp/moe_ffn.json
 The tests use independent CPU INT32 group dots and per-token/top-k-slot
 evaluation, rather than sharing the implementation's expert sorting and padding.
 They cover ragged/duplicate routes, empty experts, masks, zero scales, INT8
-extrema, both input dtypes, output ordering, streams and dynamic graph replay.
+extrema, both output dtypes, output ordering, streams and dynamic graph replay.
 
-The benchmark measures the entire FFN, including routing, dynamic activation
-quantization and combination. Weight quantization is excluded. Its floating
+The benchmark starts from INT8 activations/scales and measures routing/packing,
+both projections, middle activation/quantization and combination. Input and
+weight quantization are outside timing. Its floating
 baseline is an eager PyTorch per-expert FFN reference, not a tuned fused BF16 MoE
 kernel. It records the clock, temperature, correctness sample and timing rounds;
 the earlier square-GEMM reports use a different protocol.
@@ -343,3 +371,10 @@ and measurements describe that historical run, preceding the cached two-SM
 implementation above. It includes exact intermediate/output bit checks and
 the complete eager FFN. DeepInfer FP8 remains a performance reference with a
 different quantization and score-placement contract.
+
+The [prequantized input comparison](../benchmarks/results/thor/moe_ffn_prequantized_emc2750.md)
+measures the new INT8-input API against resident FP8 Mega and Cosmos BF16,
+including isolated input packing and the explicit timing-boundary change.
+
+The [original-token measurements](../benchmarks/results/thor/moe_ffn_original_x_emc2750.md)
+compare the current no-input-pack path with the prior packed INT8-input API.

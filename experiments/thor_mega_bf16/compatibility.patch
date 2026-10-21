@@ -1,0 +1,24 @@
+--- a/csrc/apis/layout.hpp
++++ b/csrc/apis/layout.hpp
+@@ -45,3 +45,3 @@
+     // (FP32, x, gran_k) on SM100: transform to (INT, 1, gran_k), TMA-aligned and MN-major
+-    if (sf.scalar_type() == torch::kFloat and (gran_k == 32 or gran_k == 128) and arch_major == 10) {
++    if (sf.scalar_type() == torch::kFloat and (gran_k == 32 or gran_k == 128) and (arch_major == 10 or arch_major == 11)) {
+         DG_HOST_ASSERT(not disable_ue8m0_cast);
+@@ -53,3 +53,3 @@
+     // (INT, 1, gran_k) on SM100: transform to TMA-aligned and MN-major
+-    if (sf.scalar_type() == torch::kInt and gran_mn == 1 and (gran_k == 32 or gran_k == 128) and arch_major == 10)
++    if (sf.scalar_type() == torch::kInt and gran_mn == 1 and (gran_k == 32 or gran_k == 128) and (arch_major == 10 or arch_major == 11))
+         return check_sf_layout(sf, mn, k, gran_mn, gran_k, num_groups, true, false, torch::kInt);
+--- a/csrc/apis/mega_moe.hpp
++++ b/csrc/apis/mega_moe.hpp
+@@ -255,3 +255,3 @@
+     // Dispatch into different architectures
+-    if (arch_major == 10) {
++    if (arch_major == 10 or arch_major == 11) {
+         sm100_fp8_fp4_mega_moe(y,
+@@ -366,3 +366,3 @@
+     // Dispatch into different architectures
+-    if (arch_major == 10) {
++    if (arch_major == 10 or (arch_major == 11 and jit->device.get_arch_minor() == 0)) {
+         sm100_bf16_mega_moe(y,

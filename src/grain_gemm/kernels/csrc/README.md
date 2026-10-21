@@ -87,3 +87,21 @@ different tuning choices.
 
 Register new sources in the builders, source-hash checks and package-data rules.
 Historical experiment snapshots and their recorded source paths stay unchanged.
+
+### Thor original-token MoE input
+
+`sm110/int8_g256_moe_gather.cu` reads original INT8 token rows and FP32 input
+scales via sorted route indices inside fused G1. It uses asynchronous vector
+loads into shared memory, two-SM paired gate/up MMA, exact BF16 rounding and
+FP32 SwiGLU/G256 quantization. No expanded global input or scale pack exists.
+Build with `python tools/build_moe_gather.py --cutlass-dir PATH`; native down
+still needs `tools/build_cutlass_moe.py`. The older packed fused library remains
+an isolated comparison/reference and is not required by current public dispatch.
+
+`sm110/int8_g256_moe_interleaved.cu` accepts physically interleaved
+`[g0,u0,g1,u1,...]` output rows in Linear-format weights and identically ordered
+weight-scale columns. A two-SM M128/N256 MMA produces matching pairs in each
+consumer's register fragment, followed by BF16 rounding, FP32 SwiGLU and G256
+quantization. Build with `tools/build_moe_interleaved.py --cutlass-dir PATH`
+and select `moe_ffn(..., gate_up_layout="interleaved")`. It has independent
+library/provenance checks and retains the original split build and default.

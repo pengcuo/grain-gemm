@@ -152,3 +152,28 @@ def test_graph_replay_replaces_routes_and_clears_previous_rows():
     ids.fill_(0)
     graph.replay()
     _assert_bits(captured, _reference(x.cpu(), ids.cpu(), mask.cpu(), experts, capacity))
+
+
+@cuda
+@pytest.mark.parametrize("k", [256, 768, 1536])
+@pytest.mark.parametrize("id_dtype", [torch.int32, torch.int64])
+def test_prequantized_scatter_copies_bits_with_masks_duplicates_and_padding(k, id_dtype):
+    t, e, c, r = 19, 5, 64, 3
+    torch.manual_seed(20261021)
+    # Non-aligned token/scales views are valid public inputs: native TMA uses
+    # the newly allocated packed buffers, not these original pointers.
+    q_store = torch.randint(-128, 128, (t*k+1,), device="cuda", dtype=torch.int8)
+    q = q_store[1:].view(t,k)
+    scale_store = torch.randn(t*(k//256)+1, device="cuda")
+    sx = scale_store[1:].view(t,k//256)
+    sx[1].zero_()
+    ids = (torch.arange(t*r, device="cuda").reshape(t,r)%3).to(id_dtype)
+    ids[:,1] = ids[:,0]
+    mask = torch.arange(t, device="cuda")%5 != 0
+    sx[~mask] = float("nan")
+    ids[~mask] = torch.iinfo(id_dtype).min
+    routes = kernels.prepare_routes(ids,e,mask,include_tiles=False)
+    expected = kernels.pack_inputs(q,sx,routes,c)
+    actual = moe_input_io.pack_inputs_scatter(q,sx,routes,c)
+    _assert_bits(actual, tuple(value.cpu() for value in expected))
+    assert torch.isfinite(actual[1]).all()

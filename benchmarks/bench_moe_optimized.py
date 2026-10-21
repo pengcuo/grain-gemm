@@ -238,10 +238,10 @@ def main():
         software=dict(torch=torch.__version__, triton=triton.__version__, cuda=torch.version.cuda, python=platform.python_version()),
         rounds=args.rounds, repetitions=args.repetitions, warmup=args.warmup, warmup_ms=args.warmup_ms,
         timing="Full-call CUDA events including host dispatch gaps; rotating four-method order; median of per-round medians; no CUDA Graph capture",
-        scope="Pre-routed full expert FFN including counts/alignment, gate/up, activation, down and combine; INT8 includes activation quantization. Excludes router/top-k, weight quantization/layout preparation, compilation, correctness, warmup and cooling. No serving-engine overhead.",
+        scope="Pre-routed full expert FFN including counts/alignment, gate/up, activation, down and combine; INT8 includes intermediate activation quantization; entry INT8 quantization is outside timing. Excludes router/top-k, weight quantization/layout preparation, compilation, correctness, warmup and cooling. No serving-engine overhead.",
         throughput="6*T*top_k*H*I / (latency_seconds*1e12), valid-route dense operations; INT8 effective TOPS and BF16 effective TFLOPS. Padding and non-GEMM operations excluded.",
         score_policy="Normalize FP32 once, round to BF16; Cosmos receives BF16 and both INT8/vLLM receive FP32 with identical numeric values",
-        numerical_difference="Both INT8 paths retain G256 integer-dot references and post-down FP32 combine; vLLM applies score to the FC2 accumulator before BF16 cast and sums in FP32; Cosmos compiled applies score before down with fused pointwise operations and BF16 scatter_add",
+        numerical_difference="Frozen before INT8 includes entry quantization; current INT8 starts prequantized. Both retain G256 integer-dot references and post-down FP32 combine; vLLM applies score to the FC2 accumulator before BF16 cast and sums in FP32; Cosmos compiled applies score before down with fused pointwise operations and BF16 scatter_add",
         correctness=dict(independent_cpu_tokens=args.reference_tokens, int8_rtol=0.015, int8_atol=0.025,
                          bf16_rtol=0.025, bf16_atol=0.008, before_after_full_output_check=True),
         cosmos_compilation=dict(fullgraph=True, dynamic=True, backend="inductor", mode="default"),
@@ -269,9 +269,11 @@ def main():
             scores_bf16 = (scores / scores.sum(-1, keepdim=True)).bfloat16().contiguous()
             scores = scores_bf16.float()
             config = vllm.config_for(tokens, w1, w2, r)
+            from bench_moe_ffn import quantize_rows
+            qx, sx = quantize_rows(x, torch)  # Prepared before timing.
             functions = dict(
                 int8_before=lambda: before_package.moe_ffn(x, q1, q2, scores, ids, scale_gate_up=s1, scale_down=s2),
-                int8_auto=lambda: grain_gemm.moe_ffn(x, q1, q2, scores, ids, scale_gate_up=s1, scale_down=s2),
+                int8_auto=lambda: grain_gemm.moe_ffn(qx, q1, q2, scores, ids, scale_x=sx, scale_gate_up=s1, scale_down=s2),
                 vllm_bf16=lambda: vllm(x, w1, w2, scores, ids),
                 cosmos_bf16_compiled=lambda: cosmos(x, ids, scores_bf16),
             )

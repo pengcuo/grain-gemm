@@ -17,12 +17,14 @@ def _stride(shape, column_major=False):
 
 
 def _validate(hidden_states, w_gate_up, w_down, topk_weights, topk_ids,
-              scale_gate_up, scale_down, token_mask, group_size, activation,
-              backend):
+              scale_x, scale_gate_up, scale_down, token_mask, group_size, activation,
+              backend, output_dtype, gate_up_layout="split"):
     if type(group_size) is not int or group_size != 256:
         raise ValueError("moe_ffn currently requires group_size=256")
     if activation != "swiglu":
         raise ValueError("moe_ffn currently requires activation='swiglu'")
+    if gate_up_layout not in ("split", "interleaved"):
+        raise ValueError("gate_up_layout must be 'split' or 'interleaved'")
     if backend not in ("auto", "triton", "cuda", "cutlass"):
         raise ValueError("backend must be 'auto', 'triton', 'cuda', or 'cutlass'")
     if not isinstance(hidden_states, torch.Tensor) or hidden_states.ndim != 2:
@@ -44,11 +46,12 @@ def _validate(hidden_states, w_gate_up, w_down, topk_weights, topk_ids,
         raise ValueError("H and I must be positive multiples of group_size=256")
     if not 1 <= routes <= experts:
         raise ValueError("top-k R must satisfy 1 <= R <= E")
-    if hidden_states.dtype not in (torch.bfloat16, torch.float16):
-        raise TypeError("hidden_states must have dtype torch.bfloat16 or torch.float16")
+    if output_dtype not in (torch.bfloat16, torch.float16):
+        raise ValueError("output_dtype must be torch.bfloat16 or torch.float16")
     specs = [
         ("hidden_states", hidden_states, (tokens, hidden),
-         (torch.bfloat16, torch.float16), False),
+         (torch.int8,), False),
+        ("scale_x", scale_x, (tokens, hidden // group_size), (torch.float32,), False),
         ("w_gate_up", w_gate_up, (experts, hidden, 2 * intermediate), (torch.int8,), True),
         ("w_down", w_down, (experts, intermediate, hidden), (torch.int8,), True),
         ("topk_weights", topk_weights, (tokens, routes), (torch.float32,), False),
@@ -90,7 +93,14 @@ def _validate(hidden_states, w_gate_up, w_down, topk_weights, topk_ids,
     return tokens, hidden, intermediate, experts, routes
 
 
-def _native_available(backend, device):
+def _native_available(backend, device, gate_up_layout="split"):
+    if torch.cuda.get_device_capability(device) == (11, 0):
+        if gate_up_layout == "interleaved":
+            from .kernels import moe_interleaved as first_projection
+        else:
+            from .kernels import moe_gather as first_projection
+        if not first_projection.is_available(device):
+            return False
     if backend == "cuda":
         from .kernels import cuda
         return cuda.is_available(device)
@@ -169,23 +179,33 @@ def _use_fused_gate_up(tokens, hidden, intermediate, experts, top_k, device, *, 
 
 
 def moe_ffn(hidden_states, w_gate_up, w_down, topk_weights, topk_ids, *,
-            scale_gate_up, scale_down, group_size=256, activation="swiglu",
-            token_mask=None, backend="auto"):
+            scale_x, scale_gate_up, scale_down, group_size=256, activation="swiglu",
+            token_mask=None, output_dtype=torch.bfloat16, backend="auto",
+            gate_up_layout="split"):
     """Run a complete pre-routed INT8 G256 MoE FFN on the current CUDA stream.
 
     Weights follow GEMM's right-hand operand convention, not Linear's storage
     shape: w_gate_up[E,H,2I] and w_down[E,I,H] must be transposed views of
     contiguous Linear-format INT8 weights, with strides (H*2I,1,H)/(I*H,1,I).
     FP32 scales are contiguous [E,H/256,2I] and [E,I/256,H], like scale_b.
-    The gate channels precede the up channels. Inputs [T,H] are BF16/FP16;
+    gate_up_layout='split' means output columns [g0,...,gI-1,u0,...,uI-1].
+    'interleaved' means [g0,u0,g1,u1,...]; both w_gate_up's last dimension
+    and scale_gate_up's last dimension must follow that ordering. Shapes and
+    strides stay identical, down weights are unchanged, and the function never
+    repacks weights or scales. Inputs [T,H] are INT8, with
+    contiguous FP32 scale_x[T,H/256], like GEMM scale_a. Thor reads original
+    token rows by route index inside G1 without an expanded global input pack.
+    The output dtype
+    defaults to BF16; FP16 output uses Triton. There is no input quantization;
     route scores [T,R] are FP32, expert ids [T,R] are INT32/INT64. All other
     inputs require canonical contiguous strides and the same CUDA device.
 
-    Input and FP32 SwiGLU activations are dynamically quantized per row/K group
+    Supplied input values/scales are consumed without requantization. Only
+    FP32 SwiGLU activations are dynamically quantized per row/K group
     using amax.clamp_min(1e-12)/127, nearest-even rounding and clipping to
     [-127,127]. Each GEMM accumulates group dots in INT32 and scaled sums in
-    FP32, then rounds to the input dtype. Scores multiply the second GEMM's
-    outputs, followed by FP32 reduction and one cast to the input dtype.
+    FP32, then rounds to output_dtype. Scores multiply the second GEMM's
+    outputs, followed by FP32 reduction and one cast to output_dtype.
     Scores are used as supplied, without renormalization. A token may select
     the same expert more than once; every slot contributes independently.
 
@@ -196,32 +216,38 @@ def moe_ffn(hidden_states, w_gate_up, w_down, topk_weights, topk_ids, *,
     this value contract. Warm up before graph capture to compile kernels.
 
     Auto uses the ragged Triton path, or the SM110 CUTLASS batched path for
-    dense-enough BF16 routing. Captured auto calls use Triton so changing
+    dense-enough BF16-output routing. Captured auto calls use Triton so changing
     routing needs no host synchronization or fixed expert capacity. Explicit
     native capture reserves the worst-case per-expert capacity T*R (rounded
     to 64), which can be expensive for many experts. Native backends require
-    BF16 and a matching optional build. No autograd is provided.
+    BF16 output and matching native GEMM/original-token builds. Thor auto uses
+    Triton when the matching split/interleaved build is absent or original x is
+    not 16-byte aligned; explicit native calls reject these cases.
+    No autograd is provided.
     """
     tokens, hidden, intermediate, experts, top_k = _validate(
         hidden_states, w_gate_up, w_down, topk_weights, topk_ids,
-        scale_gate_up, scale_down, token_mask, group_size, activation, backend,
+        scale_x, scale_gate_up, scale_down, token_mask, group_size, activation, backend,
+        output_dtype, gate_up_layout,
     )
     from .kernels import moe as kernels
 
     with torch.cuda.device(hidden_states.device):
         capturing = torch.cuda.is_current_stream_capturing()
         if tokens == 0:
-            return torch.zeros_like(hidden_states)
+            return torch.zeros(hidden_states.shape, device=hidden_states.device, dtype=output_dtype)
 
+        native_layout_args = () if gate_up_layout == "split" else (gate_up_layout,)
         selected = backend
         if backend == "auto":
             selected = "triton"
-            if (not capturing and hidden_states.dtype == torch.bfloat16
+            if (not capturing and output_dtype == torch.bfloat16
                     and torch.cuda.get_device_capability(hidden_states.device) == (11, 0)
                     and tokens * top_k >= experts * 128
+                    and hidden_states.data_ptr() % 16 == 0
                     and all(t.data_ptr() % 16 == 0 for t in (
                         w_gate_up, w_down, scale_gate_up, scale_down))
-                    and _native_available("cutlass", hidden_states.device)):
+                    and _native_available("cutlass", hidden_states.device, *native_layout_args)):
                 selected = "cutlass"
 
         routes = kernels.prepare_routes(
@@ -236,11 +262,16 @@ def moe_ffn(hidden_states, w_gate_up, w_down, topk_weights, topk_ids, *,
                 raise ValueError("unmasked topk_ids must be in [0, E)")
 
         if backend in ("cuda", "cutlass"):
-            if hidden_states.dtype != torch.bfloat16:
-                raise ValueError(f"backend='{backend}' requires BF16 hidden_states")
-            if not _native_available(backend, hidden_states.device):
+            if output_dtype != torch.bfloat16:
+                raise ValueError(f"backend='{backend}' requires BF16 output_dtype")
+            if not _native_available(backend, hidden_states.device, *native_layout_args):
+                build_tool = ("build_moe_interleaved.py" if gate_up_layout == "interleaved"
+                              else "build_moe_gather.py")
                 raise RuntimeError(f"MoE backend='{backend}' needs a matching native build; "
-                                   f"run tools/build_{backend}.py --cutlass-dir PATH --arch sm_XXX")
+                                   f"build the native GEMM and, on Thor, tools/{build_tool} --cutlass-dir PATH")
+            if (torch.cuda.get_device_capability(hidden_states.device) == (11, 0)
+                    and hidden_states.data_ptr() % 16):
+                raise ValueError(f"backend='{backend}' requires 16-byte-aligned original hidden_states")
             if any(t.data_ptr() % 16 for t in (w_gate_up, w_down, scale_gate_up, scale_down)):
                 raise ValueError(f"backend='{backend}' requires 16-byte-aligned weights and scales")
 
@@ -250,7 +281,7 @@ def moe_ffn(hidden_states, w_gate_up, w_down, topk_weights, topk_ids, *,
                 capacity = ((tokens * top_k + 63) // 64) * 64
             else:
                 if maximum == 0:
-                    return torch.zeros_like(hidden_states)
+                    return torch.zeros(hidden_states.shape, device=hidden_states.device, dtype=output_dtype)
                 capacity = ((maximum + 63) // 64) * 64
                 # A heavily skewed route would otherwise compute E copies of
                 # the busiest expert's capacity. Auto retains ragged execution.
@@ -263,58 +294,54 @@ def moe_ffn(hidden_states, w_gate_up, w_down, topk_weights, topk_ids, *,
         w2_linear = w_down.transpose(-2, -1)
 
         if selected == "triton":
-            qx, sx = kernels.quantize_rows(hidden_states, group_size)
+            qx, sx = hidden_states, scale_x
             gate_up = kernels.ragged_gemm(
                 qx, w1_linear, sx, scale_gate_up, routes,
-                output_dtype=hidden_states.dtype, source_is_token=True,
+                output_dtype=output_dtype, source_is_token=True,
             )
-            qh, sh = kernels.swiglu_quantize(gate_up, routes=routes)
+            qh, sh = kernels.swiglu_quantize(
+                gate_up, routes=routes, gate_up_layout=gate_up_layout,
+            )
             expert_output = kernels.ragged_gemm(
                 qh, w2_linear, sh, scale_down, routes,
-                output_dtype=hidden_states.dtype, source_is_token=False,
+                output_dtype=output_dtype, source_is_token=False,
             )
         else:
             if max(experts * capacity * hidden,
                    experts * capacity * 2 * intermediate) > 2**31 - 1:
                 raise ValueError("native MoE workspace exceeds the supported indexing range")
-            if (selected == "cutlass" and top_k <= 8
-                    and torch.cuda.get_device_capability(hidden_states.device) == (11, 0)):
-                input_producer = kernels.quantize_pack_inputs
-                # Large Thor batches benefit from sharing routing loads across
-                # adjacent G256 groups and initializing padding in the same
-                # launch. Smaller batches retain their measured faster tile.
-                if tokens >= 16384 and (experts, hidden, top_k) == (32, 1536, 4):
-                    from .kernels.moe_input_io import quantize_pack_inputs_scatter
-                    input_producer = quantize_pack_inputs_scatter
-                packed_x, packed_sx = input_producer(
-                    hidden_states, routes, capacity, group_size,
-                )
-            else:
-                qx, sx = kernels.quantize_rows(hidden_states, group_size)
-                packed_x, packed_sx = kernels.pack_inputs(qx, sx, routes, capacity)
-            if (selected == "cutlass" and _use_fused_gate_up(
-                    tokens, hidden, intermediate, experts, top_k,
-                    hidden_states.device, capturing=capturing)):
-                from .kernels import moe_fused
+            if torch.cuda.get_device_capability(hidden_states.device) == (11, 0):
+                # Only routing indices are sorted. Original tokens and scales
+                # go directly to shared memory inside G1; no global A/SA pack.
+                if gate_up_layout == "interleaved":
+                    from .kernels import moe_interleaved as first_projection
+                else:
+                    from .kernels import moe_gather as first_projection
                 qh = torch.empty((experts, capacity, intermediate),
                                  device=hidden_states.device, dtype=torch.int8)
                 sh = torch.empty((experts, capacity, intermediate // group_size),
                                  device=hidden_states.device, dtype=torch.float32)
-                moe_fused._launch_prevalidated(
-                    packed_x, w1_linear, packed_sx, scale_gate_up,
-                    routes.counts, qh, sh,
+                first_projection._launch_prevalidated(
+                    hidden_states, w1_linear, scale_x, scale_gate_up,
+                    routes.counts, routes.offsets, routes.order, qh, sh,
+                    top_k=top_k,
                 )
             else:
+                # Other architectures retain their existing native GEMM path.
+                packed_x, packed_sx = kernels.pack_inputs(
+                    hidden_states, scale_x, routes, capacity, group_size,
+                )
                 gate_up = torch.empty((experts, capacity, 2 * intermediate),
-                                      device=hidden_states.device, dtype=hidden_states.dtype)
+                                      device=hidden_states.device, dtype=output_dtype)
                 _native_gemm(packed_x, w1_linear, packed_sx, scale_gate_up, gate_up,
                              selected, counts=routes.counts)
                 qh, sh = kernels.swiglu_quantize(
                     gate_up, routes=routes, packed_capacity=capacity,
+                    gate_up_layout=gate_up_layout,
                 )
             expert_output = torch.empty((experts, capacity, hidden),
-                                        device=hidden_states.device, dtype=hidden_states.dtype)
+                                        device=hidden_states.device, dtype=output_dtype)
             _native_gemm(qh, w2_linear, sh, scale_down, expert_output,
                          selected, counts=routes.counts)
         return kernels.combine(expert_output, topk_weights, routes,
-                               output_dtype=hidden_states.dtype, packed_capacity=capacity)
+                               output_dtype=output_dtype, packed_capacity=capacity)

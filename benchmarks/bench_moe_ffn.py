@@ -147,8 +147,10 @@ def prepare_weight(weight, torch):
     return q.reshape(e, n, k).transpose(-2, -1), scales.reshape(e, n, k // 256).transpose(-2, -1).contiguous()
 
 
-def cpu_reference(x, ids, scores, w1, w2, s1, s2, torch):
+def cpu_reference(x, ids, scores, w1, w2, s1, s2, torch, *, scale_x=None, output_dtype=None):
     """Exact CPU INT32 group dots, evaluated independently per top-k slot."""
+    dtype = output_dtype or (torch.bfloat16 if x.dtype == torch.int8 else x.dtype)
+    scale_x = scale_x.cpu() if scale_x is not None else None
     x, ids, scores, w1, w2, s1, s2 = (t.cpu() for t in (x, ids, scores, w1, w2, s1, s2))
 
     def project(a, sa, b, sb):
@@ -157,11 +159,14 @@ def cpu_reference(x, ids, scores, w1, w2, s1, s2, torch):
             dot = a[:, start : start + 256].int() @ b[start : start + 256].int()
             scale = sa[:, group, None] * sb[group, None, :]
             out = (out.double() + dot.double() * scale.double()).float()
-        return out.to(x.dtype).float()
+        return out.to(dtype).float()
 
     output = torch.zeros(x.shape, dtype=torch.float32)
     for token in range(x.shape[0]):
-        qa, sa = quantize_rows(x[token : token + 1], torch)
+        if scale_x is None:
+            qa, sa = quantize_rows(x[token : token + 1], torch)
+        else:
+            qa, sa = x[token : token + 1], scale_x[token : token + 1]
         for slot in range(ids.shape[1]):
             expert = int(ids[token, slot])
             gate, up = project(qa, sa, w1[expert], s1[expert]).chunk(2, -1)
@@ -169,7 +174,7 @@ def cpu_reference(x, ids, scores, w1, w2, s1, s2, torch):
             qhidden, shidden = quantize_rows(hidden, torch)
             value = project(qhidden, shidden, w2[expert], s2[expert])
             output[token] += value[0] * scores[token, slot]
-    return output.to(x.dtype)
+    return output.to(dtype)
 
 
 def bf16_expert_reference(x, w1, w2, ids, scores, torch):
@@ -253,7 +258,7 @@ def main():
         warmup_ms=args.warmup_ms,
         software=dict(torch=torch.__version__, triton=triton.__version__, cuda=torch.version.cuda, python=platform.python_version()),
         timing="Eager full-call CUDA events; rotating implementation order; median of round medians. Includes host dispatch gaps; CUDA Graphs are not used.",
-        scope="Includes token routing, activation quantization, both expert GEMMs, SwiGLU, and FP32 weighted combination. Excludes weight quantization, input generation, compilation, warmup, correctness checks, and cooling.",
+        scope="Starts from prequantized INT8 activation and scale; includes token routing/packing, both expert GEMMs, SwiGLU, and FP32 weighted combination. Excludes weight quantization, input generation, compilation, warmup, correctness checks, and cooling.",
         floating_point_baseline="Readable per-expert PyTorch loop with the same BF16/FP16 dtype as hidden_states, dynamic torch.where routing, two Linear operations, SwiGLU and FP32 index_add. Not a tuned fused MoE backend.",
         throughput="6*T*top_k*H*I divided by full FFN latency; effective INT8 TOPS/floating-point TFLOPS exclude non-GEMM operation counts.",
         cpu_correctness="Independent per-token/per-slot CPU INT32 group dots, FP32 group scale products, GEMM output rounding, FP32 SwiGLU and re-quantization.",
@@ -279,8 +284,10 @@ def main():
             scores = torch.rand((tokens, r), device="cuda")
             scores = (scores / scores.sum(-1, keepdim=True)).contiguous()
 
+            qx, sx = quantize_rows(x, torch)
+
             def run_int8():
-                return grain_gemm.moe_ffn(x, q1, q2, scores, ids, scale_gate_up=s1, scale_down=s2, backend=args.backend)
+                return grain_gemm.moe_ffn(qx, q1, q2, scores, ids, scale_x=sx, scale_gate_up=s1, scale_down=s2, output_dtype=dtype, backend=args.backend)
 
             def run_bf16():
                 return bf16_expert_reference(x, w1, w2, ids, scores, torch)

@@ -45,26 +45,27 @@ def group_dot_cpu(a, b, scale_a, scale_b):
 
 def reference(case):
     """Evaluate every route independently, retaining the public rounding points."""
-    host = {name: value.cpu() for name, value in case.items()}
+    host = {name: value.cpu() for name, value in case.items() if isinstance(value, torch.Tensor)}
+    dtype = case.get("output_dtype", torch.bfloat16)
     x, ids, scores = (host[name] for name in ("hidden_states", "topk_ids", "topk_weights"))
     output = torch.zeros(x.shape, dtype=torch.float32)
     for token in range(x.shape[0]):
         if "token_mask" in host and not host["token_mask"][token]:
             continue
-        qa, sa = quantize_rows_cpu(x[token : token + 1])
+        qa, sa = x[token : token + 1], host["scale_x"][token : token + 1]
         for slot in range(ids.shape[1]):
             expert = int(ids[token, slot])
             first = group_dot_cpu(
                 qa, host["w_gate_up"][expert], sa, host["scale_gate_up"][expert]
-            ).to(x.dtype).float()
+            ).to(dtype).float()
             gate, up = first.chunk(2, dim=-1)
             activated = torch.nn.functional.silu(gate) * up
             qhidden, shidden = quantize_rows_cpu(activated)
             second = group_dot_cpu(
                 qhidden, host["w_down"][expert], shidden, host["scale_down"][expert]
-            ).to(x.dtype).float()
+            ).to(dtype).float()
             output[token] += second[0] * scores[token, slot]
-    return output.to(x.dtype)
+    return output.to(dtype)
 
 
 def make_case(*, dtype=torch.bfloat16, tokens=7, h=512, i=256, experts=5, device="cuda"):
@@ -94,7 +95,9 @@ def make_case(*, dtype=torch.bfloat16, tokens=7, h=512, i=256, experts=5, device
     # Deliberately not normalized; one slot contributes zero.
     scores = torch.tensor([0.25, 1.5, 0.0]).repeat(tokens, 1)
     case = dict(
-        hidden_states=x,
+        hidden_states=quantize_rows_cpu(x)[0],
+        scale_x=quantize_rows_cpu(x)[1],
+        output_dtype=dtype,
         w_gate_up=weights[0],
         w_down=weights[1],
         topk_weights=scores,
@@ -103,13 +106,14 @@ def make_case(*, dtype=torch.bfloat16, tokens=7, h=512, i=256, experts=5, device
         scale_down=scales[1],
     )
     # .to preserves the transposed weight layouts.
-    return {name: value.to(device) for name, value in case.items()}
+    return {name: value.to(device) if isinstance(value, torch.Tensor) else value
+            for name, value in case.items()}
 
 
 def assert_reference(actual, case):
     expected = reference(case)
     assert actual.shape == case["hidden_states"].shape
-    assert actual.dtype == case["hidden_states"].dtype
+    assert actual.dtype == case["output_dtype"]
     assert actual.stride() == (actual.shape[1], 1)
     # Independent FP32 activation implementations can differ around an INT8
     # rounding boundary; the absolute bound also covers outputs near zero.
@@ -393,12 +397,13 @@ def test_ragged_routes_empty_experts_extrema_and_nonunit_scores(backend, dtype):
     case["token_mask"] = torch.tensor(
         [True, False, True, True, False, True, True], device="cuda"
     )
-    saved = {name: value.clone() for name, value in case.items()}
+    saved = {name: value.clone() if isinstance(value, torch.Tensor) else value for name, value in case.items()}
     actual = moe_ffn(**case, backend=backend)
     assert_reference(actual, case)
     assert torch.count_nonzero(actual[~case["token_mask"]]).item() == 0
     for name, value in case.items():
-        torch.testing.assert_close(value, saved[name], rtol=0, atol=0)
+        if isinstance(value, torch.Tensor):
+            torch.testing.assert_close(value, saved[name], rtol=0, atol=0)
 
 
 @cuda
@@ -413,7 +418,7 @@ def test_masked_nan_offset_views_and_signed_scales_preserve_ffn(backend, dtype):
     case["token_mask"] = torch.ones(129, dtype=torch.bool, device="cuda")
     masked_rows = [0, 63, 128]
     case["token_mask"][masked_rows] = False
-    case["hidden_states"][masked_rows] = float("nan")
+    case["scale_x"][masked_rows] = float("nan")
     case["topk_weights"][masked_rows] = float("nan")
     case["topk_ids"][masked_rows] = torch.tensor(
         [2**40, -(2**40), 2**63 - 1, -(2**63)], device="cuda", dtype=torch.int64
@@ -425,6 +430,8 @@ def test_masked_nan_offset_views_and_signed_scales_preserve_ffn(backend, dtype):
     # its tensor pointer differs from the storage base. Native descriptors and
     # fused gathers must consume the view's data_ptr and honor masked rows.
     for name, value in case.items():
+        if not isinstance(value, torch.Tensor):
+            continue
         backing = torch.empty(value.numel() + 16, device=value.device, dtype=value.dtype)
         offset_view = torch.as_strided(backing, value.shape, value.stride(), storage_offset=16)
         offset_view.copy_(value)
@@ -438,7 +445,7 @@ def test_masked_nan_offset_views_and_signed_scales_preserve_ffn(backend, dtype):
     # without making an independent INT32 CPU reference unnecessarily large.
     indices = [0, 1, 63, 64, 127, 128]
     subset = dict(case)
-    for name in ("hidden_states", "topk_weights", "topk_ids", "token_mask"):
+    for name in ("hidden_states", "scale_x", "topk_weights", "topk_ids", "token_mask"):
         subset[name] = case[name][indices].contiguous()
     assert_reference(actual[indices], subset)
 
@@ -480,16 +487,15 @@ def test_thor_auto_selects_native_for_balanced_routing(monkeypatch, backend):
         actual = moe_ffn(**case, backend=backend)
     # 128 routes per expert satisfies the native threshold without padding
     # amplification. Both FFN projections must use the batched native path.
-    assert calls == [
-        (selected, (2, 128, 256), (2, 512, 256)),
-        (selected, (2, 128, 256), (2, 256, 256)),
-    ]
+    # G1 reads original tokens inside the dedicated gather kernel. Only G2
+    # goes through the existing native batched GEMM bridge.
+    assert calls == [(selected, (2, 128, 256), (2, 256, 256))]
     assert route_calls == [False]
     expected = moe_ffn(**case, backend="triton")
     torch.testing.assert_close(actual, expected, rtol=0.015, atol=0.025)
     indices = [0, 127, 128, 255]
     subset = dict(case)
-    for name in ("hidden_states", "topk_weights", "topk_ids"):
+    for name in ("hidden_states", "scale_x", "topk_weights", "topk_ids"):
         subset[name] = case[name][indices].contiguous()
     assert_reference(actual[indices], subset)
 
@@ -524,7 +530,6 @@ def test_thor_auto_uses_original_tile_for_large_expert_ffn(monkeypatch):
         native_patch.setattr(cutlass_moe, "_launch_prevalidated", tracked_launch)
         actual = moe_ffn(**case, backend="auto")
     assert calls == [
-        (47, (32, 1024, 1536), (32, 2048, 1536)),
         (47, (32, 1024, 1024), (32, 1536, 1024)),
     ]
     calls.clear()
@@ -533,14 +538,13 @@ def test_thor_auto_uses_original_tile_for_large_expert_ffn(monkeypatch):
         native_patch.setattr(cutlass_moe, "_launch_prevalidated", tracked_launch)
         expected = moe_ffn(**case, backend="auto")
     assert calls == [
-        (34, (32, 1024, 1536), (32, 2048, 1536)),
         (34, (32, 1024, 1024), (32, 1536, 1024)),
     ]
     assert torch.isfinite(actual).all().item()
     torch.testing.assert_close(actual.view(torch.int16), expected.view(torch.int16), rtol=0, atol=0)
     indices = [0, 3, 4094, tokens - 1]
     subset = dict(case)
-    for name in ("hidden_states", "topk_weights", "topk_ids"):
+    for name in ("hidden_states", "scale_x", "topk_weights", "topk_ids"):
         subset[name] = case[name][indices].contiguous()
     assert_reference(actual[indices], subset)
 
@@ -561,7 +565,7 @@ def test_thor_counted_ffn_ignores_unwritten_nan_padding(monkeypatch, config_id):
     case["token_mask"] = torch.ones(257, dtype=torch.bool, device="cuda")
     masked_rows = [0, 128, 256]
     case["token_mask"][masked_rows] = False
-    case["hidden_states"][masked_rows] = float("nan")
+    case["scale_x"][masked_rows] = float("nan")
     case["topk_weights"][masked_rows] = float("nan")
     case["topk_ids"][masked_rows] = torch.tensor([2**63 - 1, -(2**40)], device="cuda")
     expected_counts = [0] * 4
@@ -594,12 +598,12 @@ def test_thor_counted_ffn_ignores_unwritten_nan_padding(monkeypatch, config_id):
         native_patch.setattr(implementation, "_native_config", lambda *args, **kwargs: config_id)
         native_patch.setattr(implementation, "_native_gemm", poison_padding)
         actual = moe_ffn(**case, backend="cutlass")
-    assert calls == [(config_id, 384), (config_id, 384)]
+    assert calls == [(config_id, 384)]
     assert torch.isfinite(actual).all().item()
     torch.testing.assert_close(actual[masked_rows], torch.zeros_like(actual[masked_rows]), rtol=0, atol=0)
     indices = [0, 1, 2, 127, 255, 256]
     subset = dict(case)
-    for name in ("hidden_states", "topk_weights", "topk_ids", "token_mask"):
+    for name in ("hidden_states", "scale_x", "topk_weights", "topk_ids", "token_mask"):
         subset[name] = case[name][indices].contiguous()
     assert_reference(actual[indices], subset)
 
@@ -664,7 +668,7 @@ def test_thor_auto_falls_back_to_ragged_for_skewed_routing(monkeypatch):
     torch.testing.assert_close(actual, expected, rtol=0, atol=0)
     indices = [0, 127, 128, 255]
     subset = dict(case)
-    for name in ("hidden_states", "topk_weights", "topk_ids"):
+    for name in ("hidden_states", "scale_x", "topk_weights", "topk_ids"):
         subset[name] = case[name][indices].contiguous()
     assert_reference(actual[indices], subset)
 
@@ -691,10 +695,12 @@ def test_activation_quantization_uses_nearest_even(value, rounded):
     first[0, 256, 1] = 1
     second = torch.zeros((1, 256, 256), device="cuda", dtype=torch.int8)
     second[0, :, 0] = 1
+    qx, sx = quantize_rows_cpu(x.cpu())
     result = moe_ffn(
-        x, first.transpose(-2, -1), second.transpose(-2, -1),
+        qx.cuda(), first.transpose(-2, -1), second.transpose(-2, -1),
         torch.ones((1, 1), device="cuda"),
         torch.zeros((1, 1), device="cuda", dtype=torch.int64),
+        scale_x=sx.cuda(),
         scale_gate_up=torch.ones((1, 1, 512), device="cuda"),
         scale_down=torch.ones((1, 1, 256), device="cuda"),
         backend="triton",
@@ -720,11 +726,11 @@ def test_int32_expert_indices_and_empty_tokens():
     case = make_case(tokens=3, h=256)
     case["topk_ids"] = case["topk_ids"].int()
     assert_reference(moe_ffn(**case), case)
-    for name in ("hidden_states", "topk_weights", "topk_ids"):
+    for name in ("hidden_states", "scale_x", "topk_weights", "topk_ids"):
         case[name] = case[name][:0]
     empty = moe_ffn(**case)
     assert empty.shape == (0, 256)
-    assert empty.dtype == case["hidden_states"].dtype
+    assert empty.dtype == case["output_dtype"]
     assert empty.device == case["hidden_states"].device
 
 
@@ -762,7 +768,7 @@ def test_graph_replay_consumes_activation_mask_scores_and_routes(backend):
         for _ in range(2):
             moe_ffn(**case, backend="triton" if backend == "auto" else backend)
     stream.synchronize()
-    original = {name: value.clone() for name, value in case.items()}
+    original = {name: value.clone() if isinstance(value, torch.Tensor) else value for name, value in case.items()}
     graph = torch.cuda.CUDAGraph()
     with torch.cuda.graph(graph, stream=stream):
         captured = moe_ffn(**case, backend=backend)
@@ -772,6 +778,12 @@ def test_graph_replay_consumes_activation_mask_scores_and_routes(backend):
     graph.replay()
     assert torch.count_nonzero(captured).item() == 0
     case["hidden_states"].copy_(original["hidden_states"])
+    graph.replay()
+    assert_reference(captured, case)
+    case["scale_x"].zero_()
+    graph.replay()
+    assert torch.count_nonzero(captured).item() == 0
+    case["scale_x"].copy_(original["scale_x"])
     graph.replay()
     assert_reference(captured, case)
     # Change the per-expert token counts while replaying the same graph.
@@ -983,6 +995,9 @@ def test_noncanonical_stride_is_rejected(field):
     "field,dtype",
     [
         ("hidden_states", torch.float32),
+        ("hidden_states", torch.bfloat16),
+        ("hidden_states", torch.float16),
+        ("scale_x", torch.float16),
         ("w_gate_up", torch.bfloat16),
         ("w_down", torch.bfloat16),
         ("scale_gate_up", torch.float16),
@@ -1069,3 +1084,70 @@ def test_token_mask_contract():
     ):
         with pytest.raises((TypeError, ValueError)):
             moe_ffn(**case, token_mask=mask)
+
+
+@cuda
+@pytest.mark.parametrize("backend", ["auto", "triton", "cutlass", "cuda"])
+def test_prequantized_input_consumed_without_entry_quantization(monkeypatch, backend):
+    require_backend(backend, torch.bfloat16)
+    from grain_gemm.kernels import moe as kernels, moe_input_io
+    case = make_case(tokens=256, h=256, experts=2)
+    case["topk_ids"] = (torch.arange(256, device="cuda") % 2)[:, None].contiguous()
+    case["topk_weights"] = torch.ones((256, 1), device="cuda")
+    case["hidden_states"][:, 0] = -128
+    case["hidden_states"][:, 1] = 127
+    case["scale_x"][::2].mul_(-1)
+    case["scale_x"][::7].zero_()
+    def unexpected(*args, **kwargs):
+        pytest.fail("Prequantized API attempted entry quantization")
+    monkeypatch.setattr(kernels, "quantize_rows", unexpected)
+    monkeypatch.setattr(kernels, "quantize_pack_inputs", unexpected)
+    monkeypatch.setattr(moe_input_io, "quantize_pack_inputs_scatter", unexpected)
+    actual = moe_ffn(**case, backend=backend)
+    indices = [0, 1, 7, 255]
+    subset = dict(case)
+    for name in ("hidden_states", "scale_x", "topk_ids", "topk_weights"):
+        subset[name] = case[name][indices].contiguous()
+    assert_reference(actual[indices], subset)
+
+
+@cuda
+def test_scale_x_is_required_and_output_defaults_to_bf16():
+    case = make_case(tokens=2, h=256)
+    case.pop("output_dtype")
+    assert moe_ffn(**case).dtype == torch.bfloat16
+    case.pop("scale_x")
+    with pytest.raises(TypeError, match="scale_x"):
+        moe_ffn(**case)
+
+
+@cuda
+@pytest.mark.parametrize("dtype", [torch.int8, torch.float32, None])
+def test_invalid_output_dtype(dtype):
+    case = make_case(tokens=2, h=256)
+    case["output_dtype"] = dtype
+    with pytest.raises(ValueError, match="output_dtype"):
+        moe_ffn(**case)
+
+
+@cuda
+def test_thor_unaligned_original_input_uses_ragged_auto_and_explicit_native_rejects(monkeypatch):
+    from grain_gemm.kernels import moe_gather, moe_input_io
+    if torch.cuda.get_device_capability() != (11,0) or not moe_gather.is_available():
+        pytest.skip("Build original-token MoE on Thor")
+    case = make_case(tokens=256,h=256,experts=2)
+    case["topk_ids"] = (torch.arange(256,device="cuda")%2)[:,None].contiguous()
+    case["topk_weights"] = torch.ones((256,1),device="cuda")
+    store = torch.empty(case["hidden_states"].numel()+1,device="cuda",dtype=torch.int8)
+    view = store[1:].view_as(case["hidden_states"])
+    view.copy_(case["hidden_states"]);case["hidden_states"] = view
+    expected = moe_ffn(**case,backend="triton")
+    def unexpected(*args,**kwargs):
+        pytest.fail("Unaligned original input was copied or sent to native gather")
+    monkeypatch.setattr(moe_gather,"_launch_prevalidated",unexpected)
+    monkeypatch.setattr(moe_input_io,"pack_inputs_scatter",unexpected)
+    monkeypatch.setattr(__import__("grain_gemm.kernels.moe",fromlist=["pack_inputs"]),"pack_inputs",unexpected)
+    torch.testing.assert_close(moe_ffn(**case),expected,rtol=0,atol=0)
+    for backend in ("cutlass","cuda"):
+        with pytest.raises(ValueError,match="aligned original"):
+            moe_ffn(**case,backend=backend)

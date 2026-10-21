@@ -13,7 +13,7 @@ torch = pytest.importorskip("torch")
 pytest.importorskip("triton")
 
 from grain_gemm import moe_ffn
-from grain_gemm.kernels import cutlass_moe, moe as kernels, moe_fused
+from grain_gemm.kernels import cutlass_moe, moe as kernels, moe_fused, moe_gather
 from grain_gemm.moe import _use_fused_gate_up
 
 
@@ -21,7 +21,7 @@ from grain_gemm.moe import _use_fused_gate_up
 def thor_native():
     if not torch.cuda.is_available() or torch.cuda.get_device_capability() != (11, 0):
         pytest.skip("The fused MoE library requires Thor SM110")
-    if not cutlass_moe.is_available() or not moe_fused.is_available():
+    if not cutlass_moe.is_available() or not moe_fused.is_available() or not moe_gather.is_available():
         pytest.skip("Build both optional Thor MoE libraries")
 
 
@@ -158,7 +158,7 @@ def test_gpu_fused_calls_on_two_nondefault_streams_have_private_outputs(thor_nat
 def public_inputs(thor_native):
     """Shared immutable weights retain the public transposed Linear layout."""
     generator = torch.Generator().manual_seed(20261023)
-    experts, h, i, tokens = 32, 1536, 1024, 16384
+    experts, h, i, tokens = 32, 1536, 1024, 32768
     x = torch.randn((tokens, h), generator=generator).bfloat16().cuda()
     weights = []
     scales = []
@@ -172,34 +172,55 @@ def public_inputs(thor_native):
         scales.append(scale)
     ids = ((torch.arange(tokens)[:, None] * 5 + torch.tensor([0, 7, 13, 19])) % experts).cuda()
     scores = torch.tensor([.5, -.25, 1.5, 0.], dtype=torch.float32).repeat(tokens, 1).cuda()
-    return dict(hidden_states=x, w_gate_up=weights[0], w_down=weights[1],
+    x, sx = kernels.quantize_rows(x)
+    return dict(hidden_states=x, scale_x=sx, w_gate_up=weights[0], w_down=weights[1],
                 topk_weights=scores, topk_ids=ids,
                 scale_gate_up=scales[0], scale_down=scales[1])
 
 
 def _public_case(inputs, tokens):
-    return {name: tensor[:tokens] if name in ("hidden_states", "topk_ids", "topk_weights")
+    return {name: tensor[:tokens] if name in ("hidden_states", "scale_x", "topk_ids", "topk_weights")
             else tensor for name, tensor in inputs.items()}
 
 
 def _without_fused(case, monkeypatch):
-    with monkeypatch.context() as patch:
-        patch.setattr(moe_fused, "is_available", lambda device=None: False)
-        return moe_ffn(**case, backend="auto")
+    """Independent existing packed G1 + SwiGLU bit reference, outside timing."""
+    import importlib
+    production = importlib.import_module("grain_gemm.moe")
+    x = case["hidden_states"]
+    t,h = x.shape
+    e,_,twice_i = case["w_gate_up"].shape
+    i = twice_i//2
+    routes = kernels.prepare_routes(case["topk_ids"],e,case.get("token_mask"),include_tiles=False)
+    c = ((int(routes.counts.max())+63)//64)*64
+    a,sa = kernels.pack_inputs(x,case["scale_x"],routes,c)
+    y = torch.empty((e,c,2*i),device=x.device,dtype=torch.bfloat16)
+    production._native_gemm(a,case["w_gate_up"].transpose(-2,-1),sa,case["scale_gate_up"],y,"cutlass",counts=routes.counts)
+    q,s = kernels.swiglu_quantize(y,routes,packed_capacity=c)
+    out = torch.empty((e,c,h),device=x.device,dtype=torch.bfloat16)
+    production._native_gemm(q,case["w_down"].transpose(-2,-1),s,case["scale_down"],out,"cutlass",counts=routes.counts)
+    return kernels.combine(out,case["topk_weights"],routes,output_dtype=torch.bfloat16,packed_capacity=c)
 
 
-@pytest.mark.parametrize("tokens", [4096, 8192, 16384])
+@pytest.mark.parametrize("tokens", [4096, 8192, 16384, 32768])
 def test_gpu_public_auto_selects_fused_and_matches_full_ffn_bits(public_inputs, monkeypatch, tokens):
     case = _public_case(public_inputs, tokens)
     expected = _without_fused(case, monkeypatch)
-    launch = moe_fused._launch_prevalidated
+    launch = moe_gather._launch_prevalidated
     calls = []
 
     def observed(*args, **kwargs):
+        assert args[0].data_ptr() == case["hidden_states"].data_ptr()
+        assert args[2].data_ptr() == case["scale_x"].data_ptr()
         calls.append((args[0].device, torch.cuda.current_stream(args[0].device).cuda_stream))
         return launch(*args, **kwargs)
 
-    monkeypatch.setattr(moe_fused, "_launch_prevalidated", observed)
+    monkeypatch.setattr(moe_gather, "_launch_prevalidated", observed)
+    from grain_gemm.kernels import moe_input_io
+    def unexpected_pack(*args,**kwargs):
+        pytest.fail("Thor native path expanded original token data")
+    monkeypatch.setattr(kernels, "pack_inputs", unexpected_pack)
+    monkeypatch.setattr(moe_input_io, "pack_inputs_scatter", unexpected_pack)
     stream = torch.cuda.Stream()
     stream.wait_stream(torch.cuda.current_stream())
     with torch.cuda.stream(stream):
@@ -217,18 +238,19 @@ def test_gpu_public_fused_preserves_duplicate_routes_masked_nan_and_invalid_ids(
     case["topk_ids"][:, 1] = case["topk_ids"][:, 0]
     mask = torch.arange(4096, device="cuda") % 11 != 0
     case["token_mask"] = mask
-    case["hidden_states"][~mask] = float("nan")
+    case["scale_x"] = case["scale_x"].clone()
+    case["scale_x"][~mask] = float("nan")
     case["topk_weights"][~mask] = float("nan")
     case["topk_ids"][~mask] = torch.tensor([2**63 - 1, -(2**63), 2**40, -(2**40)], device="cuda")
     expected = _without_fused(case, monkeypatch)
-    launch = moe_fused._launch_prevalidated
+    launch = moe_gather._launch_prevalidated
     calls = []
 
     def observed(*args, **kwargs):
         calls.append(True)
         return launch(*args, **kwargs)
 
-    monkeypatch.setattr(moe_fused, "_launch_prevalidated", observed)
+    monkeypatch.setattr(moe_gather, "_launch_prevalidated", observed)
     actual = moe_ffn(**case, backend="auto")
     assert calls == [True]
     _assert_bits(actual, expected)
@@ -241,17 +263,17 @@ def _unexpected_fused(*args, **kwargs):
 
 def test_gpu_public_optional_absence_retains_native_ffn(public_inputs, monkeypatch):
     case = _public_case(public_inputs, 4096)
-    expected = _without_fused(case, monkeypatch)
-    monkeypatch.setattr(moe_fused, "is_available", lambda device=None: False)
-    monkeypatch.setattr(moe_fused, "_launch_prevalidated", _unexpected_fused)
+    expected = moe_ffn(**case, backend="triton")
+    monkeypatch.setattr(moe_gather, "is_available", lambda device=None: False)
+    monkeypatch.setattr(moe_gather, "_launch_prevalidated", _unexpected_fused)
     actual = moe_ffn(**case, backend="auto")
     _assert_bits(actual, expected)
 
 
 def test_gpu_public_fp16_auto_retains_triton_fallback(public_inputs, monkeypatch):
     case = _public_case(public_inputs, 4096)
-    case["hidden_states"] = case["hidden_states"].half()
-    monkeypatch.setattr(moe_fused, "_launch_prevalidated", _unexpected_fused)
+    case["output_dtype"] = torch.float16
+    monkeypatch.setattr(moe_gather, "_launch_prevalidated", _unexpected_fused)
     expected = moe_ffn(**case, backend="triton")
     actual = moe_ffn(**case, backend="auto")
     _assert_bits(actual, expected)
@@ -259,10 +281,10 @@ def test_gpu_public_fp16_auto_retains_triton_fallback(public_inputs, monkeypatch
 
 def test_gpu_public_auto_graph_replay_retains_triton_and_dynamic_routing(public_inputs, monkeypatch):
     case = _public_case(public_inputs, 4096)
-    for name in ("hidden_states", "topk_ids", "topk_weights"):
+    for name in ("hidden_states", "scale_x", "topk_ids", "topk_weights"):
         case[name] = case[name].clone()
     case["token_mask"] = torch.ones(4096, dtype=torch.bool, device="cuda")
-    monkeypatch.setattr(moe_fused, "_launch_prevalidated", _unexpected_fused)
+    monkeypatch.setattr(moe_gather, "_launch_prevalidated", _unexpected_fused)
     stream = torch.cuda.Stream()
     stream.wait_stream(torch.cuda.current_stream())
     with torch.cuda.stream(stream):
@@ -279,7 +301,7 @@ def test_gpu_public_auto_graph_replay_retains_triton_and_dynamic_routing(public_
     case["topk_ids"].fill_(31)
     case["topk_weights"].fill_(.25)
     case["token_mask"][::7] = False
-    case["hidden_states"][~case["token_mask"]] = float("nan")
+    case["scale_x"][~case["token_mask"]] = float("nan")
     graph.replay()
     _assert_bits(captured, moe_ffn(**case, backend="triton"))
     case["token_mask"].zero_()
@@ -291,6 +313,6 @@ def test_gpu_public_unmasked_invalid_ids_still_raise_before_fused(public_inputs,
     case = _public_case(public_inputs, 4096)
     case["topk_ids"] = case["topk_ids"].clone()
     case["topk_ids"][0, 0] = 2**63 - 1
-    monkeypatch.setattr(moe_fused, "_launch_prevalidated", _unexpected_fused)
+    monkeypatch.setattr(moe_gather, "_launch_prevalidated", _unexpected_fused)
     with pytest.raises(ValueError, match="unmasked topk_ids"):
         moe_ffn(**case, backend="auto")

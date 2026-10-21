@@ -1,9 +1,72 @@
 # Tests and benchmarks
 
+The [4096-square EMC comparison](results/thor/gemm_square4096_emc_comparison.md)
+measures existing CuTe #26 and default Torch BF16 at GPU1197 MHz.
+INT8 reaches 171.53 TOPS at EMC2750 and 189.62 TOPS at EMC4266.
+
+The [8192-square EMC comparison](results/thor/gemm_square8192_emc_comparison.md)
+measures existing CuTe #26 and default Torch BF16 at GPU1197 MHz.
+INT8 reaches 211.24 TOPS at EMC2750 and 220.99 TOPS at EMC4266.
+
+The [K1536/N2048 EMC comparison](results/thor/gemm_k1536_n2048_emc_comparison.md)
+measures fixed CuTe #27 and default Torch BF16 at GPU1197 MHz,
+with EMC2750 and EMC4266.
+
+The [K1536/N1024 EMC comparison](results/thor/gemm_k1536_n1024_emc_comparison.md)
+measures CuTe INT8 and default Torch BF16 with GPU locked at 1197 MHz,
+comparing EMC2750, dynamic EMC, and EMC4266.
+
+The [default PyTorch BF16 K1536/N1024 GEMM measurement](results/thor/bf16_gemm_k1536_n1024_emc2750.md)
+records M1024/2048/4096/8192 at GPU 1197 MHz and EMC 2750 MHz,
+reaching 139.71 TFLOPS at M4096 with repeated inputs.
+
+The [CuTe-inclusive K1536/N1024 rerun](results/thor/gemm_k1536_n1024_cute_emc2750.md)
+adds all 30 independent CuTe candidates omitted from the initial sweep,
+with the same GPU 1197 MHz and EMC 2750 MHz locks.
+
+The [single Thor K1536/N1024 GEMM measurement](results/thor/gemm_k1536_n1024_emc2750.md)
+compares public Auto and native candidates over M1024/2048/4096/8192 at
+reduced GPU 1.2 GHz (1197 MHz) and EMC 2750 MHz.
+
+The [Thor intermediate-width sweep](results/thor/batched_gemm_intermediate_sweep_emc2750.md)
+compares I1024/2048/4096 at fixed H1536 and 32 experts. At 4096 rows per
+expert, Down reaches 190.99 TOPS with I4096; Gate/Up reaches 167.88 TOPS.
+
+The [equal-length Thor G256 INT8 batched GEMM benchmark](results/thor/batched_gemm_equal_g256_emc2750.md)
+measures Gate/Up and Down without routing or activation at reduced GPU 1.2 GHz
+(actual 1197 MHz) and EMC 2750 MHz, including cold and repeated-input results.
+
+The [physically interleaved Thor MoE comparison](results/thor/moe_ffn_interleaved_emc2750.md)
+tests caller-supplied `[g0,u0,g1,u1,...]` weight/scale columns at reduced GPU
+1.2 GHz (actual 1197 MHz) and EMC 2750 MHz. Gate/Up latency falls by 6.1-10.3%
+and full FFN latency by 4.2-5.3% versus the same-version split control.
+
+The [interleaved INT8 Mega experiment](results/thor/moe_ffn_interleaved_mega_emc2750.md)
+keeps hidden quantization buffers on chip and coalesces Down output. At the same
+reduced GPU 1.2 GHz / EMC 2750 MHz, full-call latency improves by 2.1-9.0% in its
+four-shape comparison. It includes a fresh DeepInfer FP8 reference and rejected
+output-combine fusion trials; use its explicitly selected experimental API.
+
+The [four-way Thor Mega BF16 comparison](results/thor/moe_ffn_mega_bf16_emc2750.md)
+adds DeepInfer's BF16 Mega implementation with exact-SM110 host dispatch support.
+At reduced GPU 1.2 GHz / EMC 2750 MHz, it is 1.51-1.77x faster than Cosmos BF16;
+fresh Mega INT8 and Mega FP8 measurements remain faster across all four sizes.
+
 Thor SM110 has separate [validation and measurements](results/thor/README.md),
 reproduced with `bench_thor.py`, and a [square comparison using the GB10
 protocol](#thor-custom-kernel-comparison), reproduced with `sweep_thor.py`.
 The public API and scale layouts are shared.
+
+The [original-x Thor MoE implementation and measurements](results/thor/moe_ffn_original_x_emc2750.md)
+read original INT8 tokens/scales inside Gate/Up, with no expanded input pack,
+and compare the full FFN against the immediately preceding packed INT8-input
+API, FP8 Mega and Cosmos BF16 at GPU 1197 MHz / EMC 2750 MHz.
+
+The current MoE API accepts **prequantized INT8 activations and FP32 `scale_x`**.
+The earlier [prequantized INT8/FP8 comparison](results/thor/moe_ffn_prequantized_emc2750.md)
+starts both low-precision methods after entry quantization; it records the predecessor’s required
+packing and complete FFN at GPU 1197 MHz / EMC 2750 MHz. Earlier reports
+below retain their documented BF16-input timing boundaries.
 
 A fresh [standalone Thor BF16 GEMM measurement at 1.2 GHz
 (1197 MHz)](results/thor/bf16_gemm_1197mhz.md) reaches **130.32 TFLOPS** on

@@ -4,29 +4,47 @@ INT8 activation × INT8 weight (W8A8) GEMM with scales grouped along the reducti
 
 Python package: `grain_gemm`.
 
-The inference-only [`moe_ffn` API](docs/moe_ffn.md) composes routing, dynamic
-activation quantization, both expert projections, SwiGLU and weighted combination
+The inference-only [`moe_ffn` API](docs/moe_ffn.md) accepts INT8 activations plus
+FP32 `scale_x` and composes routing/packing, both
+expert projections, SwiGLU/intermediate quantization and weighted combination
 into one call. It uses the same logical weight views and scale layouts as GEMM.
 
-On Thor SM110, an optional native kernel fuses the gate/up projection (G1),
-BF16 rounding, FP32 SwiGLU and G256 INT8 activation quantization, avoiding the
-full BF16 gate/up workspace. Build it separately:
+For physically adjacent gate/up channels, pass
+[`gate_up_layout="interleaved"`](docs/moe_interleaved.md) and supply both
+weight and scale output columns as `[g0,u0,g1,u1,...]`. Thor uses the independent
+`tools/build_moe_interleaved.py --cutlass-dir PATH` build for that layout.
+
+On Thor SM110, the native Gate/Up kernel reads original `x_int8[T,H]` and
+`scale_x[T,H/256]` through sorted route indices. It gathers directly into shared
+memory and fuses Gate/Up, BF16 rounding, SwiGLU and G256 intermediate quantization.
+It allocates neither an expert-expanded input/scale buffer nor a BF16 Gate/Up
+workspace. Build the native down projection and original-token kernel:
 
 ```bash
-python tools/build_moe_fused.py --cutlass-dir /path/to/cutlass
+python tools/build_cutlass_moe.py --cutlass-dir /path/to/cutlass
+python tools/build_moe_gather.py --cutlass-dir /path/to/cutlass
 ```
 
-Native CUTLASS MoE execution automatically selects this kernel for eager calls
-with `E=32`, `H=1536`, `I=1024`, top-k `R=4` and `T=4096`, `8192` or `16384`, when the
-optional build is available. Other shapes, CUDA Graph capture and absent optional
-builds retain the existing path. The down projection and output combination are
-separate stages. Public API and scale layouts, and SM120/GB10 implementations,
-are unchanged.
+Auto selects native Thor execution for dense-enough BF16-output routing when the
+builds are available and original x is 16-byte aligned. Other auto cases use
+ragged Triton, which also reads original token rows directly. Captured explicit
+Thor native calls support this gather path; captured auto calls retain Triton.
+Down and output combination remain separate stages. Public weight/scale layouts,
+single-GEMM implementations and SM120/GB10 native code are unchanged.
 
-The [cached two-SM MoE benchmark](benchmarks/results/thor/moe_ffn_cached_2sm_emc2750.md)
-records the current implementation at a reduced nominal 1.2 GHz GPU clock
-(1197 MHz) and 2750 MHz EMC, with full public-API timings and DeepInfer FP8
-as a performance reference.
+The [original-token benchmark](benchmarks/results/thor/moe_ffn_original_x_emc2750.md)
+compares this path with the preceding INT8-input packed implementation and
+DeepInfer FP8 at reduced GPU 1.2 GHz (actual 1197 MHz) and EMC 2750 MHz.
+The [prequantized-input comparison](benchmarks/results/thor/moe_ffn_prequantized_emc2750.md)
+and [cached two-SM benchmark](benchmarks/results/thor/moe_ffn_cached_2sm_emc2750.md)
+retain their earlier implementations and documented input boundaries.
+
+The explicitly selected [interleaved INT8 Mega experiment](experiments/thor_interleaved_mega/README.md)
+keeps hidden quantization buffers on chip. The separate
+[Mega BF16 comparison](experiments/thor_mega_bf16/README.md) provides a reproducible
+four-way INT8/FP8/BF16/Cosmos benchmark and
+[performance report](benchmarks/results/thor/moe_ffn_mega_bf16_emc2750.md).
+These experiments do not replace production automatic dispatch.
 
 ## Operation
 

@@ -31,7 +31,8 @@ def _scatter_quantize_and_pad(X, INVERSE, KEYS, OFFSETS, COUNTS, Q, SA,
                               K: tl.constexpr, R: tl.constexpr,
                               C: tl.constexpr, GROUP: tl.constexpr,
                               ZERO_INITIALIZED: tl.constexpr,
-                              ROWS: tl.constexpr = 4, GROUPS: tl.constexpr = 2):
+                              ROWS: tl.constexpr = 4, GROUPS: tl.constexpr = 2,
+                              SCALE_X=None, PREQUANTIZED: tl.constexpr = False):
     program = tl.program_id(0)
     token_programs = tl.cdiv(T, ROWS)
     groups = tl.program_id(1) * GROUPS + tl.arange(0, GROUPS)
@@ -59,8 +60,15 @@ def _scatter_quantize_and_pad(X, INVERSE, KEYS, OFFSETS, COUNTS, Q, SA,
         values = tl.load(
             X + tokens[:, None, None] * K + cols[None, :, :],
             enabled[:, None, None] & group_valid[None, :, None], other=0,
-        ).to(tl.float32)
-        quantized, scales = _quantize_groups(values, GROUP, ROWS, GROUPS)
+        )
+        if PREQUANTIZED:
+            quantized = values
+            scales = tl.load(
+                SCALE_X + tokens[:, None] * (K // GROUP) + groups[None, :],
+                enabled[:, None] & group_valid[None, :], other=0,
+            )
+        else:
+            quantized, scales = _quantize_groups(values.to(tl.float32), GROUP, ROWS, GROUPS)
         for rank in tl.static_range(R):
             destination = destinations[rank]
             valid = masks[rank]
@@ -127,4 +135,29 @@ def quantize_pack_inputs_scatter(hidden_states, routes, capacity, group_size=256
                 rows, groups,
                 num_warps=4, enable_fp_fusion=False,
             )
+    return q, scales
+
+
+def pack_inputs_scatter(hidden_states, scale_x, routes, capacity, group_size=256):
+    """Scatter prequantized token rows/scales to experts without recomputing either.
+
+    Duplicate routes keep separate rows, masked inputs/scales are not loaded,
+    and unused expert rows receive positive-zero data and scales.
+    """
+    k = hidden_states.shape[-1]
+    if group_size != 256 or k % group_size:
+        raise ValueError("The input producer requires complete G256 groups")
+    q = torch.empty((routes.experts, capacity, k), dtype=torch.int8,
+                    device=hidden_states.device)
+    scales = torch.empty((routes.experts, capacity, k // group_size),
+                         dtype=torch.float32, device=hidden_states.device)
+    if capacity:
+        rows, groups = 4, triton.next_power_of_2(min(k // group_size, 8))
+        _scatter_quantize_and_pad[(triton.cdiv(routes.tokens, rows) + routes.experts,
+                                  triton.cdiv(k // group_size, groups))](
+            hidden_states, routes.inverse, routes.effective_ids, routes.offsets,
+            routes.counts, q, scales, routes.tokens, routes.experts, k,
+            routes.top_k, capacity, group_size, False, rows, groups,
+            scale_x, True, num_warps=4, enable_fp_fusion=False,
+        )
     return q, scales

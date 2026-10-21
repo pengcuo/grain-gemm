@@ -3,11 +3,16 @@ include benchmarks/README.md
 include benchmarks/cutlass.md
 include benchmarks/results/*.json
 include benchmarks/results/*.csv
+recursive-include benchmarks/results *.md
 include docs/assets/*.png
 include docs/assets/*.svg
 include tests/*.py
-include tools/build_cuda.py
-include tools/build_cutlass.py
+include tools/build_*.py
+include experiments/README.md
+recursive-include experiments/thor_interleaved_mega *.py *.cu *.cuh *.md
+recursive-include experiments/thor_mega_bf16 *.py *.md *.patch *LICENSE*
+prune experiments/thor_interleaved_mega/build
+prune experiments/thor_mega_bf16/build
 recursive-include src/grain_gemm/kernels/csrc *.cu *.hpp *.md
 recursive-include src/grain_gemm/kernels/configs *.json
 prune src/grain_gemm/kernels/_native

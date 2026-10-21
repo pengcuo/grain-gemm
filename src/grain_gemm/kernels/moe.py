@@ -566,7 +566,7 @@ def _swiglu_quantize_row_block(GATE_UP, Q, S, OFFSETS, COUNTS,
                                M: tl.constexpr, I: tl.constexpr,
                                GROUP: tl.constexpr, ROWS: tl.constexpr,
                                HAS_ROUTES: tl.constexpr, E: tl.constexpr,
-                               CAPACITY: tl.constexpr):
+                               CAPACITY: tl.constexpr, INTERLEAVED: tl.constexpr):
     rows = tl.program_id(0) * ROWS + tl.arange(0, ROWS)
     group = tl.program_id(1)
     present = rows < M
@@ -585,9 +585,11 @@ def _swiglu_quantize_row_block(GATE_UP, Q, S, OFFSETS, COUNTS,
     if HAS_ROUTES and CAPACITY > 0:
         has_values = tl.sum(valid.to(tl.int32), axis=0) > 0
     if has_values:
-        gate = tl.load(GATE_UP + rows[:, None] * (2 * I) + cols[None, :],
+        gate_cols = 2 * cols if INTERLEAVED else cols
+        up_cols = 2 * cols + 1 if INTERLEAVED else I + cols
+        gate = tl.load(GATE_UP + rows[:, None] * (2 * I) + gate_cols[None, :],
                        valid[:, None], other=0).to(tl.float32)
-        up = tl.load(GATE_UP + rows[:, None] * (2 * I) + I + cols[None, :],
+        up = tl.load(GATE_UP + rows[:, None] * (2 * I) + up_cols[None, :],
                      valid[:, None], other=0).to(tl.float32)
         hidden = libdevice.div_rn(gate, 1.0 + libdevice.exp(-gate)) * up
         quantized, scales = _symmetric_quantize_row_block(hidden)
@@ -600,13 +602,17 @@ def _swiglu_quantize_row_block(GATE_UP, Q, S, OFFSETS, COUNTS,
 
 
 def swiglu_quantize(gate_up, routes=None, *, packed_capacity=None, group_size=256,
-                    rows_per_program=8):
+                    rows_per_program=8, gate_up_layout="split"):
     """Compute SwiGLU in FP32 and directly quantize without a BF16 hidden round.
 
     Accept either [S,2I] ragged storage or [E,C,2I] native storage.  If routes is
     supplied, invalid/padded rows are read as zero rather than touching unwritten
-    ragged GEMM output.  The returned leading dimensions match gate_up.
+    ragged GEMM output. The returned leading dimensions match gate_up. The
+    final dimension is split [gate...,up...] or interleaved [g0,u0,g1,u1,...];
+    the output hidden channels and their scale grouping retain the same order.
     """
+    if gate_up_layout not in ("split", "interleaved"):
+        raise ValueError("gate_up_layout must be 'split' or 'interleaved'")
     intermediate = gate_up.shape[-1] // 2
     rows = prod(gate_up.shape[:-1])
     q = torch.empty((*gate_up.shape[:-1], intermediate),
@@ -619,6 +625,7 @@ def swiglu_quantize(gate_up, routes=None, *, packed_capacity=None, group_size=25
             gate_up, q, scales, routes.offsets if routes else None,
             routes.counts if routes else None, rows, intermediate, group_size, rows_per_program,
             routes is not None, routes.experts if routes else 0, capacity,
+            gate_up_layout == "interleaved",
             num_warps=4, enable_fp_fusion=False,
         )
     return q, scales

@@ -1,0 +1,9 @@
+/build/
+*.so
+*.cubin
+*.ptx
+*.log
+*.json
+*.csv
+*.nsys-rep
+*.sqlite
