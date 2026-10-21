@@ -140,13 +140,15 @@ T/E/R; the routing metadata and valid tile counts are recomputed on the device.
 This permits graph replay with changed tokens, ids, scores, masks and expert
 counts. Warm up all signatures before capturing.
 
-For up to 64 experts and 65536 expanded slots, routing uses stable device-side
-counting sort: chunk histograms, a prefix sum, then stable scattering. Larger
-cases retain the general stable-sort path. Quantization and packing process
-several rows per program; output combination uses wider column tiles to
-amortize routing-index loads. Every path preserves duplicate slots and masks.
+For up to 64 experts, routing uses stable device-side counting sort: chunk
+histograms, a prefix sum, then stable scattering. SM110 uses 2048-slot chunks
+for up to 262144 expanded slots; other architectures retain 512-slot chunks and
+the 65536-slot threshold. Larger cases retain the general stable-sort path.
+Quantization and packing process several rows per program; output combination
+uses wider column tiles to amortize routing-index loads. Every path preserves
+duplicate slots and masks.
 
-`backend="cutlass"` uses the native SM110 batched G256 kernel for both
+`backend="cutlass"` uses native SM110 G256 kernels for the expert
 projections. Actual per-expert counts are padded internally to a common
 capacity. Weights and scales must be 16-byte aligned, BF16 activations are
 required, and the matching optional library must be built:
@@ -176,10 +178,14 @@ weight scales remain `[E,K/256,N]`, with N contiguous.
 
 The separate MoE library reuses that collective with 128-row and 256-row tiles,
 one-SM/two-SM variants and dynamic/static persistent schedulers. Counts-aware
-variants read `[E]` INT32 counts on the current CUDA stream and skip subsequent
-tiles whose entire cluster lies in padding. The initial work tile is retained
-to preserve the collective's producer/consumer and barrier protocol. Valid
-rows retain the original G256 math; padding output need not be written. SwiGLU
+variants read `[E]` INT32 counts on the current CUDA stream and skip every
+work tile whose entire cluster lies in padding, including initial work and
+empty experts. A cluster with no live work returns before pipeline setup;
+otherwise every producer, consumer and peer CTA starts at the same first live
+task. Skipped tiles perform no GEMM operand loads, matrix arithmetic or output
+stores. Partially live clusters still compute their full 128-row or 256-row
+tile. Valid rows retain the original G256 math; padding output need not be
+written. SwiGLU
 masks these rows before loading, and combination reads only live routes.
 Entirely padded SwiGLU blocks write zero INT8 values and the original finite
 zero-group scale directly, avoiding nonlinear math while fully initializing
@@ -193,6 +199,51 @@ token/group once and scatters it to its selected packed expert rows. A separate
 padding kernel initializes only unused rows. This removes intermediate token
 INT8/scale tensors while retaining the original packed layout, exact rounding,
 duplicate-route behavior and fully initialized TMA inputs.
+For the calibrated E32/H1536/Top-4 cases with at least 16384 tokens, a separate
+input producer shares route loads across adjacent G256 groups and initializes
+padding in the same launch.
+
+An additional optional SM110 library fuses gate/up projection, FP32 SwiGLU and
+G256 activation quantization. Build it independently of either GEMM library:
+
+```bash
+python tools/build_moe_fused.py --cutlass-dir /path/to/cutlass
+```
+
+This installs `libgrain_moe_fused.so` and `moe_fused_build.json` under the private
+native-library directory. The loader checks the SM110 target, ABI, source hashes
+and binary hash. A missing or stale build retains the original gate/up GEMM
+plus activation-quantization path. No new public arguments or weight preparation
+are required.
+
+Eligible eager CUTLASS calls, including `backend="auto"` after it selects
+CUTLASS, use the fusion for BF16 inputs with T=4096, 8192 or 16384 and
+E=32/H=1536/I=1024/Top-4. Existing padding/skew checks still apply. T=32768
+and other token counts retain the native separate gate/up GEMM and activation
+quantization. SM120/GB10, FP16 auto, captured auto and captured explicit native
+calls retain their existing implementations.
+
+The fused kernel uses two-SM clusters with a 128-row cluster tile, 64 rows per
+physical CTA, and paired 128-channel gate/up projections. Each G256 output
+group is computed in two I128 halves. Gate and up share the loaded input A;
+for H=1536, all six input G256 blocks remain in shared memory for reuse by the
+second I128 half. Two operand stages and four paired TMEM accumulator buffers
+overlap input movement, INT8 matrix operations and FP32 scaled accumulation.
+The private launcher's `persistent_blocks` counts physical CTAs and rounds up
+to an even count. Zero starts from the device SM count; the number of clusters
+is capped by the available cluster tasks.
+
+Both projections retain their BF16 rounding before FP32 SwiGLU. The complete
+256-channel SwiGLU group stays FP32 in CTA shared memory until its scale
+reduction and INT8 quantization, then the kernel writes INT8 `[E,C,I]` and FP32
+`[E,C,I/256]` directly. It removes the full BF16 `[E,C,2I]` global intermediate
+allocation and its write/read. Packed inputs and quantized intermediate
+outputs still use global memory; input packing, down GEMM and output
+combination remain separate kernels. This is a fused G1 stage, not a complete
+single-kernel Mega MoE. Public weight/scale shapes, strides, G256 grouping and
+score placement are unchanged. Kernel arguments and output buffers belong to
+each invocation on its current stream; weight tensors and their pointers are
+not cached.
 
 Cosmos supplies the equal-capacity batched GEMM. This function additionally
 implements ragged routing, padding without token dropping, dynamic activation
@@ -213,32 +264,40 @@ includes masked slots. It retains ragged Triton execution if equal-capacity
 padding would exceed twice the number of valid, unmasked assignments. This is
 a conservative heuristic, not an offline-tuned optimal dispatcher.
 
-Within the separate Thor MoE library, the default is config 34: a dynamic
-persistent 2SM 128x256x256 tile. Full-FFN calibration selects config 44, a
+Within the separate Thor MoE library, the default is config 43: a counts-aware
+static persistent 2SM 128x256x256 tile. Full-FFN calibration selects config 44, a
 counts-aware static 1SM 128x128x256 tile, for `(E,C,N,K)` equal to
-`(32,320,2048,1536)` or `(32,320,1536,1024)`. Config 45 retains the original
-dynamic 2SM 256x256x256 tile and is selected for measured E32 capacities:
+`(32,320,2048,1536)` or `(32,320,1536,1024)`. Config 47 uses a counts-aware
+static 2SM 256x256x256 tile and is selected for measured E32 capacities:
 
-| Projection `(N,K)` | Capacities selecting config 45 |
+| Projection `(N,K)` | Capacities selecting config 47 |
 |---|---|
 | Gate/up `(2048,1536)` | 768, 960, 1024, 1088, 1152, 1216, 2048, 2112, 2176, 2240, 4096, 4288, 4352 |
-| Down `(1536,1024)` | 768, 960, 1024, 1216, 2048, 2240, 4096, 4288, 4352 |
+| Down `(1536,1024)` | 768, 960, 1024, 1216, 2048, 2240, 4096, 4352 |
 
-The projections choose independently: at capacity 1152, the larger tile speeds
-up gate/up but slows down down-projection because of tile padding. Capacities
-640 and 896 retain config 34, as do uncalibrated shapes. These choices do not
-modify any single-GEMM dispatch table. Captured explicit native calls still
-use their reserved worst-case capacity when choosing a configuration.
+Measured exceptions take priority over that table: E32 down `(N,K)=(1536,1024)`
+at capacities 640, 1152 and 4288 selects config 44; the first two use swizzle 4.
+E32 gate/up `(N,K)=(2048,1536)` at capacity 4288 also selects config 47.
+Uncalibrated shapes retain config 43. Config 46 provides a counts-aware static
+2SM 256x128x256 alternative. Original dynamic configurations 34, 36 and 45
+remain available for isolated comparisons. The projections choose independently;
+these choices
+do not modify any single-GEMM dispatch table. Captured explicit native calls
+still use their reserved worst-case capacity when choosing a configuration.
 
 Captured auto execution always selects Triton. Explicit native capture reserves
 the worst-case capacity `round_up(T*R,64)` per expert to accommodate any valid
-routing on replay. This can use substantial memory and unnecessary compute;
-prefer auto/Triton for graphs with dynamic routing.
+routing on replay. Counts-aware tiles reread the GPU counts on every replay
+and skip wholly unused clusters, but the reserved memory and partial-cluster
+padding remain. Input/intermediate padding initialization still writes its
+required zero values. Prefer auto/Triton for graphs with dynamic routing.
+See the [per-expert padding-skip measurements](../benchmarks/results/thor/moe_ffn_padding_skip_emc2750.md).
 
 ## Validation and measurements
 
 ```bash
 PYTHONPATH=src python -m pytest -q tests/test_moe_ffn.py
+PYTHONPATH=src python -m pytest -q tests/test_moe_fused.py tests/test_moe_fused_sm110.py
 PYTHONPATH=src python benchmarks/bench_moe_ffn.py --output /tmp/moe_ffn.json
 ```
 
@@ -270,3 +329,17 @@ remeasures before/after INT8, upstream vLLM BF16 and Cosmos compiled BF16 in
 one process on identical inputs at 1197 MHz. It records actual per-projection
 native configuration IDs, independent correctness checks, raw samples and
 source/build hashes; the earlier measurements above remain unchanged.
+
+The [cached two-SM benchmark](../benchmarks/results/thor/moe_ffn_cached_2sm_emc2750.md)
+records the current implementation against the immediately preceding package
+and DeepInfer FP8 at 1197 MHz GPU / 2750 MHz EMC. It includes public eager
+timings, stage breakdowns, bit comparisons and rejected full-fusion prototypes.
+
+The [earlier SM110 fused INT8 and DeepInfer FP8 comparison](../benchmarks/results/thor/moe_ffn_mega_int8_emc2750.md)
+records the original one-SM fused implementation, selected at T=4096/8192,
+using actual before/current public auto calls at a reduced nominal 1.2 GHz GPU
+clock (1197 MHz) with EMC locked at 2750 MHz. Its source hashes, dispatch scope
+and measurements describe that historical run, preceding the cached two-SM
+implementation above. It includes exact intermediate/output bit checks and
+the complete eager FFN. DeepInfer FP8 remains a performance reference with a
+different quantization and score-placement contract.

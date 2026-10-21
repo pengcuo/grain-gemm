@@ -55,10 +55,10 @@
 namespace cutlass::gemm { struct GrainMoeCountsScheduler {}; }
 
 namespace grain_moe_sm110 {
-// Preserve the first work tile: the collective enters its producer/consumer
-// loops before checking validity. Subsequent work is skipped only for a whole
-// cluster whose rows all lie outside the expert's live prefix. Every warp and
-// both CTAs of a 2SM cluster follow the same sequence, retaining all barriers.
+// Skip whole clusters outside each expert's live row prefix, including the
+// initial task. The entry adapter returns an entirely idle cluster before
+// pipeline setup; active clusters enter the collective at their first live task.
+// All roles and both CTAs follow the same static work sequence.
 template <class CtaShape, class ClusterShape>
 class CountsStaticScheduler
     : public cutlass::gemm::kernel::detail::StaticPersistentTileScheduler100 {
@@ -87,20 +87,33 @@ class CountsStaticScheduler
     return params;
   }
 
+  template <class ActualClusterShape>
+  CUTLASS_DEVICE WorkTileInfo initial_work_tile_info(ActualClusterShape cluster_shape) {
+    auto work = Base::initial_work_tile_info(cluster_shape);
+    while (expert_counts_ && work.is_valid() && !has_live_rows(work)) {
+      Base::advance_to_next_work();
+      work = Base::get_current_work();
+    }
+    return work;
+  }
+
   template <class Pipeline, class State>
   CUTLASS_DEVICE auto fetch_next_work(WorkTileInfo work, Pipeline& pipeline, State state) {
     auto next = Base::fetch_next_work(work, pipeline, state);
     while (expert_counts_ && cute::get<0>(next).is_valid()) {
       auto const& candidate = cute::get<0>(next);
-      constexpr int cluster_m = cute::size<0>(ClusterShape{});
-      constexpr int cta_m = cute::size<0>(CtaShape{});
-      int row_start = (candidate.M_idx / cluster_m) * cluster_m * cta_m;
-      if (row_start < expert_counts_[candidate.L_idx]) break;
+      if (has_live_rows(candidate)) break;
       next = Base::fetch_next_work(candidate, pipeline, state);
     }
     return next;
   }
  private:
+  CUTLASS_DEVICE bool has_live_rows(WorkTileInfo const& work) const {
+    constexpr int cluster_m = cute::size<0>(ClusterShape{});
+    constexpr int cta_m = cute::size<0>(CtaShape{});
+    int row_start = (work.M_idx / cluster_m) * cluster_m * cta_m;
+    return row_start < expert_counts_[work.L_idx];
+  }
   int32_t const* expert_counts_;
 };
 }  // namespace grain_moe_sm110
@@ -115,6 +128,22 @@ struct TileSchedulerSelector<cutlass::gemm::GrainMoeCountsScheduler,
 
 namespace grain_moe_sm110 {
 using namespace cute;
+
+// Preflight has no barriers, TMEM allocations or tensor accesses. A cluster's
+// static work indices share the same M-cluster origin, expert and validity, so
+// either all its CTAs enter the original collective or all return here.
+// The collective constructs a fresh scheduler, reproducing the same first live
+// task selected during preflight. Counts must not change during a launch.
+template <class BaseKernel>
+struct CountsKernel : BaseKernel {
+  CUTLASS_DEVICE void operator()(typename BaseKernel::Params const& params, char* smem) {
+    typename BaseKernel::TileScheduler scheduler(nullptr, params.scheduler,
+                                                cute::block_id_in_cluster());
+    auto work = scheduler.initial_work_tile_info(typename BaseKernel::ClusterShape{});
+    if (!work.is_valid()) return;
+    BaseKernel::operator()(params, smem);
+  }
+};
 
 template <int TileM, int TileN, bool TwoSm, bool Static = false, bool Counts = false> struct Blockwise {
   using Tile = Shape<Int<TileM>, Int<TileN>, _256>;
@@ -149,10 +178,11 @@ template <int TileM, int TileN, bool TwoSm, bool Static = false, bool Counts = f
       Cluster, cutlass::gemm::collective::StageCountAutoCarveout<
           static_cast<int>(sizeof(typename Epilogue::SharedStorage))>,
       MainloopSchedule>::CollectiveOp;
-  using Kernel = cutlass::gemm::kernel::GemmUniversal<
+  using BaseKernel = cutlass::gemm::kernel::GemmUniversal<
       Shape<int, int, int, int>, Mainloop, Epilogue,
       cute::conditional_t<Counts, cutlass::gemm::GrainMoeCountsScheduler,
           cute::conditional_t<Static, cutlass::gemm::StaticPersistentScheduler, void>>>;
+  using Kernel = cute::conditional_t<Counts, CountsKernel<BaseKernel>, BaseKernel>;
   using Gemm = cutlass::gemm::device::GemmUniversalAdapter<Kernel>;
 
   static typename Gemm::Arguments arguments(
@@ -239,7 +269,9 @@ inline bool valid(int M, int N, int K, int E, int swizzle, int raster) {
   OP(42, 128, 128, false, true, false) \
   OP(43, 128, 256, true, true, true)   \
   OP(44, 128, 128, false, true, true)  \
-  OP(45, 256, 256, true, false, false)
+  OP(45, 256, 256, true, false, false) \
+  OP(46, 256, 128, true, true, true)   \
+  OP(47, 256, 256, true, true, true)
 
 extern "C" size_t grain_cutlass_moe_workspace_bytes(
     int M, int N, int K, int E, int config, int swizzle, int raster) {

@@ -12,13 +12,14 @@ _ROOT = Path(__file__).parent
 _LIBRARY = _ROOT / "_native/libgrain_cutlass_moe.so"
 CONFIGS = {
     config: dict(block_m=m, block_n=n, block_k=256, cluster_m=cluster,
-                 scheduler="static" if static else "dynamic", counts_aware=config in (43, 44))
+                 scheduler="static" if static else "dynamic", counts_aware=config in (43, 44, 46, 47))
     for config, m, n, cluster, static in (
         (34, 128, 256, 2, False), (35, 128, 128, 2, False), (36, 256, 128, 2, False),
         (37, 128, 256, 1, False), (38, 128, 128, 1, False),
         (41, 128, 256, 2, True), (42, 128, 128, 1, True),
         (43, 128, 256, 2, True), (44, 128, 128, 1, True),
         (45, 256, 256, 2, False),
+        (46, 256, 128, 2, True), (47, 256, 256, 2, True),
     )
 }
 
@@ -69,7 +70,9 @@ def launch(a, weight, scale_a, scale_b, out, config_id=34, *, counts=None, swizz
     Scale tensors retain public layouts SA[E,M,K/256], SB[E,K/256,N].
     Raster 0 is heuristic, 1 along N, 2 along M; swizzle is 1/2/4/8.
     Counts-aware configs accept GPU int32 counts[E] in [0,M]; only each
-    expert's live row prefix is defined. None computes all M rows. Other
+    expert's live row prefix is defined. Entire padding clusters, including
+    initial work and empty experts, are skipped before GEMM loading/computation.
+    A partially valid cluster still executes at tile granularity. None computes all M rows. Other
     configs ignore counts. No values are synchronized to the host.
     """
     import torch

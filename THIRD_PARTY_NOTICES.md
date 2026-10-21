@@ -88,6 +88,17 @@ adapter. The launcher also retains the existing warp-MMA candidates described
 above. CUTLASS headers remain an external build dependency; SM120/GB10 source
 and configurations are unchanged.
 
+`src/grain_gemm/kernels/csrc/sm110/int8_g256_moe_fused.cu` adapts the same
+CUTLASS Blackwell CuTe primitives for an optional fused INT8 gate/up projection,
+BF16 rounding, SwiGLU and G256 activation quantization. NVIDIA's full
+BSD-3-Clause copyright and license notice is retained in the source; the
+complete license is included in [licenses/CUTLASS-LICENSE](licenses/CUTLASS-LICENSE).
+Its persistent work scheduling draws algorithmic inspiration from
+[DeepInfer's Mega MoE design](https://github.com/deepseek-ai/DeepInfer).
+The CuTe source derivation and license attribution are to CUTLASS as described
+above; the scheduling inspiration does not introduce copied DeepInfer or
+DeepGEMM source code.
+
 ## Thor CUTLASS blockwise implementation
 
 `src/grain_gemm/kernels/csrc/sm110/int8_g256_cutlass.cu` and the three

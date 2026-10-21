@@ -44,6 +44,37 @@ SM120/GB10 sources, configuration IDs and build flags remain unchanged.
 The SM110 CUTLASS adapter adds a two-SM G256 pipeline
 and uses architecture-specific shadow headers, while preserving its 32 shared
 warp MMA candidates. Its source hash covers all transitive project dependencies.
+
+The separate `sm110/int8_g256_moe_fused.cu` translation unit builds an optional
+SM110 MoE library with `python tools/build_moe_fused.py --cutlass-dir PATH`.
+It fuses the INT8 gate/up projection (G1), its BF16 rounding, FP32 SwiGLU and
+G256 activation quantization. Two-SM clusters use a 128-row cluster tile, 64
+rows per CTA, paired 128-channel gate/up projections, two operand stages and
+four paired TMEM accumulator buffers. Each output G256 group uses two I128
+halves. Gate/up reuse input A, and H=1536 caches all six input G256 blocks in
+shared memory across both halves. The private launcher's `persistent_blocks`
+counts physical CTAs rounded up to a multiple of two; zero starts from the
+device SM count, with clusters capped by the available cluster tasks.
+
+Each projection preserves BF16 rounding before SwiGLU. The complete SwiGLU
+G256 group remains FP32 in shared memory until quantization, avoiding the
+full BF16 gate/up allocation and write/read in global memory. Packed inputs
+and quantized intermediate outputs still use global memory; down projection
+and output combination execute separately. This is a fused G1 stage, not a
+complete single-kernel Mega MoE. INT32 group dots, FP32 scaled accumulation and
+the public weight/scale layouts are preserved. The builder records this single
+CUDA translation unit's source hash and the library hash independently of the
+existing native libraries.
+
+The public MoE dispatcher selects this optional kernel only for eager SM110
+native CUTLASS calls with `E=32`, `H=1536`, `I=1024`, top-k `R=4` and `T=4096`,
+`8192` or `16384`. T=32768 retains separate native G1 and activation kernels.
+Missing optional builds, other shapes and CUDA Graph capture use the existing
+path. SM120/GB10 kernels and dispatch remain unchanged. The source
+retains NVIDIA's full CUTLASS BSD-3-Clause notice; persistent scheduling draws
+algorithmic inspiration from DeepInfer's Mega MoE design. See the repository's
+`THIRD_PARTY_NOTICES.md` and `licenses/CUTLASS-LICENSE` for source attribution.
+
 Shared implementation details can move
 into a common directory when there is an actual second user. Keep internal
 symbols distinct when linking several implementations through a shared public

@@ -109,18 +109,23 @@ _THOR_MOE_TILE45_CAPACITIES = {
 
 
 def _native_config(capacity, output_width, reduction_width, *, experts=None):
-    """Thor MoE tile choice; independent of single-GEMM configuration tables."""
+    """Counted Thor MoE tiles; independent of single-GEMM configuration tables."""
+    if experts == 32:
+        if (output_width, reduction_width) == (1536, 1024) and capacity in (640, 1152, 4288):
+            return 44
+        if (capacity, output_width, reduction_width) == (4288, 2048, 1536):
+            return 47
     # Full-FFN comparisons favor counted 1SM tiles for these measured shapes.
     if (experts, capacity, output_width, reduction_width) in (
             (32, 320, 2048, 1536), (32, 320, 1536, 1024)):
         return 44
-    # The original 256-row tile wins on these measured E32 projections.
+    # Retain the measured 256-row geometry with a counts-aware scheduler.
     # Keep 128-row tiles at other capacities: extra M padding can reverse
     # the result, and gate/up and down do not always prefer the same tile.
     if experts == 32 and capacity in _THOR_MOE_TILE45_CAPACITIES.get(
             (output_width, reduction_width), ()):
-        return 45
-    return 34
+        return 47
+    return 43
 
 
 def _native_gemm(a, weight, sa, sb, out, backend, *, counts=None):
@@ -133,6 +138,9 @@ def _native_gemm(a, weight, sa, sb, out, backend, *, counts=None):
             # ownership and current-stream launch in the private bridge.
             return cutlass_moe._launch_prevalidated(
                 a, weight, sa, sb, out, config_id=config, counts=counts,
+                swizzle=4 if (config == 44 and a.shape[0] == 32
+                              and a.shape[1] in (640, 1152)
+                              and (weight.shape[1], a.shape[2]) == (1536, 1024)) else 1,
             )
         return cutlass.launch_batched(a, weight, sa, sb, out, config_id=32)
     from .gemm import get_kernel_config
@@ -149,6 +157,15 @@ def _native_gemm(a, weight, sa, sb, out, backend, *, counts=None):
         implementation.launch(a[expert], b, sa[expert], sb[expert], out[expert],
                               config["config_id"])
     return out
+
+
+def _use_fused_gate_up(tokens, hidden, intermediate, experts, top_k, device, *, capturing):
+    """Measured Thor shapes; absent optional builds retain the original path."""
+    if (capturing or tokens not in (4096, 8192, 16384)
+            or (experts, hidden, intermediate, top_k) != (32, 1536, 1024, 4)):
+        return False
+    from .kernels import moe_fused
+    return moe_fused.is_available(device)
 
 
 def moe_ffn(hidden_states, w_gate_up, w_down, topk_weights, topk_ids, *,
@@ -262,19 +279,39 @@ def moe_ffn(hidden_states, w_gate_up, w_down, topk_weights, topk_ids, *,
                 raise ValueError("native MoE workspace exceeds the supported indexing range")
             if (selected == "cutlass" and top_k <= 8
                     and torch.cuda.get_device_capability(hidden_states.device) == (11, 0)):
-                packed_x, packed_sx = kernels.quantize_pack_inputs(
+                input_producer = kernels.quantize_pack_inputs
+                # Large Thor batches benefit from sharing routing loads across
+                # adjacent G256 groups and initializing padding in the same
+                # launch. Smaller batches retain their measured faster tile.
+                if tokens >= 16384 and (experts, hidden, top_k) == (32, 1536, 4):
+                    from .kernels.moe_input_io import quantize_pack_inputs_scatter
+                    input_producer = quantize_pack_inputs_scatter
+                packed_x, packed_sx = input_producer(
                     hidden_states, routes, capacity, group_size,
                 )
             else:
                 qx, sx = kernels.quantize_rows(hidden_states, group_size)
                 packed_x, packed_sx = kernels.pack_inputs(qx, sx, routes, capacity)
-            gate_up = torch.empty((experts, capacity, 2 * intermediate),
-                                  device=hidden_states.device, dtype=hidden_states.dtype)
-            _native_gemm(packed_x, w1_linear, packed_sx, scale_gate_up, gate_up,
-                         selected, counts=routes.counts)
-            qh, sh = kernels.swiglu_quantize(
-                gate_up, routes=routes, packed_capacity=capacity,
-            )
+            if (selected == "cutlass" and _use_fused_gate_up(
+                    tokens, hidden, intermediate, experts, top_k,
+                    hidden_states.device, capturing=capturing)):
+                from .kernels import moe_fused
+                qh = torch.empty((experts, capacity, intermediate),
+                                 device=hidden_states.device, dtype=torch.int8)
+                sh = torch.empty((experts, capacity, intermediate // group_size),
+                                 device=hidden_states.device, dtype=torch.float32)
+                moe_fused._launch_prevalidated(
+                    packed_x, w1_linear, packed_sx, scale_gate_up,
+                    routes.counts, qh, sh,
+                )
+            else:
+                gate_up = torch.empty((experts, capacity, 2 * intermediate),
+                                      device=hidden_states.device, dtype=hidden_states.dtype)
+                _native_gemm(packed_x, w1_linear, packed_sx, scale_gate_up, gate_up,
+                             selected, counts=routes.counts)
+                qh, sh = kernels.swiglu_quantize(
+                    gate_up, routes=routes, packed_capacity=capacity,
+                )
             expert_output = torch.empty((experts, capacity, hidden),
                                         device=hidden_states.device, dtype=hidden_states.dtype)
             _native_gemm(qh, w2_linear, sh, scale_down, expert_output,

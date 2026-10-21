@@ -208,6 +208,17 @@ def _routing_tiles(OFFSETS, TILE_OFFSETS, TILE_EXPERTS, TILE_STARTS,
     tl.store(TILE_STARTS + tiles, tl.where(active, starts, 0), tiles < MAX_TILES)
 
 
+def _routing_chunk_size(slots, num_experts, device):
+    """Choose stable-counting chunks without reading device routing values."""
+    if not 0 < slots <= 262144 or num_experts > 64:
+        return 0
+    if torch.cuda.get_device_capability(device) == (11, 0):
+        # Larger chunks bound the prefix workspace while retaining counting
+        # sort for Thor batches that would otherwise use the general sort.
+        return 2048
+    return 512 if slots <= 65536 else 0
+
+
 def prepare_routes(topk_ids, num_experts, token_mask=None, block_m=32,
                    include_tiles=True):
     """Sort assignments and construct fixed-size, GPU-resident expert metadata.
@@ -225,14 +236,13 @@ def prepare_routes(topk_ids, num_experts, token_mask=None, block_m=32,
     # For ordinary expert counts a small counting sort replaces the general
     # Torch stable sort and its temporary allocations/launches. The bounded
     # prefix workspace keeps the fallback practical for very large inputs.
-    counting_sort = 0 < slots <= 65536 and num_experts <= 64
+    block = _routing_chunk_size(slots, num_experts, topk_ids.device)
     counts = torch.empty((num_experts,), dtype=torch.int32, device=topk_ids.device)
     inverse = torch.empty((slots,), dtype=torch.int32, device=topk_ids.device)
     offsets = torch.empty((num_experts + 1,), dtype=torch.int32, device=topk_ids.device)
     tile_offsets = torch.empty_like(offsets) if include_tiles else None
     statistics = torch.empty((3,), dtype=torch.int32, device=topk_ids.device)
-    if counting_sort:
-        block = 512
+    if block:
         chunks = triton.cdiv(slots, block)
         bins = triton.next_power_of_2(num_experts + 1)
         histogram = torch.empty((chunks, bins), dtype=torch.int32, device=topk_ids.device)

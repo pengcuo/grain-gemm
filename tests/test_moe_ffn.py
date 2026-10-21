@@ -134,20 +134,20 @@ def test_thor_native_selector_retains_measured_projection_choices():
 
     for n, k in ((2048, 1536), (1536, 1024)):
         for capacity in (1024, 2048, 4096):
-            assert _native_config(capacity, n, k, experts=32) == 45
+            assert _native_config(capacity, n, k, experts=32) == 47
         assert _native_config(320, n, k, experts=32) == 44
-        assert _native_config(640, n, k, experts=32) == 34
-        assert _native_config(896, n, k, experts=32) == 34
-        assert _native_config(1024, n, k, experts=16) == 34
-    assert _native_config(1152, 2048, 1536, experts=32) == 45
-    assert _native_config(1152, 1536, 1024, experts=32) == 34
-    assert _native_config(1088, 1536, 1024, experts=32) == 34
-    assert _native_config(2176, 1536, 1024, experts=32) == 34
-    assert _native_config(2112, 2048, 1536, experts=32) == 45
-    assert _native_config(2112, 1536, 1024, experts=32) == 34
-    assert _native_config(1280, 2048, 1536, experts=32) == 34
-    assert _native_config(1024, 1024, 1536, experts=32) == 34
-    assert _native_config(1024, 2048, 1024, experts=32) == 34
+        assert _native_config(640, n, k, experts=32) == (44 if n == 1536 else 43)
+        assert _native_config(896, n, k, experts=32) == 43
+        assert _native_config(1024, n, k, experts=16) == 43
+    assert _native_config(1152, 2048, 1536, experts=32) == 47
+    assert _native_config(1152, 1536, 1024, experts=32) == 44
+    assert _native_config(1088, 1536, 1024, experts=32) == 43
+    assert _native_config(2176, 1536, 1024, experts=32) == 43
+    assert _native_config(2112, 2048, 1536, experts=32) == 47
+    assert _native_config(2112, 1536, 1024, experts=32) == 43
+    assert _native_config(1280, 2048, 1536, experts=32) == 43
+    assert _native_config(1024, 1024, 1536, experts=32) == 43
+    assert _native_config(1024, 2048, 1024, experts=32) == 43
 
 
 def routing_fixture_cpu():
@@ -496,10 +496,13 @@ def test_thor_auto_selects_native_for_balanced_routing(monkeypatch, backend):
 
 @cuda
 def test_thor_auto_uses_original_tile_for_large_expert_ffn(monkeypatch):
-    """Both real projections select the large tile and retain complete FFN math."""
+    """The native fallback retains both measured tiles and complete FFN math."""
     if torch.cuda.get_device_capability() != (11, 0) or not cutlass_moe.is_available():
         pytest.skip("Build the dedicated Thor MoE library on SM110")
     import grain_gemm.moe as implementation
+    # Check the existing native fallback even when the optional fused G1 build
+    # is installed; its automatic selection has separate public API coverage.
+    monkeypatch.setattr(implementation, "_use_fused_gate_up", lambda *args, **kwargs: False)
 
     tokens, experts, top_k = 8192, 32, 4
     case = make_case(tokens=tokens, experts=experts, h=1536, i=1024)
@@ -521,8 +524,8 @@ def test_thor_auto_uses_original_tile_for_large_expert_ffn(monkeypatch):
         native_patch.setattr(cutlass_moe, "_launch_prevalidated", tracked_launch)
         actual = moe_ffn(**case, backend="auto")
     assert calls == [
-        (45, (32, 1024, 1536), (32, 2048, 1536)),
-        (45, (32, 1024, 1024), (32, 1536, 1024)),
+        (47, (32, 1024, 1536), (32, 2048, 1536)),
+        (47, (32, 1024, 1024), (32, 1536, 1024)),
     ]
     calls.clear()
     with monkeypatch.context() as native_patch:
@@ -543,7 +546,7 @@ def test_thor_auto_uses_original_tile_for_large_expert_ffn(monkeypatch):
 
 
 @cuda
-@pytest.mark.parametrize("config_id", [43, 44])
+@pytest.mark.parametrize("config_id", [43, 44, 46, 47])
 def test_thor_counted_ffn_ignores_unwritten_nan_padding(monkeypatch, config_id):
     """Sparse native padding cannot reach SwiGLU or valid combined outputs."""
     if torch.cuda.get_device_capability() != (11, 0) or not cutlass_moe.is_available():
@@ -933,6 +936,11 @@ def test_thor_moe_counted_scheduler_consumes_uneven_and_changing_populations(con
             run()
         actual = out.cpu()
         for expert, count in enumerate(population):
+            # Whole padding clusters must not write even their first scheduled
+            # tile. NaN poison directly detects a missing initial-work skip.
+            cluster_rows = cutlass_moe.CONFIGS[config_id]["block_m"]
+            padding_begin = ((count + cluster_rows - 1) // cluster_rows) * cluster_rows
+            assert torch.isnan(actual[expert, padding_begin:]).all()
             if count == 0:
                 continue
             assert torch.isfinite(actual[expert, :count]).all()

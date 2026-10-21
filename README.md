@@ -8,6 +8,26 @@ The inference-only [`moe_ffn` API](docs/moe_ffn.md) composes routing, dynamic
 activation quantization, both expert projections, SwiGLU and weighted combination
 into one call. It uses the same logical weight views and scale layouts as GEMM.
 
+On Thor SM110, an optional native kernel fuses the gate/up projection (G1),
+BF16 rounding, FP32 SwiGLU and G256 INT8 activation quantization, avoiding the
+full BF16 gate/up workspace. Build it separately:
+
+```bash
+python tools/build_moe_fused.py --cutlass-dir /path/to/cutlass
+```
+
+Native CUTLASS MoE execution automatically selects this kernel for eager calls
+with `E=32`, `H=1536`, `I=1024`, top-k `R=4` and `T=4096`, `8192` or `16384`, when the
+optional build is available. Other shapes, CUDA Graph capture and absent optional
+builds retain the existing path. The down projection and output combination are
+separate stages. Public API and scale layouts, and SM120/GB10 implementations,
+are unchanged.
+
+The [cached two-SM MoE benchmark](benchmarks/results/thor/moe_ffn_cached_2sm_emc2750.md)
+records the current implementation at a reduced nominal 1.2 GHz GPU clock
+(1197 MHz) and 2750 MHz EMC, with full public-API timings and DeepInfer FP8
+as a performance reference.
+
 ## Operation
 
 For `A[M, K] @ B[K, N]`:

@@ -19,6 +19,27 @@ remeasures the previous INT8 implementation, optimized INT8, upstream vLLM
 BF16 and Cosmos compiled BF16 together at the reduced 1.2 GHz setting
 (actual 1197 MHz). It includes activation quantization and both projections.
 
+The [cached two-SM INT8 MoE retry](results/thor/moe_ffn_cached_2sm_emc2750.md)
+measures the current public API against its preceding implementation and
+DeepInfer FP8 at GPU 1197 MHz / EMC 2750 MHz, including stage breakdowns,
+correctness checks and full-fusion experiments that did not improve latency.
+
+The [same-run Cosmos BF16 / current INT8 / DeepInfer FP8 Mega comparison](results/thor/moe_ffn_cosmos_int8_fp8_emc2750.md)
+measures full FFNs at GPU 1197 MHz / EMC 2750 MHz, using Cosmos's original
+compiled `torch._grouped_mm` implementation and common inputs/weights/routes.
+
+A fresh [padding-aware INT8 versus DeepInfer FP8 Mega retest](results/thor/moe_ffn_padding_skip_vs_deepinfer_emc2750.md)
+measures four random-routing sizes and a 4096/1000-row expert split, including
+complete FFN latency and useful-operation throughput at GPU 1197 MHz / EMC 2750 MHz.
+
+The [per-expert INT8 padding-skip measurements](results/thor/moe_ffn_padding_skip_emc2750.md)
+compare the public API before and after skipping wholly unused expert tiles,
+including a 4096-row / 1000-row expert split, at the same reduced GPU and EMC clocks.
+
+The [earlier selective INT8 gate/up fusion and DeepInfer FP8 reference](results/thor/moe_ffn_mega_int8_emc2750.md)
+compares complete public MoE calls at GPU 1197 MHz and EMC 2750 MHz. It includes
+stage timings, useful-operation throughput and exact before/after INT8 checks.
+
 **Hardware scope: the historical batch below is GB10-only (SM121, compute capability
 12.1).** Measured performance, tuned configurations and backend rankings in
 those historical reports, especially the CuTe/CUTLASS comparisons, apply only to
